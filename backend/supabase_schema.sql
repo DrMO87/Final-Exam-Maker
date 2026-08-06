@@ -1,10 +1,17 @@
 -- ==========================================
 -- SUPABASE POSTGRESQL DATABASE SCHEMA
 -- Final Exam Maker - Exam Scheduler
+-- Run this ENTIRE file in Supabase SQL Editor
 -- ==========================================
 
+-- Drop existing tables first (clean slate)
+DROP TABLE IF EXISTS saved_schedules CASCADE;
+DROP TABLE IF EXISTS conflicts CASCADE;
+DROP TABLE IF EXISTS courses CASCADE;
+DROP TABLE IF EXISTS scheduling_sessions CASCADE;
+
 -- 1. Scheduling Sessions Table
-CREATE TABLE IF NOT EXISTS scheduling_sessions (
+CREATE TABLE scheduling_sessions (
     id SERIAL PRIMARY KEY,
     session_name VARCHAR(255) NOT NULL,
     semester VARCHAR(100) NOT NULL,
@@ -15,11 +22,11 @@ CREATE TABLE IF NOT EXISTS scheduling_sessions (
 );
 
 -- 2. Courses Table
-CREATE TABLE IF NOT EXISTS courses (
+CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     session_id INT REFERENCES scheduling_sessions(id) ON DELETE CASCADE,
     program VARCHAR(100) NOT NULL,
-    "level" INT NOT NULL,
+    level INT NOT NULL,
     course_code VARCHAR(50) NOT NULL,
     course_title VARCHAR(255) NOT NULL,
     has_oral_exam BOOLEAN DEFAULT FALSE,
@@ -31,7 +38,7 @@ CREATE TABLE IF NOT EXISTS courses (
 );
 
 -- 3. Conflicts Table
-CREATE TABLE IF NOT EXISTS conflicts (
+CREATE TABLE conflicts (
     id SERIAL PRIMARY KEY,
     session_id INT REFERENCES scheduling_sessions(id) ON DELETE CASCADE,
     course_a_id INT REFERENCES courses(id) ON DELETE CASCADE,
@@ -42,7 +49,7 @@ CREATE TABLE IF NOT EXISTS conflicts (
 );
 
 -- 4. Saved Schedule Vault Table
-CREATE TABLE IF NOT EXISTS saved_schedules (
+CREATE TABLE saved_schedules (
     id SERIAL PRIMARY KEY,
     session_id INT REFERENCES scheduling_sessions(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
@@ -52,7 +59,7 @@ CREATE TABLE IF NOT EXISTS saved_schedules (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexing for Lightning-Fast Queries
-CREATE INDEX IF NOT EXISTS idx_courses_session ON courses(session_id);
-CREATE INDEX IF NOT EXISTS idx_conflicts_session ON conflicts(session_id);
-CREATE INDEX IF NOT EXISTS idx_saved_schedules_session ON saved_schedules(session_id);
+-- Indexes for fast queries
+CREATE INDEX idx_courses_session ON courses(session_id);
+CREATE INDEX idx_conflicts_session ON conflicts(session_id);
+CREATE INDEX idx_saved_schedules_session ON saved_schedules(session_id);
