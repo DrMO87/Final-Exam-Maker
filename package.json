@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build"
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"import('fs').then(fs => fs.cpSync('frontend/dist', 'dist', {recursive: true}))\""
   },
   "dependencies": {
     "cors": "^2.8.5",
