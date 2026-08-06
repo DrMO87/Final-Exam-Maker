@@ -1,0 +1,77 @@
+﻿Course Code,Course Title,Semester,Has Oral Exam,Department / Supervising Department
+PC-111,Pharmaceutical Analytical Chemistry (1),Level 1; Semester 1,Yes,Pharmaceutical Chemistry
+PC-112,Pharmaceutical Organic Chemistry (1),Level 1; Semester 1,Yes,Pharmaceutical Chemistry
+PG-113,Medicinal Plants,Level 1; Semester 1,Yes,Pharmacognosy
+MD-114,Cell Biology,Level 1; Semester 1,No,"Medical Science (Supervised by Biochemistry, Microbiology and Immunology)"
+PL-115,Medical & Pharmaceutical Terminology,Level 1; Semester 1,No,Pharmacology
+PP-116,Pharmacy Orientation,Level 1; Semester 1,No,Pharmacy Practice
+UM-117,English Language,Level 1; Semester 1,No,University Mandatory (Supervised by Pharmaceutical Chemistry)
+UM-118,Human Rights and Fighting Corruption,Level 1; Semester 1,No,University Mandatory (Supervised by Pharmaceutical Chemistry)
+NP-119,Information Technology,Level 1; Semester 1,No,Non-Pharmaceutical (Supervised by Pharmaceutical Chemistry)
+PC-121,Pharmaceutical Analytical Chemistry (2),Level 1; Semester 2,Yes,Pharmaceutical Chemistry
+PC-122,Pharmaceutical Organic Chemistry (2),Level 1; Semester 2,Yes,Pharmaceutical Chemistry
+PG-123,Pharmacognosy (1),Level 1; Semester 2,Yes,Pharmacognosy
+PT-124,Physical Pharmacy,Level 1; Semester 2,Yes,Pharmaceutical Technology
+MD-125,Histology,Level 1; Semester 2,No,Medical Science
+MD-126,Anatomy,Level 1; Semester 2,No,Medical Science (Supervised by Pharmacology and Biochemistry)
+MD-127,Behavioral Science,Level 1; Semester 2,No,Medical Science (Supervised by Pharmacology and Biochemistry)
+NP-128,Mathematics,Level 1; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmaceutical Technology)
+PC-211,Instrumental Analysis,Level 2; Semester 1,Yes,Pharmaceutical Chemistry
+PB-212,Biochemistry (1),Level 2; Semester 1,Yes,Biochemistry
+PG-213,Pharmacognosy (2),Level 2; Semester 1,No,Pharmacognosy
+PT-214,Pharmaceutical Dosage Forms (1),Level 2; Semester 1,Yes,Pharmaceutical Technology
+PC-215,Pharmaceutical Organic Chemistry (3),Level 2; Semester 1,Yes,Pharmaceutical Chemistry
+MD-216,Physiology,Level 2; Semester 1,No,Medical Science
+PL-221,Pharmacology (1),Level 2; Semester 2,Yes,Pharmacology
+PB-222,Biochemistry (2),Level 2; Semester 2,Yes,Biochemistry
+PM-223,General Microbiology & Immunology,Level 2; Semester 2,Yes,Microbiology and Immunology
+PT-224,Pharmaceutical Dosage Forms (2),Level 2; Semester 2,Yes,Pharmaceutical Technology
+MD-225,Pathology & Pathophysiology,Level 2; Semester 2,No,Medical Science
+NP-226,Communication & Presentation Skills,Level 2; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmacology and Biochemistry)
+UE-00X,University Elective,Level 2; Semester 2,No,University Elective
+PL-311,Pharmacology (2),Level 3; Semester 1,Yes,Pharmacology
+PM-312,Pharmaceutical Microbiology,Level 3; Semester 1,Yes,Microbiology and Immunology
+PT-313,Pharmaceutical Dosage forms (3),Level 3; Semester 1,Yes,Pharmaceutical Technology
+PG-314,Phytochemistry (1),Level 3; Semester 1,Yes,Pharmacognosy
+PP-315,Community Pharmacy Practice,Level 3; Semester 1,No,Pharmacy Practice
+PC-316,Chemical Basis of Drug Action,Level 3; Semester 1,No,Pharmaceutical Chemistry
+NP-317,Scientific Writing,Level 3; Semester 1,No,Non-Pharmaceutical (Supervised by Pharmaceutical Technology)
+PC-321,Medicinal Chemistry (1),Level 3; Semester 2,Yes,Pharmaceutical Chemistry
+PG-322,Phytochemistry (2),Level 3; Semester 2,Yes,Pharmacognosy
+PT-323,Biopharmaceutics & Pharmacokinetics,Level 3; Semester 2,Yes,Pharmaceutical Technology
+PP-324,Clinical Pharmacy Practice,Level 3; Semester 2,No,Pharmacy Practice
+PL-325,Pharmacology (3),Level 3; Semester 2,Yes,Pharmacology
+PL-326,Biostatistics,Level 3; Semester 2,No,Pharmacology
+MD-327,Parasitology,Level 3; Semester 2,No,Medical Science (Supervised by Microbiology and Immunology)
+PT-328,Sterile Dosage Forms & Radiopharmaceuticals,Level 3; Semester 2,No,Pharmaceutical Technology
+PC-411,Medicinal Chemistry (2),Level 4; Semester 1,Yes,Pharmaceutical Chemistry
+PP-412,Hospital Pharmacy,Level 4; Semester 1,No,Pharmacy Practice
+PM-413,Medical Microbiology,Level 4; Semester 1,Yes,Microbiology and Immunology
+PC-414,Quality Control of Pharmaceuticals,Level 4; Semester 1,Yes,Pharmaceutical Chemistry
+PP-415,Drug Marketing & Pharmacoeconomics,Level 4; Semester 1,No,Pharmacy Practice
+PP-416,Drug Information,Level 4; Semester 1,No,Pharmacy Practice
+PP-417,Clinical Research & Pharmacovigilance,Level 4; Semester 1,No,Pharmacy Practice
+FE-00X,Faculty Elective,Level 4; Semester 1,No,Faculty Elective
+PP-421,Management of Oncological Diseases,Level 4; Semester 2,Yes,Pharmacy Practice
+PP-422,Clinical Pharmacokinetics,Level 4; Semester 2,No,Pharmacy Practice
+PB-423,Clinical Biochemistry,Level 4; Semester 2,Yes,Biochemistry
+PP-424,Management of Endocrine and Renal Disorders,Level 4; Semester 2,Yes,Pharmacy Practice
+PC-425,Medicinal Chemistry (3),Level 4; Semester 2,Yes,Pharmaceutical Chemistry
+MD-426,Public Health & Preventive Medicine,Level 4; Semester 2,No,Medical Science (Supervised by Microbiology and Immunology)
+FE-00X,Faculty elective,Level 4; Semester 2,No,Faculty Elective
+PL-511,Basic & Clinical Toxicology,Level 5; Semester 1,Yes,Pharmacology
+PT-512,Industrial Pharmacy,Level 5; Semester 1,No,Pharmaceutical Technology
+PM-513,Pharmaceutical Biotechnology,Level 5; Semester 1,Yes,Microbiology and Immunology
+PG-514,Phytotherapy,Level 5; Semester 1,Yes,Pharmacognosy
+MD-515,First Aid & Management of Critical Care Patients,Level 5; Semester 1,Yes,Medical Science (Supervised by Pharmacology and Biochemistry)
+PB-516,Clinical Nutrition,Level 5; Semester 1,No,Biochemistry
+PT-517,Pharmaceutical Legislation,Level 5; Semester 1,No,Pharmaceutical Technology
+FE-00X,Faculty Elective,Level 5; Semester 1,No,Faculty Elective
+PP-521,Management of Cardiovascular Diseases,Level 5; Semester 2,Yes,Pharmacy Practice
+PP-522,Management of Gastrointestinal Diseases,Level 5; Semester 2,Yes,Pharmacy Practice
+PP-523,Management of Pediatric and Geriatric Diseases,Level 5; Semester 2,Yes,Pharmacy Practice
+PP-524,"Management of Dermatological, Reproductive & Musculoskeletal Diseases",Level 5; Semester 2,No,Pharmacy Practice
+PP-525,Management of Neuropsychiatric Diseases,Level 5; Semester 2,No,Pharmacy Practice
+PP-526,Management of Respiratory Diseases,Level 5; Semester 2,No,Pharmacy Practice
+NP-527,Entrepreneurship,Level 5; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmacognosy)
+FE-00X,Faculty Elective,Level 5; Semester 2,No,Faculty Elective

@@ -1,0 +1,76 @@
+﻿Course Code,Course Title,Semester,Has Oral Exam,Department / Supervising Department
+PC-111,Pharmaceutical Analytical Chemistry (1),Level 1; Semester 1,Yes,Pharmaceutical Chemistry
+PC-112,Pharmaceutical Organic Chemistry (1),Level 1; Semester 1,Yes,Pharmaceutical Chemistry
+PG-113,Medicinal Plants,Level 1; Semester 1,Yes,Pharmacognosy
+MD-114,Cell Biology,Level 1; Semester 1,No,Medical Science (Supervised by Biochemistry and Microbiology and Immunology)
+PL-115,Medical & Pharmaceutical Terminology,Level 1; Semester 1,No,Pharmacology
+PP-116,Pharmacy Orientation,Level 1; Semester 1,No,Pharmacy Practice
+UM-117,English Language,Level 1; Semester 1,No,University Mandatory
+UM-118,Human Rights and Fighting Corruption,Level 1; Semester 1,No,University Mandatory
+NP-119,Mathematics,Level 1; Semester 1,No,Non-Pharmaceutical (Supervised by Pharmaceutical Technology)
+PC-121,Pharmaceutical Analytical Chemistry (2),Level 1; Semester 2,Yes,Pharmaceutical Chemistry
+PC-122,Pharmaceutical Organic Chemistry (2),Level 1; Semester 2,Yes,Pharmaceutical Chemistry
+PG-123,Pharmacognosy (1),Level 1; Semester 2,Yes,Pharmacognosy
+PT-124,Physical Pharmacy,Level 1; Semester 2,Yes,Pharmaceutical Technology
+MD-125,Histology,Level 1; Semester 2,No,Medical Science
+MD-126,Anatomy,Level 1; Semester 2,No,Medical Science
+MD-127,Behavioral Science,Level 1; Semester 2,No,Medical Science (Supervised by Pharmacology)
+NP-128,Information Technology,Level 1; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmaceutical Chemistry)
+PC-211,Pharmaceutical Analytical Chemistry (3),Level 2; Semester 1,Yes,Pharmaceutical Chemistry
+PG-212,Pharmacognosy (2),Level 2; Semester 1,Yes,Pharmacognosy
+PT-213,Dosage Forms (1),Level 2; Semester 1,Yes,Pharmaceutical Technology
+PM-214,General Microbiology & Immunology,Level 2; Semester 1,Yes,Microbiology and Immunology
+MD-215,Physiology,Level 2; Semester 1,No,Medical Science
+PC-216,Pharmaceutical Organic Chemistry (3),Level 2; Semester 1,No,Pharmaceutical Chemistry
+PG-221,Phytochemistry (1),Level 2; Semester 2,Yes,Pharmacognosy
+PT-222,Dosage Forms (2),Level 2; Semester 2,Yes,Pharmaceutical Technology
+PB-223,Biochemistry (1),Level 2; Semester 2,Yes,Biochemistry
+PM-224,Pharmaceutical Microbiology,Level 2; Semester 2,Yes,Microbiology and Immunology
+PC-225,Instrumental Analysis,Level 2; Semester 2,No,Pharmaceutical Chemistry
+NP-226,Scientific Writing,Level 2; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmaceutical Technology)
+NP-227,Communication & presentation Skills,Level 2; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmacology and Biochemistry)
+PG-311,Phytochemistry (2),Level 3; Semester 1,Yes,Pharmacognosy
+PB-312,Biochemistry (2),Level 3; Semester 1,Yes,Biochemistry
+PT-313,Dosage forms (3),Level 3; Semester 1,Yes,Pharmaceutical Technology
+PM-314,Medical Microbiology,Level 3; Semester 1,Yes,Microbiology and Immunology
+PC-315,Chemical Basis of Drug Action,Level 3; Semester 1,No,Pharmaceutical Chemistry
+PL-316,Biostatistics,Level 3; Semester 1,No,Pharmacology
+UE-00X,University Elective,Level 3; Semester 1,No,University Elective
+PC-321,Medicinal Chemistry (1),Level 3; Semester 2,Yes,Pharmaceutical Chemistry
+PL-322,Pharmacology (1),Level 3; Semester 2,Yes,Pharmacology
+MD-323,Pathophysiology,Level 3; Semester 2,No,Medical Science
+MD-324,Pathology,Level 3; Semester 2,No,Medical Science
+MD-325,Parasitology,Level 3; Semester 2,No,Medical Science (Supervised by Microbiology and Immunology)
+PT-326,Sterile Dosage Forms & Radiopharmaceuticals,Level 3; Semester 2,Yes,Pharmaceutical Technology
+FE-00X,Faculty Elective,Level 3; Semester 2,No,Faculty Elective
+PB-411,Clinical Biochemistry,Level 4; Semester 1,Yes,Biochemistry
+PT-412,Industrial Pharmacy,Level 4; Semester 1,No,Pharmaceutical Technology
+PT-413,Biopharmaceutics & Pharmacokinetics,Level 4; Semester 1,Yes,Pharmaceutical Technology
+PL-414,Pharmacology (2),Level 4; Semester 1,Yes,Pharmacology
+PC-415,Medicinal Chemistry (2),Level 4; Semester 1,Yes,Pharmaceutical Chemistry
+MD-416,Public Health & Preventive Medicine,Level 4; Semester 1,No,Medical Science
+FE-00X,Faculty Elective,Level 4; Semester 1,No,Faculty Elective
+PL-421,Toxicology & forensic Chemistry,Level 4; Semester 2,Yes,Pharmacology
+PP-422,Pharmacotherapy (1),Level 4; Semester 2,Yes,Pharmacy Practice
+PC-423,Medicinal Chemistry (3),Level 4; Semester 2,No,Pharmaceutical Chemistry
+PP-424,Pharmacy Practice (1),Level 4; Semester 2,Yes,Pharmacy Practice
+PL-425,Pharmacology (3),Level 4; Semester 2,Yes,Pharmacology
+PP-426,Drug Marketing & Pharmacoeconomics,Level 4; Semester 2,No,Pharmacy Practice
+PP-427,Clinical Research & Pharmacovigilance,Level 4; Semester 2,No,Pharmacy Practice
+PP-511,Pharmacotherapy (2),Level 5; Semester 1,Yes,Pharmacy Practice
+PP-512,Pharmacy Practice (2),Level 5; Semester 1,Yes,Pharmacy Practice
+PM-513,Pharmaceutical Biotechnology,Level 5; Semester 1,Yes,Microbiology and Immunology
+PG-514,Phytotherapy,Level 5; Semester 1,Yes,Pharmacognosy
+PC-515,Drug Design & Development,Level 5; Semester 1,Yes,Pharmaceutical Chemistry
+PP-516,Drug Information,Level 5; Semester 1,No,Pharmacy Practice
+MD-517,First Aid & Basic Life Support,Level 5; Semester 1,No,Medical Science (Supervised by Pharmacology)
+FE-00X,Faculty Elective,Level 5; Semester 1,No,Faculty Elective
+PC-521,Drug Quality Control,Level 5; Semester 2,Yes,Pharmaceutical Chemistry
+PP-522,Clinical Pharmacokinetics,Level 5; Semester 2,No,Pharmacy Practice
+PP-523,Pharmacotherapy (3),Level 5; Semester 2,Yes,Pharmacy Practice
+PL-524,Drug Interactions,Level 5; Semester 2,No,Pharmacology
+PT-525,Good Manufacturing Practice & Quality Assurance,Level 5; Semester 2,No,Pharmaceutical Technology
+PT-526,Professional Ethics & Pharmaceutical Legislation,Level 5; Semester 2,No,Pharmaceutical Technology
+PP-527,Pharmacy Management,Level 5; Semester 2,No,Pharmacy Practice
+NP-528,Entrepreneurship,Level 5; Semester 2,No,Non-Pharmaceutical (Supervised by Pharmacognosy)
+FE-00X,Faculty Elective,Level 5; Semester 2,No,Faculty Elective
