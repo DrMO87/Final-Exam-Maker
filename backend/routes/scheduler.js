@@ -65,9 +65,17 @@ router.post('/load-sample', async (req, res) => {
     await client.query('DELETE FROM conflicts WHERE session_id = ?', [session_id]);
     await client.query('DELETE FROM courses WHERE session_id = ?', [session_id]);
 
-    const sampleDir = fs.existsSync(path.resolve(process.cwd(), 'sample_data'))
-      ? path.resolve(process.cwd(), 'sample_data')
-      : path.resolve(process.cwd(), '..', 'sample_data');
+    const candidateDirs = [
+      path.resolve(process.cwd(), 'sample_data'),
+      path.resolve(process.cwd(), '..', 'sample_data'),
+      path.resolve(process.cwd(), 'backend', 'sample_data'),
+      path.resolve(path.dirname(path.dirname(process.argv[1] || '')), 'sample_data')
+    ];
+
+    const sampleDir = candidateDirs.find(d => fs.existsSync(d));
+    if (!sampleDir) {
+      throw new Error(`Sample data directory not found. Checked: ${candidateDirs.join(', ')}`);
+    }
 
     const getSamplePath = (keyword) => {
       const files = fs.readdirSync(sampleDir);
