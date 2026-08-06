@@ -42,6 +42,8 @@ if (connectionString) {
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
 
+        -- Fix any old table column leftover from 'lvl'
+        ALTER TABLE courses DROP COLUMN IF EXISTS lvl;
         ALTER TABLE courses ADD COLUMN IF NOT EXISTS level INT NOT NULL DEFAULT 1;
 
         CREATE TABLE IF NOT EXISTS conflicts (
