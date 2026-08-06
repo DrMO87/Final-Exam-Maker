@@ -175,7 +175,18 @@ router.post('/load-sample', async (req, res) => {
           );
         }
 
-        if (curriculumCourse) {
+        const targetProgram = curriculumCourse ? curriculumCourse.program : mappedProgram;
+        const targetCode = curriculumCourse ? normalizeStr(curriculumCourse.course_code) : codeStr;
+        const targetTitle = curriculumCourse ? normalizeStr(curriculumCourse.course_title) : titleStr;
+
+        const existingIdx = scheduledCourses.findIndex(c => 
+          c.program === targetProgram &&
+          (normalizeStr(c.course_code) === targetCode || normalizeStr(c.course_title) === targetTitle)
+        );
+
+        if (existingIdx !== -1) {
+          scheduledCourses[existingIdx].student_count += studentCount;
+        } else if (curriculumCourse) {
           scheduledCourses.push({
             ...curriculumCourse,
             program: curriculumCourse.program,
@@ -400,7 +411,19 @@ router.post('/upload', upload.fields([
           }
         }
 
-        if (curriculumCourse) {
+        const targetProgram = curriculumCourse ? curriculumCourse.program : mappedProgram;
+        const targetCode = curriculumCourse ? normalizeStr(curriculumCourse.course_code) : codeStr;
+        const targetTitle = curriculumCourse ? normalizeStr(curriculumCourse.course_title) : normalizeStr(courseName);
+
+        const existingIdx = scheduledCourses.findIndex(c => 
+          c.program === targetProgram &&
+          (normalizeStr(c.course_code) === targetCode || normalizeStr(c.course_title) === targetTitle)
+        );
+
+        if (existingIdx !== -1) {
+          console.log(`  ➕ Merged duplicate course entry: ${scheduledCourses[existingIdx].course_code} (${scheduledCourses[existingIdx].program}) -> +${studentCount} students (Total: ${scheduledCourses[existingIdx].student_count + studentCount})`);
+          scheduledCourses[existingIdx].student_count += studentCount;
+        } else if (curriculumCourse) {
           scheduledCourses.push({
             ...curriculumCourse,
             program: curriculumCourse.program,
