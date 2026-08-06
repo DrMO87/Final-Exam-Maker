@@ -7,12 +7,14 @@ import ExcelParser from '../services/excelParser.js';
 import SchedulerEngine from '../services/schedulerEngine.js';
 import AdvancedScheduler from '../services/advancedScheduler.js';
 
+import os from 'os';
+
 const router = express.Router();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = 'uploads/';
+    const uploadDir = path.join(os.tmpdir(), 'uploads');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
