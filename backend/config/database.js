@@ -1,5 +1,4 @@
 import pg from 'pg';
-import sqliteDb from './database-sqlite.js';
 
 let dbPool;
 
@@ -35,6 +34,7 @@ if (connectionString) {
   };
 } else {
   console.log('✅ Using local SQLite database (no DATABASE_URL provided)');
+  const sqliteDb = (await import('./database-sqlite.js')).default;
   dbPool = sqliteDb;
 }
 
