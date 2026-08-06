@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 
 function FileUpload({ sessionId, onFilesUploaded, onBack }) {
@@ -13,6 +13,42 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [dragActive, setDragActive] = useState({});
+  const batchInputRef = useRef(null);
+
+  const autoMatchFiles = (fileList) => {
+    const arr = Array.from(fileList);
+    const newFiles = { ...files };
+    let matched = 0;
+
+    arr.forEach(file => {
+      const name = file.name.toLowerCase().replace(/[\s_\-]/g, '');
+
+      if (name.includes('student')) {
+        newFiles.student_numbers = file;
+        matched++;
+      } else if (name.includes('clinical') && name.includes('conflict')) {
+        newFiles.clinical_conflicts = file;
+        matched++;
+      } else if (name.includes('pharmd') && name.includes('conflict')) {
+        newFiles.pharmd_conflicts = file;
+        matched++;
+      } else if (name.includes('clinical')) {
+        newFiles.clinical_courses = file;
+        matched++;
+      } else if (name.includes('pharmd')) {
+        newFiles.pharmd_courses = file;
+        matched++;
+      }
+    });
+
+    setFiles(newFiles);
+    if (matched > 0) {
+      setError('');
+      setSuccess(`Successfully detected and matched ${matched} file(s) from your local folder! Review below and click Upload.`);
+    } else {
+      setError('Could not automatically match the selected files. Please ensure file names contain keywords like "student", "pharmd", "clinical", "conflict".');
+    }
+  };
 
   const handleDrag = (e, id) => {
     e.preventDefault();
@@ -28,18 +64,21 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(prev => ({ ...prev, [id]: false }));
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFiles(prev => ({
-        ...prev,
-        [id]: e.dataTransfer.files[0]
-      }));
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      if (e.dataTransfer.files.length > 1) {
+        autoMatchFiles(e.dataTransfer.files);
+      } else {
+        setFiles(prev => ({
+          ...prev,
+          [id]: e.dataTransfer.files[0]
+        }));
+      }
     }
   };
 
   const handleFileChange = (e) => {
     const { name, files: selectedFiles } = e.target;
     if (selectedFiles && selectedFiles[0]) {
-      console.log(`[FileUpload] File selected for "${name}":`, selectedFiles[0].name);
       setFiles(prev => ({
         ...prev,
         [name]: selectedFiles[0]
@@ -49,19 +88,12 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('[FileUpload] handleSubmit called! sessionId:', sessionId);
-    console.log('[FileUpload] Current files state:', Object.fromEntries(
-      Object.entries(files).map(([k, v]) => [k, v ? v.name : null])
-    ));
-    
     setLoading(true);
     setError('');
     setSuccess('');
 
     if (!files.student_numbers && (!files.pharmd_courses || !files.clinical_courses)) {
-      const msg = 'Please select at least the Student Numbers CSV file (or both PharmD and Clinical Course CSV files) before clicking Upload & Process.';
-      console.log('[FileUpload] Validation failed:', msg);
-      setError(msg);
+      setError('Please select at least the Student Numbers CSV file (or course files) before uploading.');
       setLoading(false);
       return;
     }
@@ -71,21 +103,18 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
       formData.append('session_id', sessionId);
 
       Object.keys(files).forEach(key => {
-        if (files[key]) {
+        if (files[key] && files[key].size) {
           formData.append(key, files[key]);
-          console.log(`[FileUpload] Appending ${key}: ${files[key].name}`);
         }
       });
 
-      console.log('[FileUpload] Sending POST to /api/scheduler/upload...');
       const response = await axios.post('/api/scheduler/upload', formData);
-      console.log('[FileUpload] Response:', response.data);
 
       if (response.data.success) {
-        setSuccess(`Successfully processed ${response.data.stats.courses} courses and ${response.data.stats.conflicts} conflicts`);
+        setSuccess(`Successfully processed ${response.data.stats.courses} courses and ${response.data.stats.conflicts} conflicts!`);
         setTimeout(() => {
           onFilesUploaded();
-        }, 1500);
+        }, 1200);
       } else {
         setError('Failed to process files: ' + (response.data.error || 'Unknown error'));
       }
@@ -104,17 +133,16 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
     setError('');
     setSuccess('');
     try {
-      console.log('[FileUpload] Loading sample data for sessionId:', sessionId);
       const response = await axios.post('/api/scheduler/load-sample', { session_id: sessionId });
       if (response.data.success) {
         setFiles({
-          student_numbers: { name: 'student_numbers.csv (Sample Data Loaded)' },
-          pharmd_courses: { name: 'pharmd_courses.csv (Sample Data Loaded)' },
-          clinical_courses: { name: 'clinical_courses.csv (Sample Data Loaded)' },
-          pharmd_conflicts: { name: 'pharmd_conflicts.csv (Sample Data Loaded)' },
-          clinical_conflicts: { name: 'clinical_conflicts.csv (Sample Data Loaded)' }
+          student_numbers: { name: 'student_numbers.csv (Sample Data)' },
+          pharmd_courses: { name: 'pharmd_courses.csv (Sample Data)' },
+          clinical_courses: { name: 'clinical_courses.csv (Sample Data)' },
+          pharmd_conflicts: { name: 'pharmd_conflicts.csv (Sample Data)' },
+          clinical_conflicts: { name: 'clinical_conflicts.csv (Sample Data)' }
         });
-        setSuccess(`Successfully loaded sample files (${response.data.stats.courses} courses, ${response.data.stats.conflicts} conflicts)! Proceeding...`);
+        setSuccess(`Loaded sample files (${response.data.stats.courses} courses, ${response.data.stats.conflicts} conflicts)! Proceeding...`);
         setTimeout(() => {
           onFilesUploaded();
         }, 1200);
@@ -122,7 +150,6 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
         setError('Failed to load sample data: ' + response.data.error);
       }
     } catch (err) {
-      console.error('[FileUpload] Sample load error:', err);
       const apiErr = err.response?.data?.error;
       const errMsg = typeof apiErr === 'object' ? apiErr.message : apiErr;
       setError(errMsg || 'Failed to load sample data files.');
@@ -172,21 +199,42 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
 
   return (
     <div className="card max-w-3xl mx-auto">
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
         <div>
           <h2 className="mb-1">Upload Files</h2>
           <p className="text-slate-500 text-sm">
             Upload student numbers, course lists, and conflict matrices (.csv or .xlsx format)
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleLoadSampleData}
-          disabled={loading}
-          className="btn btn-secondary text-xs border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 shrink-0 flex items-center gap-1.5 shadow-sm font-semibold py-2 px-3"
-        >
-          <span>⚡</span> Auto-Fill Sample Data Files
-        </button>
+
+        <div className="flex flex-wrap gap-2 shrink-0">
+          <input
+            type="file"
+            ref={batchInputRef}
+            multiple
+            accept=".csv,.xlsx,.xls"
+            onChange={(e) => autoMatchFiles(e.target.files)}
+            className="hidden"
+          />
+          
+          <button
+            type="button"
+            onClick={() => batchInputRef.current?.click()}
+            disabled={loading}
+            className="btn text-xs border-indigo-300 bg-indigo-50 text-indigo-900 hover:bg-indigo-100 flex items-center gap-1.5 shadow-sm font-semibold py-2 px-3"
+          >
+            <span>📂</span> Select Local CSV Folder / Files
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLoadSampleData}
+            disabled={loading}
+            className="btn text-xs border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 flex items-center gap-1.5 shadow-sm font-semibold py-2 px-3"
+          >
+            <span>⚡</span> Auto-Fill Built-in Samples
+          </button>
+        </div>
       </div>
 
       {error && <div className="bg-semantic-danger/10 border border-semantic-danger/20 text-semantic-danger px-4 py-3 rounded-xl mb-6 text-sm font-medium">{error}</div>}
