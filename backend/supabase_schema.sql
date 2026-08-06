@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
     session_id INT REFERENCES scheduling_sessions(id) ON DELETE CASCADE,
     program VARCHAR(100) NOT NULL,
-    level INT NOT NULL,
+    "level" INT NOT NULL,
     course_code VARCHAR(50) NOT NULL,
     course_title VARCHAR(255) NOT NULL,
     has_oral_exam BOOLEAN DEFAULT FALSE,

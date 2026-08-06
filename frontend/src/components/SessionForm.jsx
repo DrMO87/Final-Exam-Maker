@@ -48,7 +48,10 @@ function SessionForm({ onSessionCreated }) {
         setError('Failed to create session');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred');
+      console.error('Error creating session:', err);
+      const apiErr = err.response?.data?.error;
+      const errMsg = typeof apiErr === 'object' ? apiErr.message : apiErr;
+      setError(errMsg || 'An error occurred');
     } finally {
       setLoading(false);
     }

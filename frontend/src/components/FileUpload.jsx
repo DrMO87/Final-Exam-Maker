@@ -91,7 +91,9 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
       }
     } catch (err) {
       console.error('[FileUpload] Upload error:', err);
-      setError(err.response?.data?.error || 'An error occurred while uploading files. Please try again.');
+      const apiErr = err.response?.data?.error;
+      const errMsg = typeof apiErr === 'object' ? apiErr.message : apiErr;
+      setError(errMsg || 'An error occurred while uploading files. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -121,7 +123,9 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
       }
     } catch (err) {
       console.error('[FileUpload] Sample load error:', err);
-      setError(err.response?.data?.error || 'Failed to load sample data files.');
+      const apiErr = err.response?.data?.error;
+      const errMsg = typeof apiErr === 'object' ? apiErr.message : apiErr;
+      setError(errMsg || 'Failed to load sample data files.');
     } finally {
       setLoading(false);
     }
