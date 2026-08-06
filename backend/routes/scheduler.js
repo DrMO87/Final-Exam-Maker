@@ -11,6 +11,26 @@ import os from 'os';
 
 const router = express.Router();
 
+const inferLevelFromCode = (code, title) => {
+  const codeStr = String(code).trim().toUpperCase();
+  const titleStr = String(title || '').toLowerCase();
+
+  // Rule 1: Non-zero first digit (1-5) from left in course code directly determines level (e.g. PC-515 -> Level 5)
+  const digitMatch = codeStr.match(/(\d)/);
+  const firstDigit = digitMatch ? digitMatch[1] : null;
+
+  if (firstDigit && firstDigit >= '1' && firstDigit <= '5') {
+    return parseInt(firstDigit);
+  }
+
+  // Rule 2: Elective courses starting with '0' (e.g. 002, 004, 008) -> Review from program curriculum / keywords
+  if (titleStr.includes('novel drug') || titleStr.includes('phytotherapy') || titleStr.includes('neuropsychiatric') || titleStr.includes('respiratory') || codeStr.includes('008')) return 5;
+  if (titleStr.includes('cosmetic') || titleStr.includes('drug design') || titleStr.includes('clinical nutrition') || codeStr.includes('004') || codeStr.includes('005') || codeStr.includes('006')) return 4;
+  if (titleStr.includes('negotiation') || codeStr.includes('002')) return 2;
+
+  return 1;
+};
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
