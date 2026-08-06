@@ -139,7 +139,8 @@ router.post('/load-sample', async (req, res) => {
 
         if (!curriculumCourse) {
           curriculumCourse = primaryCurriculum.find(c => 
-            normalizeStr(c.course_title).includes(titleStr) || titleStr.includes(normalizeStr(c.course_title))
+            !c.course_code.toLowerCase().includes('00x') &&
+            (normalizeStr(c.course_title).includes(titleStr) || titleStr.includes(normalizeStr(c.course_title)))
           );
         }
 
@@ -147,16 +148,17 @@ router.post('/load-sample', async (req, res) => {
           curriculumCourse = secondaryCurriculum.find(c => normalizeStr(c.course_code) === codeStr);
         }
 
-        if (!curriculumCourse) {
+        if (!curriculumCourse && !codeStr.includes('00x')) {
           curriculumCourse = secondaryCurriculum.find(c => 
-            normalizeStr(c.course_title).includes(titleStr) || titleStr.includes(normalizeStr(c.course_title))
+            !c.course_code.toLowerCase().includes('00x') &&
+            (normalizeStr(c.course_title) === titleStr || normalizeStr(c.course_title).includes(titleStr) || titleStr.includes(normalizeStr(c.course_title)))
           );
         }
 
         if (curriculumCourse) {
           scheduledCourses.push({
             ...curriculumCourse,
-            program: mappedProgram || curriculumCourse.program,
+            program: curriculumCourse.program,
             student_count: studentCount
           });
         } else {
@@ -321,14 +323,22 @@ router.post('/upload', upload.fields([
           normalizeStr(c.course_code) === codeStr && c.program === mappedProgram
         );
 
-        // 2. Try exact match on code (any program)
+        // 2. Try exact match on title + same program
+        if (!curriculumCourse) {
+          const nameStr = normalizeStr(courseName);
+          curriculumCourse = allCourses.find(c => 
+            normalizeStr(c.course_title) === nameStr && c.program === mappedProgram
+          );
+        }
+
+        // 3. Try exact match on code (any program)
         if (!curriculumCourse) {
           curriculumCourse = allCourses.find(c => 
             normalizeStr(c.course_code) === codeStr
           );
         }
 
-        // 3. Try exact match on title
+        // 4. Try exact match on title (any program)
         if (!curriculumCourse) {
           const nameStr = normalizeStr(courseName);
           curriculumCourse = allCourses.find(c => 
@@ -336,14 +346,16 @@ router.post('/upload', upload.fields([
           );
         }
 
-        // 4. Try Fuzzy Match (Typos or Substrings)
-        if (!curriculumCourse) {
+        // 5. Try Fuzzy Match (Typos or Substrings) - EXCLUDE generic placeholders like 00X
+        if (!curriculumCourse && !codeStr.includes('00x')) {
           let bestMatch = null;
           let lowestDistance = Infinity;
 
           for (const c of allCourses) {
             const cCode = normalizeStr(c.course_code);
             const cTitle = normalizeStr(c.course_title);
+
+            if (cCode.includes('00x')) continue; // Skip generic placeholders like UE-00X, FE-00X
 
             if (cCode.includes(codeStr) || codeStr.includes(cCode) || 
                 cTitle.includes(codeStr) || codeStr.includes(cTitle)) {
@@ -356,7 +368,7 @@ router.post('/upload', upload.fields([
             const distTitle = getEditDistance(codeStr, cTitle);
             const minD = Math.min(distCode, distTitle);
 
-            if (minD < lowestDistance && minD <= 3) {
+            if (minD < lowestDistance && minD <= 2) {
               lowestDistance = minD;
               bestMatch = c;
             }
@@ -371,7 +383,7 @@ router.post('/upload', upload.fields([
         if (curriculumCourse) {
           scheduledCourses.push({
             ...curriculumCourse,
-            program: mappedProgram || curriculumCourse.program,
+            program: curriculumCourse.program,
             student_count: studentCount
           });
         } else {
