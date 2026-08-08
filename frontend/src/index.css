@@ -106,3 +106,28 @@
   }
 }
 
+/* Print Styles for Branded PDF Export */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #pdf-document-content, #pdf-document-content * {
+    visibility: visible;
+  }
+  #pdf-document-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 15px !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  @page {
+    size: auto;
+    margin: 5mm;
+  }
+}
+
+

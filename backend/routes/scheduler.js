@@ -677,6 +677,11 @@ router.post('/generate/:sessionId', async (req, res) => {
         session.end_date,
         lockedAssignments
       );
+      
+      console.log(`🧠 Engine Initialized. Calendar Length: ${engine.calendar.length}`);
+      console.log(`🔒 Locked Assignments Count: ${Object.keys(engine.lockedAssignments).length}`);
+      console.log(`📅 Start Date: ${session.start_date} -> ${engine.startDate}`);
+      console.log(`📅 End Date: ${session.end_date} -> ${engine.endDate}`);
 
       const result = engine.generateSchedule();
       console.log(`✅ Schedule generated: ${result.schedule.length} exams, ${result.violations.length} violations`);

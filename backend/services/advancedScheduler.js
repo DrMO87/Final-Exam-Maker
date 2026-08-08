@@ -10,9 +10,18 @@ class AdvancedScheduler {
     this.conflicts = conflicts;
     this.startDate = parseISO(startDate);
     this.endDate = parseISO(endDate);
+    
+    // Fallback if parseISO fails (e.g. invalid format in DB)
+    if (isNaN(this.startDate.getTime())) this.startDate = new Date(startDate);
+    if (isNaN(this.endDate.getTime())) this.endDate = new Date(endDate);
+
     this.lockedAssignments = lockedAssignments;
     this.conflictMap = this.buildConflictMap();
     this.calendar = this.generateCalendar();
+
+    if (this.calendar.length === 0) {
+      throw new Error(`Calendar generation failed: 0 valid days found between ${startDate} and ${endDate}. Please check the session dates.`);
+    }
     
     // Genetic Algorithm parameters
     this.populationSize = 50;
@@ -519,11 +528,11 @@ class AdvancedScheduler {
         course: course
       });
     });
-    
     return {
       schedule: result,
       violations,
       fitness,
+      calendar: this.calendar,
       stats: {
         totalCourses: this.courses.length,
         scheduledCourses: result.length,

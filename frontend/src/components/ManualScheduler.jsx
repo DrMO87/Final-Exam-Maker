@@ -338,6 +338,19 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
               break;
             }
 
+            // Check global capacity for the period (1000 students max)
+            const assignedCoursesInPeriod = Object.entries(nextAssignments)
+              .filter(([_, a]) => a.dayIndex === day.dayIndex && a.period === periodToTry)
+              .map(([cId]) => courses.find(item => String(item.id) === String(cId)))
+              .filter(Boolean);
+            const totalStudentsInPeriod = assignedCoursesInPeriod.reduce((sum, c) => sum + (c.student_count || 0), 0);
+            const courseStudents = course.student_count || 0;
+            
+            if (totalStudentsInPeriod + courseStudents > 1000) {
+              isDayValid = false;
+              break;
+            }
+
             // Same-day student conflict check against all courses assigned to this day
             const dayAssignedIds = Object.entries(nextAssignments)
               .filter(([_, a]) => a.dayIndex === day.dayIndex)

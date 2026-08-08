@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import ScheduleVaultModal from './ScheduleVaultModal';
+import PdfExportModal from './PdfExportModal';
 
 function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGenerated, onBack, onReset }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedSchedule, setGeneratedSchedule] = useState(schedule);
   const [showVaultModal, setShowVaultModal] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   const lockedCount = Object.keys(lockedAssignments || {}).length;
   const [showChoiceModal, setShowChoiceModal] = useState(!schedule && lockedCount > 0);
@@ -278,6 +280,12 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
             </div>
             <div className="flex flex-wrap gap-2">
               <button 
+                className="btn btn-gold btn-sm font-bold shadow-md hover:shadow-lg flex items-center gap-1.5" 
+                onClick={() => setShowPdfModal(true)}
+              >
+                📄 Export Branded PDF
+              </button>
+              <button 
                 className="btn btn-secondary btn-sm border-hue-gold/60 text-hue-navy hover:bg-hue-gold/15 font-bold" 
                 onClick={() => setShowVaultModal(true)}
               >
@@ -297,6 +305,16 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
               </button>
             </div>
           </div>
+
+          {/* Branded PDF Export Modal */}
+          {showPdfModal && (
+            <PdfExportModal
+              sessionId={sessionId}
+              session={generatedSchedule?.session}
+              scheduleData={generatedSchedule}
+              onClose={() => setShowPdfModal(false)}
+            />
+          )}
 
           {/* Schedule Vault Modal */}
           {showVaultModal && (
