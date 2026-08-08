@@ -293,6 +293,7 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
     const preferredGroup = isOddLevel ? 'A' : 'B';
     const primaryDays = calendar.filter(d => d.groupType === preferredGroup);
     const candidateDays = primaryDays.length > 0 ? primaryDays : calendar;
+    const searchDays = [...candidateDays, ...calendar.filter(d => !candidateDays.includes(d))];
 
     courseGroups.forEach(group => {
       let chosenDay = null;

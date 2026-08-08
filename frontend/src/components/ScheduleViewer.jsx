@@ -162,12 +162,12 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
               </div>
               <div>
                 <h3 className="text-lg font-bold text-hue-navy">Schedule Generation Mode</h3>
-                <p className="text-xs text-slate-500">You have {lockedCount} pre-scheduled course(s) from Step 3.</p>
+                <p className="text-xs text-slate-500">You have {lockedCount} pre-scheduled course(s) from Step 4.</p>
               </div>
             </div>
 
             <div className="space-y-3">
-              {/* Option 1: Continue with Step 3 */}
+              {/* Option 1: Continue with Step 4 */}
               <button
                 onClick={() => handleGenerateSchedule(false)}
                 className="w-full text-left p-4 rounded-xl border-2 border-hue-navy/20 hover:border-hue-gold bg-slate-50 hover:bg-hue-gold/5 transition-all group cursor-pointer flex items-start gap-4"
@@ -175,10 +175,10 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
                 <div className="text-2xl mt-0.5">🔒</div>
                 <div>
                   <div className="font-bold text-sm text-hue-navy group-hover:text-hue-gold transition-colors">
-                    Continue with Step 3 Pre-Scheduled Assignments
+                    Continue with Step 4 Pre-Scheduled Assignments
                   </div>
                   <div className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Keep your {lockedCount} locked course(s) from Step 3 fixed in place on the calendar, and let AI auto-schedule all remaining courses around them.
+                    Keep your {lockedCount} locked course(s) from Step 4 fixed in place on the calendar, and let AI auto-schedule all remaining courses around them.
                   </div>
                 </div>
               </button>
@@ -191,7 +191,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
                 <div className="text-2xl mt-0.5">🔄</div>
                 <div>
                   <div className="font-bold text-sm text-slate-800 group-hover:text-red-600 transition-colors">
-                    Start All Over (Ignore Step 3)
+                    Start All Over (Ignore Step 4)
                   </div>
                   <div className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Ignore all manual pre-scheduled assignments and generate a completely fresh AI schedule from scratch for all courses.
@@ -202,7 +202,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
 
             <div className="flex justify-between items-center pt-3 border-t border-slate-100">
               <button className="btn btn-secondary btn-sm text-xs" onClick={onBack}>
-                ← Return to Step 3
+                ← Return to Step 4 (Pre-Scheduling)
               </button>
               <button className="text-xs text-slate-400 hover:text-slate-600 underline" onClick={() => setShowChoiceModal(false)}>
                 Dismiss
