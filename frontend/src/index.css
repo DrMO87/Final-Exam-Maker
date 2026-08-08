@@ -108,26 +108,65 @@
 
 /* Print Styles for Branded PDF Export */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   body * {
     visibility: hidden;
   }
+
   #pdf-document-content, #pdf-document-content * {
     visibility: visible;
+    overflow: visible !important;
   }
+
   #pdf-document-content {
     position: absolute;
     left: 0;
     top: 0;
     width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
-    padding: 15px !important;
+    padding: 10mm !important;
     box-shadow: none !important;
     border: none !important;
+    background: white !important;
   }
+
+  table {
+    page-break-inside: auto;
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+
+  td, th {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    word-break: break-word !important;
+  }
+
+  /* Reset line-clamp in print mode to avoid cutting off text lines in Chrome Print */
+  .line-clamp-1, .line-clamp-2, .line-clamp-3 {
+    display: block !important;
+    -webkit-line-clamp: none !important;
+    -webkit-box-orient: horizontal !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
   @page {
-    size: auto;
-    margin: 5mm;
+    size: landscape;
+    margin: 6mm;
   }
 }
+
 
 

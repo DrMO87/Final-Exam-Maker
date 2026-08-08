@@ -399,28 +399,28 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                               const assignedItems = matrixData[dateStr]?.[periodNum]?.[pl] || [];
 
                               return (
-                                <td key={pl} className="border border-slate-300 p-1 align-top min-h-[36px] max-w-0 overflow-hidden">
+                                <td key={pl} className="border border-slate-300 p-1 align-top bg-white/50">
                                   {assignedItems.length > 0 ? (
                                     assignedItems.map(item => (
-                                      <div key={item.course_id} className="bg-slate-100/90 rounded border border-slate-300 p-1 mb-1 last:mb-0 shadow-2xs leading-tight">
-                                        <div className="font-bold text-[#0B1E36] text-[8.5px] flex justify-between items-center gap-0.5">
-                                          <span className="truncate">{item.course.course_code}</span>
-                                          <span className="text-[7px] bg-slate-200 text-slate-700 px-0.5 rounded font-semibold whitespace-nowrap">
+                                      <div key={item.course_id} className="bg-slate-50/90 rounded-md border border-slate-300 p-1.5 mb-1 last:mb-0 shadow-2xs overflow-visible">
+                                        <div className="font-bold text-[#0B1E36] text-[9px] leading-tight flex justify-between items-center gap-1 border-b border-slate-200/80 pb-0.5 mb-0.5">
+                                          <span className="font-extrabold tracking-tight">{item.course.course_code}</span>
+                                          <span className="text-[7.5px] bg-slate-200 text-slate-800 px-1 rounded font-bold whitespace-nowrap">
                                             {item.course.student_count} stds
                                           </span>
                                         </div>
-                                        <div className="text-[7.5px] text-slate-700 font-medium line-clamp-2 mt-0.5 leading-tight">
+                                        <div className="text-[8px] text-slate-800 font-medium leading-[11px] whitespace-normal break-words">
                                           {item.course.course_title}
                                         </div>
                                         {item.course.has_oral_exam && (
-                                          <div className="mt-0.5 inline-block text-[6.5px] font-bold text-amber-900 bg-amber-200/90 px-1 py-0.2 rounded">
+                                          <div className="mt-1 inline-flex items-center gap-0.5 text-[7px] font-bold text-amber-900 bg-amber-100 border border-amber-300/80 px-1 py-0.5 rounded leading-none">
                                             🎤 Oral
                                           </div>
                                         )}
                                       </div>
                                     ))
                                   ) : (
-                                    <div className="text-slate-300 text-center py-0.5 text-[8px] font-light">—</div>
+                                    <div className="text-slate-300 text-center py-1 text-[8px] font-light">—</div>
                                   )}
                                 </td>
                               );
