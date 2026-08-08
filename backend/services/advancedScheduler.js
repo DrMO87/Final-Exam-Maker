@@ -180,10 +180,10 @@ class AdvancedScheduler {
 
     // Check minimum gaps between conflicting courses
     schedule.forEach((assignment1, idx1) => {
-      if (!assignment1 || assignment1.dayIndex === -1) return;
+      if (!assignment1 || typeof assignment1.dayIndex !== 'number' || assignment1.dayIndex < 0 || assignment1.dayIndex >= this.calendar.length) return;
 
       schedule.forEach((assignment2, idx2) => {
-        if (idx1 >= idx2 || !assignment2 || assignment2.dayIndex === -1) return;
+        if (idx1 >= idx2 || !assignment2 || typeof assignment2.dayIndex !== 'number' || assignment2.dayIndex < 0 || assignment2.dayIndex >= this.calendar.length) return;
 
         const course1 = this.courses[idx1];
         const course2 = this.courses[idx2];
@@ -220,10 +220,10 @@ class AdvancedScheduler {
 
     // RULE: Same course title/code across different programs MUST be on the SAME DAY
     schedule.forEach((assignment1, idx1) => {
-      if (!assignment1 || assignment1.dayIndex === -1) return;
+      if (!assignment1 || typeof assignment1.dayIndex !== 'number' || assignment1.dayIndex < 0 || assignment1.dayIndex >= this.calendar.length) return;
 
       schedule.forEach((assignment2, idx2) => {
-        if (idx1 >= idx2 || !assignment2 || assignment2.dayIndex === -1) return;
+        if (idx1 >= idx2 || !assignment2 || typeof assignment2.dayIndex !== 'number' || assignment2.dayIndex < 0 || assignment2.dayIndex >= this.calendar.length) return;
 
         const course1 = this.courses[idx1];
         const course2 = this.courses[idx2];
