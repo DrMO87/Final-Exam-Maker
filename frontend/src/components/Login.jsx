@@ -24,39 +24,26 @@ function Login() {
         {/* Brand Shield Logo Header */}
         <div className="flex flex-col items-center justify-center text-center">
           
-          {/* Shield Icon Graphic */}
-          <div className="relative mb-2">
-            <svg className="w-20 h-20 text-[#EAB308]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Shield Outline */}
-              <path d="M50 8L85 24V48C85 70 70 88 50 94C30 88 15 70 15 48V24L50 8Z" fill="#FFFBEB" stroke="#EAB308" strokeWidth="4" strokeLinejoin="round" />
-              {/* Gold Grid Network Nodes */}
-              <path d="M35 32L50 24L65 32L65 48L50 56L35 48Z" stroke="#EAB308" strokeWidth="2.5" strokeDasharray="2 2" />
-              <path d="M50 24V56M35 32L65 48M65 32L35 48" stroke="#EAB308" strokeWidth="2" />
-              <circle cx="50" cy="24" r="3.5" fill="#0B1E36" />
-              <circle cx="35" cy="32" r="3.5" fill="#0B1E36" />
-              <circle cx="65" cy="32" r="3.5" fill="#0B1E36" />
-              <circle cx="35" cy="48" r="3.5" fill="#0B1E36" />
-              <circle cx="65" cy="48" r="3.5" fill="#0B1E36" />
-              {/* Center Checkmark Emblem */}
-              <circle cx="50" cy="40" r="11" fill="#EAB308" />
-              <path d="M44 40L48 44L56 36" stroke="#0B1E36" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          {/* Official Session Master Image Logo */}
+          <div className="flex justify-center mb-1">
+            <img 
+              src="/assets/logo-session-master-transparent.png" 
+              alt="Session Master Logo" 
+              className="h-24 w-auto object-contain"
+            />
           </div>
 
-          {/* Title & Subtitle */}
-          <h1 className="text-xl font-black tracking-tight text-[#EAB308] uppercase font-outfit m-0">
-            SESSION MASTER
-          </h1>
-          <div className="text-[9.5px] font-extrabold text-slate-400 uppercase tracking-widest mt-0.5">
+          {/* Subtitle */}
+          <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mt-0.5">
             FINAL EXAM MAKER
           </div>
 
           {/* Heading */}
-          <h2 className="text-2xl font-black text-slate-900 mt-5 mb-1 font-outfit">
+          <h2 className="text-2xl font-black text-slate-900 mt-4 mb-1 font-outfit">
             Welcome Back
           </h2>
-          <p className="text-slate-500 text-xs font-medium max-w-[260px] leading-relaxed">
-            Sign In to access the Horus University Exam Supervision System
+          <p className="text-slate-500 text-xs font-medium max-w-[280px] leading-relaxed">
+            Sign In to access the Horus University Exam Management System
           </p>
 
         </div>
