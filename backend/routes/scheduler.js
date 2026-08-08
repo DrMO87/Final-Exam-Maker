@@ -15,21 +15,30 @@ const inferLevelFromCode = (code, title) => {
   const codeStr = String(code).trim().toUpperCase();
   const titleStr = String(title || '').toLowerCase();
 
-  // Rule 1: Non-zero first digit (1-5) from left in course code directly determines level (e.g. PC-515 -> Level 5)
-  const digitMatch = codeStr.match(/(\d)/);
-  const firstDigit = digitMatch ? digitMatch[1] : null;
-
-  if (firstDigit && firstDigit >= '1' && firstDigit <= '5') {
-    return parseInt(firstDigit);
+  // Rule 1: Standard codes — first non-zero digit after the hyphen determines level
+  //         e.g. PC-515 -> 5, PL-221 -> 2, MD-327 -> 3
+  const afterHyphen = codeStr.split('-')[1] || '';
+  if (afterHyphen) {
+    const firstDigit = afterHyphen.charAt(0);
+    if (firstDigit >= '1' && firstDigit <= '5') {
+      return parseInt(firstDigit);
+    }
   }
 
-  // Rule 2: Elective courses starting with '0' (e.g. 002, 004, 008) -> Review from program curriculum / keywords
-  if (titleStr.includes('novel drug') || titleStr.includes('phytotherapy') || titleStr.includes('neuropsychiatric') || titleStr.includes('respiratory') || codeStr.includes('008')) return 5;
-  if (titleStr.includes('cosmetic') || titleStr.includes('drug design') || titleStr.includes('clinical nutrition') || codeStr.includes('004') || codeStr.includes('005') || codeStr.includes('006')) return 4;
-  if (titleStr.includes('negotiation') || codeStr.includes('002')) return 2;
+  // Rule 2: Fallback — first non-zero digit anywhere in the code
+  const digitMatch = codeStr.match(/([1-5])/);
+  if (digitMatch) {
+    return parseInt(digitMatch[1]);
+  }
+
+  // Rule 3: Elective courses starting with '0' (e.g. 002, 004, 008) -> keyword/code heuristics
+  if (titleStr.includes('novel drug') || titleStr.includes('neuropsychiatric') || titleStr.includes('respiratory') || titleStr.includes('cardiovascular') || titleStr.includes('gastrointestinal') || titleStr.includes('oncological') || titleStr.includes('basic & clinical toxicology') || titleStr.includes('basic and clinical toxicology') || codeStr.includes('008')) return 5;
+  if (titleStr.includes('cosmetic') || titleStr.includes('drug design') || titleStr.includes('clinical nutrition') || titleStr.includes('phytotherapy') || codeStr.includes('004') || codeStr.includes('005') || codeStr.includes('006')) return 4;
+  if (titleStr.includes('negotiation') || titleStr.includes('community pharmacy') || codeStr.includes('002')) return 3;
 
   return 1;
 };
+
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -102,7 +111,20 @@ router.post('/load-sample', async (req, res) => {
     const getSamplePath = (keyword) => {
       const files = fs.readdirSync(sampleDir);
       const normKey = keyword.toLowerCase().replace(/[\s_\-]/g, '');
-      const matched = files.find(f => f.toLowerCase().replace(/[\s_\-]/g, '').includes(normKey));
+
+      // 1. Try exact match first (normalized filename without extension)
+      let matched = files.find(f => {
+        const normName = f.replace(/\.[^.]+$/, '').toLowerCase().replace(/[\s_\-]/g, '');
+        return normName === normKey;
+      });
+
+      // 2. If no exact match, try substring match — prefer shortest filename
+      //    to avoid 'clinical_pharmd_courses' matching before 'pharmd_courses'
+      if (!matched) {
+        const sorted = [...files].sort((a, b) => a.length - b.length);
+        matched = sorted.find(f => f.toLowerCase().replace(/[\s_\-]/g, '').includes(normKey));
+      }
+
       if (matched) return path.join(sampleDir, matched);
       throw new Error(`Sample file matching "${keyword}" not found in ${sampleDir}`);
     };
@@ -126,18 +148,26 @@ router.post('/load-sample', async (req, res) => {
         const codeStr = String(code).trim().toUpperCase();
         const titleStr = String(title).toLowerCase();
 
-        // Rule 1: Non-zero first digit (1-5) from left in course code directly determines level (e.g. PC-515 -> Level 5)
-        const digitMatch = codeStr.match(/(\d)/);
-        const firstDigit = digitMatch ? digitMatch[1] : null;
-
-        if (firstDigit && firstDigit >= '1' && firstDigit <= '5') {
-          return parseInt(firstDigit);
+        // Rule 1: Standard codes — first non-zero digit after the hyphen determines level
+        //         e.g. PC-515 -> 5, PL-221 -> 2, MD-327 -> 3
+        const afterHyphen = codeStr.split('-')[1] || '';
+        if (afterHyphen) {
+          const firstDigit = afterHyphen.charAt(0);
+          if (firstDigit >= '1' && firstDigit <= '5') {
+            return parseInt(firstDigit);
+          }
         }
 
-        // Rule 2: Elective courses starting with '0' (e.g. 002, 004, 008) -> Review from program curriculum / keywords
-        if (titleStr.includes('novel drug') || titleStr.includes('phytotherapy') || titleStr.includes('neuropsychiatric') || titleStr.includes('respiratory') || codeStr.includes('008')) return 5;
-        if (titleStr.includes('cosmetic') || titleStr.includes('drug design') || titleStr.includes('clinical nutrition') || codeStr.includes('004') || codeStr.includes('005') || codeStr.includes('006')) return 4;
-        if (titleStr.includes('negotiation') || codeStr.includes('002')) return 2;
+        // Rule 2: Fallback — first non-zero digit anywhere in the code
+        const digitMatch = codeStr.match(/([1-5])/);
+        if (digitMatch) {
+          return parseInt(digitMatch[1]);
+        }
+
+        // Rule 3: Elective courses starting with '0' (e.g. 002, 004, 008) -> keyword/code heuristics
+        if (titleStr.includes('novel drug') || titleStr.includes('neuropsychiatric') || titleStr.includes('respiratory') || titleStr.includes('cardiovascular') || titleStr.includes('gastrointestinal') || titleStr.includes('oncological') || titleStr.includes('basic & clinical toxicology') || titleStr.includes('basic and clinical toxicology') || codeStr.includes('008')) return 5;
+        if (titleStr.includes('cosmetic') || titleStr.includes('drug design') || titleStr.includes('clinical nutrition') || titleStr.includes('phytotherapy') || codeStr.includes('004') || codeStr.includes('005') || codeStr.includes('006')) return 4;
+        if (titleStr.includes('negotiation') || titleStr.includes('community pharmacy') || codeStr.includes('002')) return 3;
 
         return 1;
       };
