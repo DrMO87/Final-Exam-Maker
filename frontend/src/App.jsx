@@ -112,19 +112,28 @@ function App() {
         </button>
 
         {/* Sidebar Header */}
-        <div className={`p-6 pb-4 border-b border-white/10 flex items-center ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-between'}`}>
-          <h1 className="text-2xl font-bold font-outfit tracking-tight text-white drop-shadow-sm flex items-center gap-3 overflow-hidden">
-            <span 
-              className="text-3xl shrink-0 cursor-pointer hover:opacity-80 transition-opacity" 
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-              title="Exam Scheduler"
-            >
-              📚
-            </span>
-            {!isSidebarCollapsed && (
-              <span className="whitespace-nowrap transition-opacity duration-300">Exam<br/>Scheduler</span>
-            )}
-          </h1>
+        <div 
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className={`p-4 border-b border-white/10 flex items-center cursor-pointer hover:bg-white/5 transition-all ${
+            isSidebarCollapsed ? 'justify-center px-2 py-4' : 'justify-between px-5 py-4'
+          }`}
+          title="Session Master - Final Exam Maker"
+        >
+          {isSidebarCollapsed ? (
+            <img 
+              src="/assets/session_master_shield_logo.png" 
+              alt="Session Master Logo" 
+              className="w-10 h-10 object-contain hover:scale-105 transition-transform" 
+            />
+          ) : (
+            <div className="flex items-center gap-3 overflow-hidden">
+              <img 
+                src="/assets/session_master_shield_logo.png" 
+                alt="Session Master Logo" 
+                className="h-12 w-auto object-contain shrink-0 drop-shadow-md" 
+              />
+            </div>
+          )}
         </div>
 
         {/* User Account Profile Card */}

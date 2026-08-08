@@ -27,14 +27,14 @@ function Login() {
           {/* Official Session Master Image Logo */}
           <div className="flex justify-center mb-1">
             <img 
-              src="/assets/logo-session-master-transparent.png" 
+              src="/assets/session_master_shield_logo.png" 
               alt="Session Master Logo" 
-              className="h-24 w-auto object-contain"
+              className="h-28 md:h-32 w-auto object-contain"
             />
           </div>
 
           {/* Subtitle */}
-          <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mt-0.5">
+          <div className="text-[10px] font-extrabold text-[#EAB308] uppercase tracking-widest mt-1">
             FINAL EXAM MAKER
           </div>
 
