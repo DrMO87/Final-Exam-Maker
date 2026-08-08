@@ -26,6 +26,29 @@ function App() {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
+  // Global PDF & System Settings state
+  const [pdfSettings, setPdfSettings] = useState(() => {
+    const saved = localStorage.getItem('hue_pdf_settings');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      semester: 'Fall Semester',
+      academicYear: '2025-2026',
+      period1Time: '09:00 AM - 11:00 AM',
+      period2Time: '12:00 PM - 02:00 PM',
+      showSignatures: true,
+      numSignatures: 2,
+      signatories: [
+        { name: 'Dr. Exam Control Chair', title: 'Head of Exam Control' },
+        { name: 'Prof. Dean Signature', title: 'Dean of Faculty of Pharmacy' },
+        { name: 'Vice Dean Signature', title: 'Vice Dean of Academic Affairs' },
+        { name: 'Committee Member', title: 'Control Committee Secretary' }
+      ],
+      showStamp: false
+    };
+  });
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('scheduler_sidebarCollapsed') === 'true';
   });
@@ -46,6 +69,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('scheduler_sidebarCollapsed', isSidebarCollapsed);
   }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('hue_pdf_settings', JSON.stringify(pdfSettings));
+  }, [pdfSettings]);
 
   // If user is not authenticated, render Login screen
   if (!user) {
@@ -90,6 +117,12 @@ function App() {
     setCurrentStep(stepNum);
   };
 
+  const handleSignatorySettingChange = (index, field, value) => {
+    const updated = [...pdfSettings.signatories];
+    updated[index][field] = value;
+    setPdfSettings({ ...pdfSettings, signatories: updated });
+  };
+
   const stepsList = [
     { num: 1, label: 'Create Session', icon: '🏠', desc: 'Initialize session dates' },
     { num: 2, label: 'Upload Files', icon: '📋', desc: 'Courses & matrices' },
@@ -119,7 +152,7 @@ function App() {
           </svg>
         </button>
 
-        {/* Top Logo Container matching Supervisors Automated Assign navigation.tsx */}
+        {/* Top Logo Container */}
         <div 
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className={`border-b border-white/10 flex items-center justify-center cursor-pointer transition-all duration-300 ${
@@ -356,6 +389,8 @@ function App() {
         <PdfExportModal
           sessionId={sessionId}
           scheduleData={schedule ? { schedule } : { schedule: [] }}
+          pdfSettings={pdfSettings}
+          onUpdatePdfSettings={(newSettings) => setPdfSettings(newSettings)}
           onClose={() => setShowPdfModal(false)}
         />
       )}
@@ -363,10 +398,11 @@ function App() {
       {/* Dedicated System & PDF Settings Modal */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200">
+          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
+            
             <div className="flex justify-between items-center pb-3 border-b border-slate-200">
               <h3 className="text-lg font-black text-[#002147] font-outfit flex items-center gap-2">
-                <span>⚙️</span> Settings & System Preferences
+                <span>⚙️</span> Settings & PDF Preferences
               </h3>
               <button 
                 onClick={() => setShowSettingsModal(false)}
@@ -377,26 +413,134 @@ function App() {
             </div>
             
             <div className="py-4 space-y-4 text-xs">
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-                <div className="font-bold text-[#002147] mb-1">🏢 Room Capacity Overflow Limit</div>
-                <p className="text-slate-500 leading-relaxed">
-                  Default period slot capacity limit is set at <span className="font-bold text-slate-800">1,000 students</span> per period. Manual auto-scheduling automatically directs overflow into Period 2.
-                </p>
+              
+              {/* Semester & Academic Year Setup */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div className="font-bold text-[#002147] text-xs">📅 Semester & Academic Year</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-600 font-semibold mb-1">Semester</label>
+                    <select
+                      value={pdfSettings.semester}
+                      onChange={(e) => setPdfSettings({ ...pdfSettings, semester: e.target.value })}
+                      className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                    >
+                      <option value="Fall Semester">Fall Semester</option>
+                      <option value="Spring Semester">Spring Semester</option>
+                      <option value="Summer Semester">Summer Semester</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 font-semibold mb-1">Academic Year</label>
+                    <input
+                      type="text"
+                      value={pdfSettings.academicYear}
+                      onChange={(e) => setPdfSettings({ ...pdfSettings, academicYear: e.target.value })}
+                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                      placeholder="2025-2026"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-                <div className="font-bold text-[#002147] mb-1">📄 PDF Export Layout Presets</div>
-                <p className="text-slate-500 leading-relaxed">
-                  Toggle between <span className="font-bold text-slate-800">Hall Supervision Schedule</span> (4 logos, room info, RTL Arabic supervisors) and <span className="font-bold text-slate-800">Master Timetable Matrix</span> in the Reports Studio.
-                </p>
+              {/* Periods Config Setup */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div className="font-bold text-[#002147] text-xs">⏰ Examination Period Times</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-600 font-semibold mb-1">Period 1 Time</label>
+                    <input
+                      type="text"
+                      value={pdfSettings.period1Time}
+                      onChange={(e) => setPdfSettings({ ...pdfSettings, period1Time: e.target.value })}
+                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                      placeholder="09:00 AM - 11:00 AM"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 font-semibold mb-1">Period 2 Time</label>
+                    <input
+                      type="text"
+                      value={pdfSettings.period2Time}
+                      onChange={(e) => setPdfSettings({ ...pdfSettings, period2Time: e.target.value })}
+                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                      placeholder="12:00 PM - 02:00 PM"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-                <div className="font-bold text-[#002147] mb-1">🔑 Account & Security</div>
-                <p className="text-slate-500 leading-relaxed">
-                  Manage staff roles and authorized personnel using <span className="font-bold text-slate-800">Staff Accounts</span> in the sidebar.
-                </p>
+              {/* Custom Signatures & Titles Setup */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="font-bold text-[#002147] text-xs">✍️ Customized Document Signatures</div>
+                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={pdfSettings.showSignatures}
+                      onChange={(e) => setPdfSettings({ ...pdfSettings, showSignatures: e.target.checked })}
+                      className="rounded text-[#002147]"
+                    />
+                    Enable Block
+                  </label>
+                </div>
+
+                {pdfSettings.showSignatures && (
+                  <>
+                    <div>
+                      <label className="block text-slate-600 font-semibold mb-1">Number of Signatories</label>
+                      <select
+                        value={pdfSettings.numSignatures}
+                        onChange={(e) => setPdfSettings({ ...pdfSettings, numSignatures: Number(e.target.value) })}
+                        className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                      >
+                        <option value={1}>1 Signatory</option>
+                        <option value={2}>2 Signatories</option>
+                        <option value={3}>3 Signatories</option>
+                        <option value={4}>4 Signatories</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      {Array.from({ length: pdfSettings.numSignatures }).map((_, idx) => (
+                        <div key={idx} className="grid grid-cols-2 gap-2 bg-white p-2 rounded-xl border border-slate-200">
+                          <input
+                            type="text"
+                            value={pdfSettings.signatories[idx]?.name || ''}
+                            onChange={(e) => handleSignatorySettingChange(idx, 'name', e.target.value)}
+                            placeholder={`#${idx + 1} Signatory Name`}
+                            className="h-7 px-2 border border-slate-200 rounded-lg text-xs font-medium"
+                          />
+                          <input
+                            type="text"
+                            value={pdfSettings.signatories[idx]?.title || ''}
+                            onChange={(e) => handleSignatorySettingChange(idx, 'title', e.target.value)}
+                            placeholder={`#${idx + 1} Official Title`}
+                            className="h-7 px-2 border border-slate-200 rounded-lg text-xs font-bold text-[#002147]"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
+
+              {/* Table Stamp Toggle */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-[#002147] text-xs">💮 Official Approval Stamp</div>
+                  <div className="text-slate-500 text-[11px]">Include circular approval seal at bottom of document table</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={pdfSettings.showStamp}
+                  onChange={(e) => setPdfSettings({ ...pdfSettings, showStamp: e.target.checked })}
+                  className="w-4 h-4 rounded text-[#002147]"
+                />
+              </div>
+
             </div>
 
             <div className="pt-3 border-t border-slate-200 flex justify-end">
@@ -404,7 +548,7 @@ function App() {
                 onClick={() => setShowSettingsModal(false)}
                 className="px-6 py-2 bg-[#002147] text-white font-bold rounded-xl text-xs hover:bg-[#001530] transition-all shadow-md"
               >
-                Done
+                Save Settings
               </button>
             </div>
           </div>
