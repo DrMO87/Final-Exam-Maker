@@ -14,7 +14,6 @@ const db = new Database(dbPath, { verbose: console.log });
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
 
-// Ensure saved_schedules table exists
 db.exec(`
   CREATE TABLE IF NOT EXISTS saved_schedules (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,8 +24,33 @@ db.exec(`
     violation_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES scheduling_sessions(id) ON DELETE CASCADE
-  )
+  );
+
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    name TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'Staff',
+    department TEXT DEFAULT 'Faculty of Pharmacy',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
+
+// Seed default accounts if empty
+try {
+  const userCheck = db.prepare('SELECT COUNT(*) as count FROM users').get();
+  if (userCheck && userCheck.count === 0) {
+    const insertStmt = db.prepare('INSERT INTO users (username, password, name, role, department) VALUES (?, ?, ?, ?, ?)');
+    insertStmt.run('melkhodary@horus.edu.eg', 'admin123', 'Dr. M. Elkhodary', 'Admin', 'Faculty of Pharmacy');
+    insertStmt.run('admin', 'admin123', 'System Administrator', 'Admin', 'IT & Control System');
+    insertStmt.run('control', 'control123', 'Dr. Exam Control Chair', 'Control Committee', 'Exam Control Committee');
+    insertStmt.run('pharmacy', 'pharmacy123', 'Pharmacy Academic Staff', 'Faculty Staff', 'Faculty of Pharmacy');
+    console.log('✅ Default authorized users seeded into local SQLite!');
+  }
+} catch (e) {
+  console.error('User seeding error:', e.message);
+}
 
 console.log(`📊 SQLite database initialized at: ${dbPath}`);
 

@@ -76,7 +76,33 @@ if (connectionString) {
             period VARCHAR(50),
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(255) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            role VARCHAR(100) NOT NULL DEFAULT 'Staff',
+            department VARCHAR(255) DEFAULT 'Faculty of Pharmacy',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
       `);
+      
+      // Seed default accounts if empty
+      try {
+        const countRes = await pool.query('SELECT COUNT(*) as count FROM users');
+        if (Number(countRes.rows[0]?.count || 0) === 0) {
+          await pool.query(`
+            INSERT INTO users (username, password, name, role, department) VALUES
+            ('melkhodary@horus.edu.eg', 'admin123', 'Dr. M. Elkhodary', 'Admin', 'Faculty of Pharmacy'),
+            ('admin', 'admin123', 'System Administrator', 'Admin', 'IT & Control System'),
+            ('control', 'control123', 'Dr. Exam Control Chair', 'Control Committee', 'Exam Control Committee'),
+            ('pharmacy', 'pharmacy123', 'Pharmacy Academic Staff', 'Faculty Staff', 'Faculty of Pharmacy')
+            ON CONFLICT DO NOTHING;
+          `);
+        }
+      } catch (e) {}
+
       initialized = true;
       console.log('✅ Supabase PostgreSQL schema verified & auto-migrated successfully!');
     } catch (err) {
