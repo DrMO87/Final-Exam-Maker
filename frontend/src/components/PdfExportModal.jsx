@@ -9,8 +9,20 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
   const [layoutMode, setLayoutMode] = useState('matrix'); // 'matrix' or 'chronological'
   const [orientation, setOrientation] = useState('landscape'); // 'landscape' or 'portrait'
   const [pageSize, setPageSize] = useState('a4'); // 'a4' or 'a3'
-  const [documentTitle, setDocumentTitle] = useState(session?.session_name || 'Final Examination Timetable');
+  const [semester, setSemester] = useState(session?.semester || 'Fall Semester');
+  const [academicYear, setAcademicYear] = useState('2025-2026');
+  const [period1Time, setPeriod1Time] = useState('09:00 AM - 11:00 AM');
+  const [period2Time, setPeriod2Time] = useState('12:00 PM - 02:00 PM');
+  
   const [showSignatures, setShowSignatures] = useState(true);
+  const [numSignatures, setNumSignatures] = useState(2);
+  const [signatories, setSignatories] = useState([
+    { name: 'Dr. Exam Control Chair', title: 'Head of Exam Control' },
+    { name: 'Prof. Dean Signature', title: 'Dean of Faculty of Pharmacy' },
+    { name: 'Vice Dean Signature', title: 'Vice Dean of Academic Affairs' },
+    { name: 'Committee Member', title: 'Control Committee Secretary' }
+  ]);
+
   const [showStats, setShowStats] = useState(true);
   const [exporting, setExporting] = useState(false);
 
@@ -95,166 +107,183 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
     day: 'numeric'
   });
 
+  const handleSignatoryChange = (index, field, value) => {
+    const updated = [...signatories];
+    updated[index][field] = value;
+    setSignatories(updated);
+  };
+
   const handleDownloadPdf = async () => {
     if (!printAreaRef.current) return;
     setExporting(true);
 
     try {
-      const element = printAreaRef.current;
-      const cleanFileName = (documentTitle || 'Schedule')
-        .replace(/[^a-zA-Z0-9\s_-]/g, '')
-        .replace(/\s+/g, '_');
-
       const opt = {
-        margin: [5, 5, 5, 5],
-        filename: `${cleanFileName}_HUE_Horus_University.pdf`,
+        margin: [8, 8, 8, 8],
+        filename: `HUE_Exam_Schedule_${semester.replace(/\s+/g, '_')}_${session?.session_name || 'Timetable'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
-          logging: false,
-          windowWidth: orientation === 'landscape' ? 1280 : 960
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: pageSize, 
-          orientation: orientation 
-        }
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: pageSize, orientation: orientation }
       };
 
-      await html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(printAreaRef.current).save();
     } catch (err) {
-      console.error('Failed to generate PDF:', err);
-      alert('Could not generate PDF. You can also use the "Print / Save via Browser" button.');
+      console.error('PDF export error:', err);
+      window.print();
     } finally {
       setExporting(false);
     }
   };
 
-  const handleNativePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-3">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-7xl max-h-[95vh] flex flex-col overflow-hidden animate-fade-in">
+    <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in select-none">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[92vh] flex flex-col overflow-hidden border border-slate-200">
         
-        {/* Header / Controls Bar */}
-        <div className="p-4 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-800">
+        {/* Modal Header Bar */}
+        <div className="bg-[#0B1E36] text-white p-4 flex justify-between items-center shrink-0 border-b border-[#D4AF37]/30">
           <div className="flex items-center gap-3">
-            <img src={LOGO_HUE} alt="HUE Logo" className="h-9 w-auto object-contain bg-white/10 p-1 rounded" />
+            <span className="text-2xl">📄</span>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white tracking-wide">Horus University — Egypt (HUE) PDF Studio</h3>
-                <span className="bg-hue-gold/20 text-hue-gold border border-hue-gold/40 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Official Accreditation</span>
-              </div>
-              <p className="text-slate-400 text-xs mt-0.5">Faculty of Pharmacy • Digital Transformation Unit (DTU) • NAQAAE Accredited</p>
+              <h3 className="font-extrabold text-base tracking-wide font-outfit text-white">
+                Export Studio — Horus University Egypt (HUE)
+              </h3>
+              <p className="text-xs text-[#D4AF37] font-semibold">
+                Configure Layout, Semester, Periods & Customized Signature Blocks
+              </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleNativePrint}
-              className="btn btn-secondary btn-sm bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 font-semibold"
-              title="Print document or save using browser print dialog"
-            >
-              🖨️ Print View
-            </button>
-            <button
-              onClick={handleDownloadPdf}
-              disabled={exporting}
-              className="btn btn-gold btn-sm font-bold shadow-lg shadow-hue-gold/20"
-            >
-              {exporting ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-hue-navy" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Exporting PDF...
-                </>
-              ) : (
-                <>
-                  📄 Download PDF Document
-                </>
-              )}
-            </button>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-            >
-              ✕
-            </button>
-          </div>
+          <button 
+            onClick={onClose}
+            className="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition-all"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Options Toolbar */}
-        <div className="p-3 bg-slate-100 border-b border-slate-200 grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+        {/* Configuration Controls Bar */}
+        <div className="bg-slate-100 border-b border-slate-200 p-4 shrink-0 grid grid-cols-1 md:grid-cols-6 gap-3 text-xs">
+          
           <div>
-            <label className="block text-slate-600 font-semibold mb-1">Layout Format</label>
+            <label className="block text-slate-700 font-bold mb-1">Layout Format</label>
             <select
               value={layoutMode}
               onChange={(e) => setLayoutMode(e.target.value)}
-              className="input input-sm h-8 py-0 border-slate-300 font-medium"
+              className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
             >
-              <option value="matrix">Detailed Matrix Timetable</option>
+              <option value="matrix">Timetable Matrix Grid</option>
               <option value="chronological">Chronological Master List</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-slate-600 font-semibold mb-1">Page Orientation</label>
-            <select
-              value={orientation}
-              onChange={(e) => setOrientation(e.target.value)}
-              className="input input-sm h-8 py-0 border-slate-300 font-medium"
-            >
-              <option value="landscape">Landscape (Recommended)</option>
-              <option value="portrait">Portrait</option>
-            </select>
+            <label className="block text-slate-700 font-bold mb-1">Orientation & Size</label>
+            <div className="flex gap-1">
+              <select
+                value={orientation}
+                onChange={(e) => setOrientation(e.target.value)}
+                className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+              >
+                <option value="landscape">Landscape</option>
+                <option value="portrait">Portrait</option>
+              </select>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(e.target.value)}
+                className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+              >
+                <option value="a4">A4</option>
+                <option value="a3">A3</option>
+              </select>
+            </div>
           </div>
 
           <div>
-            <label className="block text-slate-600 font-semibold mb-1">Paper Size</label>
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(e.target.value)}
-              className="input input-sm h-8 py-0 border-slate-300 font-medium"
-            >
-              <option value="a4">Standard A4</option>
-              <option value="a3">Large Format A3</option>
-            </select>
+            <label className="block text-slate-700 font-bold mb-1">Semester & Year</label>
+            <div className="flex gap-1">
+              <select
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+              >
+                <option value="Fall Semester">Fall</option>
+                <option value="Spring Semester">Spring</option>
+                <option value="Summer Semester">Summer</option>
+              </select>
+              <input
+                type="text"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+                className="w-1/2 h-8 px-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+                placeholder="2025-2026"
+              />
+            </div>
           </div>
 
-          <div className="col-span-2">
-            <label className="block text-slate-600 font-semibold mb-1">Document Title</label>
+          <div>
+            <label className="block text-slate-700 font-bold mb-1">Period 1 Time</label>
             <input
               type="text"
-              value={documentTitle}
-              onChange={(e) => setDocumentTitle(e.target.value)}
-              className="input input-sm h-8 py-0 border-slate-300 font-medium w-full"
+              value={period1Time}
+              onChange={(e) => setPeriod1Time(e.target.value)}
+              className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+              placeholder="09:00 AM - 11:00 AM"
             />
           </div>
 
-          <div className="flex items-center gap-3 pt-5">
-            <label className="flex items-center gap-1.5 cursor-pointer select-none font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={showSignatures}
-                onChange={(e) => setShowSignatures(e.target.checked)}
-                className="rounded text-hue-navy focus:ring-hue-navy"
-              />
-              Signatures Block
-            </label>
-
-            <label className="flex items-center gap-1.5 cursor-pointer select-none font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={showStats}
-                onChange={(e) => setShowStats(e.target.checked)}
-                className="rounded text-hue-navy focus:ring-hue-navy"
-              />
-              Summary Stats
-            </label>
+          <div>
+            <label className="block text-slate-700 font-bold mb-1">Period 2 Time</label>
+            <input
+              type="text"
+              value={period2Time}
+              onChange={(e) => setPeriod2Time(e.target.value)}
+              className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+              placeholder="12:00 PM - 02:00 PM"
+            />
           </div>
+
+          <div>
+            <label className="block text-slate-700 font-bold mb-1">Signatures Count</label>
+            <select
+              value={numSignatures}
+              onChange={(e) => setNumSignatures(Number(e.target.value))}
+              className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+            >
+              <option value={1}>1 Signatory</option>
+              <option value={2}>2 Signatories</option>
+              <option value={3}>3 Signatories</option>
+              <option value={4}>4 Signatories</option>
+            </select>
+          </div>
+
         </div>
+
+        {/* Dynamic Signatories Config Inputs Panel */}
+        {showSignatures && (
+          <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 text-xs flex flex-wrap gap-3 items-center">
+            <span className="font-extrabold text-[#0B1E36] uppercase tracking-wider text-[10px]">
+              ✍️ Signatory Titles:
+            </span>
+            {Array.from({ length: numSignatures }).map((_, idx) => (
+              <div key={idx} className="flex gap-1 items-center bg-white p-1 rounded-lg border border-slate-200">
+                <span className="font-bold text-slate-500 text-[10px]">#{idx + 1}:</span>
+                <input
+                  type="text"
+                  value={signatories[idx]?.name || ''}
+                  onChange={(e) => handleSignatoryChange(idx, 'name', e.target.value)}
+                  placeholder="Signatory Name"
+                  className="h-6 px-1.5 w-32 border border-slate-200 rounded text-[10px] font-medium"
+                />
+                <input
+                  type="text"
+                  value={signatories[idx]?.title || ''}
+                  onChange={(e) => handleSignatoryChange(idx, 'title', e.target.value)}
+                  placeholder="Official Title"
+                  className="h-6 px-1.5 w-36 border border-slate-200 rounded text-[10px] font-bold text-[#0B1E36]"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Live Document Preview Scroll Container */}
         <div className="flex-1 overflow-auto p-4 bg-slate-200/70">
@@ -267,12 +296,12 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
               minHeight: '750px'
             }}
           >
-            {/* BRANDED HEADER BANNER WITH THE 3 OFFICIAL LOGOS */}
+            {/* BRANDED HEADER BANNER (NO EXAMINATION CONTROL COMMITTEE TEXT) */}
             <div className="bg-[#0B1E36] text-white p-4 rounded-lg border-b-4 border-[#D4AF37] relative overflow-hidden mb-4">
               <div className="flex justify-between items-center relative z-10 gap-2">
                 
-                {/* LOGO 1: HUE Horus University - Egypt Primary Logo */}
-                <div className="flex items-center bg-white p-1.5 rounded-md shadow-md border border-slate-200">
+                {/* LOGO 1: HUE Primary Emblem */}
+                <div className="flex items-center bg-white p-1.5 rounded-md shadow-md border border-slate-200 shrink-0">
                   <img src={LOGO_HUE} alt="Horus University Egypt Logo" className="h-12 w-auto object-contain" />
                 </div>
 
@@ -281,24 +310,28 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                   <h1 className="text-lg font-black tracking-wide text-white m-0 uppercase font-outfit">
                     HORUS UNIVERSITY — EGYPT (HUE)
                   </h1>
-                  <h2 className="text-xs font-bold text-[#D4AF37] tracking-wider uppercase m-0 mt-0.5">
-                    FACULTY OF PHARMACY • EXAMINATION CONTROL COMMITTEE
+                  
+                  {/* REMOVED EXAMINATION CONTROL COMMITTEE TEXT AS REQUESTED */}
+                  <h2 className="text-xs font-bold text-[#D4AF37] tracking-widest uppercase m-0 mt-0.5">
+                    FACULTY OF PHARMACY
                   </h2>
                   <p className="text-[9px] text-slate-300 m-0 mt-0.5 font-medium">
                     New Damietta, Egypt • NAQAAE Accredited Institution
                   </p>
-                  <div className="mt-1 inline-block text-[11px] font-extrabold text-white bg-white/10 px-3 py-0.5 rounded border border-[#D4AF37]/50 tracking-wider">
-                    {documentTitle.toUpperCase()} — {session?.semester || 'ACADEMIC YEAR 2025-2026'}
+
+                  {/* PERFECTLY FITTED GOLD BORDER BOX (NO OVERFLOW OR CLIPPING) */}
+                  <div className="mt-2 inline-block text-[11px] font-black text-white bg-white/10 px-4 py-1 rounded-lg border border-[#D4AF37] tracking-wide leading-tight shadow-inner max-w-full">
+                    FINAL EXAMINATION TIMETABLE — {semester.toUpperCase()} — ACADEMIC YEAR {academicYear}
                   </div>
                 </div>
 
                 {/* LOGO 2 & LOGO 3: Pharmacy Seal & DTU Emblem */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <div className="bg-white p-1 rounded-full shadow-md border border-slate-200 flex items-center justify-center">
                     <img src={LOGO_PHARMACY} alt="Faculty of Pharmacy Seal" className="h-12 w-12 object-contain" title="Faculty of Pharmacy NAQAAE Seal" />
                   </div>
                   <div className="bg-white p-1 rounded-md shadow-md border border-slate-200 flex items-center justify-center">
-                    <img src={LOGO_DTU} alt="DTU Digital Transformation Unit Logo" className="h-12 w-auto object-contain" title="Digital Transformation Unit (DTU)" />
+                    <img src={LOGO_DTU} alt="DTU Logo" className="h-12 w-auto object-contain" title="Digital Transformation Unit (DTU)" />
                   </div>
                 </div>
 
@@ -307,7 +340,7 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
               {/* Document Sub-Metadata */}
               <div className="flex justify-between items-center text-[9px] text-slate-300 mt-3 pt-2 border-t border-slate-700/60 font-medium">
                 <div>Issue Date: <span className="text-white font-bold">{formattedIssueDate}</span></div>
-                <div>Session: <span className="text-white font-bold">{session?.session_name || 'Final Exams'}</span></div>
+                <div>Session: <span className="text-white font-bold">{session?.session_name || 'Final Exams'} ({semester})</span></div>
                 <div className="text-[#D4AF37] font-bold">Doc ID: HUE-EXAM-{sessionId || 'FINAL'}</div>
               </div>
             </div>
@@ -343,7 +376,7 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
               </div>
             )}
 
-            {/* MAIN CONTENT: TIMETABLE MATRIX VIEW (FIT TO CANVAS GUARANTEED) */}
+            {/* MAIN CONTENT: TIMETABLE MATRIX VIEW */}
             {layoutMode === 'matrix' && (
               <div className="mb-4 overflow-hidden">
                 <div className="flex justify-between items-center mb-1 px-0.5">
@@ -351,7 +384,7 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                     Official Timetable Grid (By Date & Period)
                   </span>
                   <span className="text-[9px] text-slate-500 font-semibold">
-                    * Period 1: Morning (09:00 AM) • Period 2: Afternoon (12:30 PM)
+                    * Period 1: {period1Time} • Period 2: {period2Time}
                   </span>
                 </div>
 
@@ -360,7 +393,7 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                   <thead>
                     <tr className="bg-[#0B1E36] text-white">
                       <th className="border border-slate-400 p-1.5 text-center w-[8%] uppercase font-bold tracking-wider text-[9px]">Date & Day</th>
-                      <th className="border border-slate-400 p-1.5 text-center w-[5%] uppercase font-bold tracking-wider text-[8px]">Period</th>
+                      <th className="border border-slate-400 p-1.5 text-center w-[6%] uppercase font-bold tracking-wider text-[8px]">Period</th>
                       {programLevels.map(pl => {
                         const [prog, lvl] = pl.split('|');
                         const isClinical = prog.includes('Clinical');
@@ -390,9 +423,12 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                             )}
 
                             <td className="border border-slate-300 p-0.5 text-center font-bold text-slate-700 bg-slate-50 align-middle">
-                              <span className={`inline-block px-1 py-0.5 rounded text-[8px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
+                              <span className={`inline-block px-1 py-0.5 rounded text-[7.5px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
                                 P{periodNum}
                               </span>
+                              <div className="text-[6.5px] text-slate-500 font-normal leading-none mt-0.5">
+                                {periodNum === 1 ? 'Morning' : 'Afternoon'}
+                              </div>
                             </td>
 
                             {programLevels.map(pl => {
@@ -448,36 +484,29 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                   const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
                   return (
-                    <div key={dayData.dateStr} className="border border-slate-300 rounded-lg overflow-hidden bg-white shadow-2xs">
-                      <div className="bg-[#0B1E36] text-white px-3 py-1.5 flex justify-between items-center">
-                        <span className="font-bold text-xs tracking-wide">{formattedDate}</span>
-                        <span className="text-[10px] text-[#D4AF37] font-semibold">
-                          Total Exams: {dayData.period1.length + dayData.period2.length}
-                        </span>
+                    <div key={dayData.dateStr} className="border border-slate-300 rounded-lg overflow-hidden bg-white">
+                      <div className="bg-[#0B1E36] text-white py-1 px-3 text-xs font-bold flex justify-between">
+                        <span>📅 {formattedDate}</span>
+                        <span className="text-[#D4AF37] font-semibold">{dayData.period1.length + dayData.period2.length} Total Exams</span>
                       </div>
 
-                      <div className="p-2.5 grid grid-cols-2 gap-3 text-[9.5px]">
-                        {/* Period 1 */}
-                        <div className="border-r border-slate-200 pr-2">
-                          <div className="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 mb-1.5 flex justify-between items-center text-[9px]">
-                            <span>PERIOD 1 (09:00 AM - 11:00 AM)</span>
-                            <span className="text-[8.5px] bg-blue-200 text-blue-900 px-1 rounded">{dayData.period1.length} courses</span>
+                      <div className="p-2 grid grid-cols-2 gap-3 text-[9px]">
+                        <div>
+                          <div className="font-bold text-blue-900 bg-blue-50 border-b border-blue-200 px-2 py-0.5 mb-1 rounded flex justify-between">
+                            <span>Period 1</span>
+                            <span className="font-normal text-[8px]">{period1Time}</span>
                           </div>
-
                           {dayData.period1.length > 0 ? (
                             <div className="space-y-1">
                               {dayData.period1.map(item => (
                                 <div key={item.course_id} className="p-1.5 rounded bg-slate-50 border border-slate-200">
                                   <div className="flex justify-between font-bold text-[#0B1E36]">
                                     <span>{item.course.course_code} - {item.course.course_title}</span>
-                                    <span className="text-slate-500 font-semibold">{item.course.student_count} students</span>
+                                    <span className="text-slate-500 font-semibold">{item.course.student_count} stds</span>
                                   </div>
                                   <div className="flex gap-1.5 mt-0.5 text-[8.5px] text-slate-600">
                                     <span className="bg-slate-200 px-1 rounded font-medium">{item.course.program}</span>
                                     <span className="bg-slate-200 px-1 rounded font-medium">Level {item.course.level}</span>
-                                    {item.course.has_oral_exam && (
-                                      <span className="bg-amber-100 text-amber-800 font-bold px-1 rounded">🎤 Oral Exam</span>
-                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -487,20 +516,18 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
                           )}
                         </div>
 
-                        {/* Period 2 */}
-                        <div className="pl-1">
-                          <div className="font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 mb-1.5 flex justify-between items-center text-[9px]">
-                            <span>PERIOD 2 (12:30 PM - 02:30 PM)</span>
-                            <span className="text-[8.5px] bg-amber-200 text-amber-900 px-1 rounded">{dayData.period2.length} courses</span>
+                        <div>
+                          <div className="font-bold text-amber-900 bg-amber-50 border-b border-amber-200 px-2 py-0.5 mb-1 rounded flex justify-between">
+                            <span>Period 2</span>
+                            <span className="font-normal text-[8px]">{period2Time}</span>
                           </div>
-
                           {dayData.period2.length > 0 ? (
                             <div className="space-y-1">
                               {dayData.period2.map(item => (
                                 <div key={item.course_id} className="p-1.5 rounded bg-slate-50 border border-slate-200">
                                   <div className="flex justify-between font-bold text-[#0B1E36]">
                                     <span>{item.course.course_code} - {item.course.course_title}</span>
-                                    <span className="text-slate-500 font-semibold">{item.course.student_count} students</span>
+                                    <span className="text-slate-500 font-semibold">{item.course.student_count} stds</span>
                                   </div>
                                   <div className="flex gap-1.5 mt-0.5 text-[8.5px] text-slate-600">
                                     <span className="bg-slate-200 px-1 rounded font-medium">{item.course.program}</span>
@@ -520,65 +547,31 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
               </div>
             )}
 
-            {/* VIOLATIONS / NOTES CALLOUT IF ANY */}
-            {violations.length > 0 && (
-              <div className="mb-4 p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-[9.5px]">
-                <div className="font-bold text-amber-900 uppercase tracking-wider mb-0.5">
-                  ⚠️ Examination Control Notes & Advisory ({violations.length})
-                </div>
-                <ul className="list-disc pl-4 text-amber-800 space-y-0.5">
-                  {violations.slice(0, 4).map((v, i) => (
-                    <li key={i}>
-                      <span className="font-semibold">{v.type || 'Notice'}:</span> {v.course} ({v.program || 'General'}, Level {v.level || '-'}) - {v.reason || 'Special allocation'}
-                    </li>
-                  ))}
-                  {violations.length > 4 && (
-                    <li className="font-medium italic">...and {violations.length - 4} additional schedule adjustments.</li>
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {/* OFFICIAL SIGNATURES & STAMP BLOCK WITH 3 EMBLEMS */}
+            {/* DYNAMIC CONFIGURABLE SIGNATURES (REMOVED STAMP AS REQUESTED) */}
             {showSignatures && (
-              <div className="mt-6 pt-4 border-t-2 border-slate-300 flex justify-between items-end">
-                {/* Official Stamp & NAQAAE Certification */}
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-full border-2 border-dashed border-[#0B1E36]/40 flex flex-col items-center justify-center text-center p-1 rotate-[-6deg] bg-slate-50">
-                    <div className="text-[6px] font-bold text-[#0B1E36] uppercase tracking-tighter">Horus University</div>
-                    <div className="text-[7.5px] font-black text-[#D4AF37] my-0.2">★ NAQAAE ★</div>
-                    <div className="text-[5.5px] font-semibold text-slate-600">Exam Control Committee</div>
-                  </div>
-                  <div className="text-[8.5px] text-slate-500 leading-tight">
-                    <div className="font-bold text-slate-800">OFFICIAL ACADEMIC TIMETABLE</div>
-                    <div>Horus University — Egypt (HUE)</div>
-                    <div>Faculty of Pharmacy • DTU Certified</div>
-                  </div>
-                </div>
-
-                {/* Signatures */}
-                <div className="flex gap-10 text-center text-[9px]">
-                  <div>
-                    <div className="h-8 border-b border-slate-400 w-32 mb-1 flex items-end justify-center">
-                      <span className="font-serif italic text-slate-500 text-[10px] opacity-70">Dr. Control Chair</span>
+              <div className="mt-8 pt-4 border-t-2 border-slate-300">
+                <div className={`grid grid-cols-${numSignatures} gap-6 text-center text-[9px]`}>
+                  {Array.from({ length: numSignatures }).map((_, idx) => (
+                    <div key={idx} className="flex flex-col items-center">
+                      <div className="h-10 border-b border-slate-400 w-44 mb-1.5 flex items-end justify-center pb-1">
+                        <span className="font-serif italic text-slate-400 text-[10px] opacity-60">
+                          {signatories[idx]?.name || 'Signature'}
+                        </span>
+                      </div>
+                      <div className="font-bold text-[#0B1E36] text-[9.5px]">
+                        {signatories[idx]?.title || `Signatory #${idx + 1}`}
+                      </div>
+                      <div className="text-[7.5px] text-slate-500 font-medium mt-0.5">
+                        Horus University — Egypt
+                      </div>
                     </div>
-                    <div className="font-bold text-[#0B1E36]">Head of Exam Control</div>
-                    <div className="text-[7.5px] text-slate-500">Horus University — Egypt</div>
-                  </div>
-
-                  <div>
-                    <div className="h-8 border-b border-slate-400 w-32 mb-1 flex items-end justify-center">
-                      <span className="font-serif italic text-slate-500 text-[10px] opacity-70">Prof. Dean Signature</span>
-                    </div>
-                    <div className="font-bold text-[#0B1E36]">Dean of Faculty</div>
-                    <div className="text-[7.5px] text-slate-500">Faculty of Pharmacy • HUE</div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* DOCUMENT FOOTER */}
-            <div className="mt-4 text-center text-[7.5px] text-slate-400 border-t border-slate-200 pt-2">
+            <div className="mt-5 text-center text-[7.5px] text-slate-400 border-t border-slate-200 pt-2 font-medium">
               Horus University — Egypt (HUE) • Faculty of Pharmacy • Digital Transformation Unit (DTU) • NAQAAE Accredited
             </div>
 
@@ -586,15 +579,15 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 bg-slate-100 border-t border-slate-200 flex justify-between items-center">
+        <div className="p-3 bg-slate-100 border-t border-slate-200 flex justify-between items-center shrink-0">
           <div className="text-xs text-slate-500 font-medium">
-            💡 Tip: Set <span className="font-semibold text-slate-800">Landscape</span> & <span className="font-semibold text-slate-800">A4/A3</span> size so the 10-column table fits 100% onto the canvas.
+            💡 Tip: Set <span className="font-semibold text-slate-800">Landscape</span> & <span className="font-semibold text-slate-800">A4/A3</span> for matrix view.
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="btn btn-secondary btn-sm"
+              className="px-4 py-1.5 rounded-lg border border-slate-300 font-bold text-xs text-slate-700 bg-white hover:bg-slate-50 transition-all"
             >
               Close
             </button>
@@ -602,7 +595,7 @@ function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
             <button
               onClick={handleDownloadPdf}
               disabled={exporting}
-              className="btn btn-gold btn-sm font-bold px-5 shadow-md"
+              className="px-5 py-1.5 rounded-lg font-extrabold text-xs text-[#0B1E36] bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] hover:opacity-90 shadow-md transition-all flex items-center gap-1.5"
             >
               {exporting ? 'Generating PDF...' : '📄 Export PDF Now'}
             </button>

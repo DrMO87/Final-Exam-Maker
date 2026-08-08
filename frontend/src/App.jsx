@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import UserManagementModal from './components/UserManagementModal';
+import PdfExportModal from './components/PdfExportModal';
 import SessionForm from './components/SessionForm';
 import FileUpload from './components/FileUpload';
 import DataValidator from './components/DataValidator';
@@ -20,7 +21,10 @@ function App() {
   });
   const [lockedAssignments, setLockedAssignments] = useState({});
   const [schedule, setSchedule] = useState(null);
+  
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('scheduler_sidebarCollapsed') === 'true';
@@ -87,19 +91,18 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Retractable Dark Blue Sidebar */}
+    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans select-none">
+      {/* Sidebar matching exact structure from reference screenshot */}
       <aside 
-        className={`bg-gradient-sidebar text-white shrink-0 shadow-2xl z-20 flex flex-col relative transition-all duration-300 select-none ${
+        className={`bg-[#001738] text-white shrink-0 shadow-2xl z-20 flex flex-col relative transition-all duration-300 ${
           isSidebarCollapsed ? 'w-20' : 'w-72'
         }`}
       >
         {/* Sidebar Collapse Toggle Button */}
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="absolute -right-3.5 top-7 z-30 w-7 h-7 bg-slate-800 border border-white/20 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all focus:outline-none"
+          className="absolute -right-3.5 top-7 z-30 w-7 h-7 bg-[#0B1E36] border border-white/20 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-slate-800 hover:scale-110 active:scale-95 transition-all focus:outline-none"
           title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          aria-label={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
           <svg
             className={`w-4 h-4 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`}
@@ -111,130 +114,197 @@ function App() {
           </svg>
         </button>
 
-        {/* Sidebar Header */}
+        {/* Sidebar Brand Header */}
         <div 
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className={`p-4 border-b border-white/10 flex items-center cursor-pointer hover:bg-white/5 transition-all ${
-            isSidebarCollapsed ? 'justify-center px-2 py-4' : 'justify-between px-5 py-4'
+            isSidebarCollapsed ? 'justify-center py-4' : 'px-5 py-4'
           }`}
           title="Session Master - Final Exam Maker"
         >
-          {isSidebarCollapsed ? (
+          <div className="flex items-center gap-3 overflow-hidden">
             <img 
               src="/assets/session_master_shield_logo.png" 
               alt="Session Master Logo" 
-              className="w-10 h-10 object-contain hover:scale-105 transition-transform" 
+              className={`${isSidebarCollapsed ? 'w-10 h-10' : 'h-14'} w-auto object-contain shrink-0 drop-shadow-md transition-all`} 
             />
-          ) : (
-            <div className="flex items-center gap-3 overflow-hidden">
-              <img 
-                src="/assets/session_master_shield_logo.png" 
-                alt="Session Master Logo" 
-                className="h-12 w-auto object-contain shrink-0 drop-shadow-md" 
-              />
-            </div>
-          )}
+          </div>
         </div>
 
-        {/* User Account Profile Card */}
-        <div className={`border-b border-white/10 ${isSidebarCollapsed ? 'p-2' : 'p-4'} bg-white/5`}>
-          <div className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-10 h-10 rounded-full bg-[#D4AF37] text-[#0B1E36] font-black text-sm flex items-center justify-center shrink-0 shadow-lg border border-white/30">
-              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-            </div>
-
+        {/* Navigation Sections */}
+        <div className="flex-1 px-3 py-4 flex flex-col gap-5 overflow-y-auto">
+          
+          {/* SECTION 1: OVERVIEW */}
+          <div>
             {!isSidebarCollapsed && (
-              <div className="overflow-hidden flex-1">
-                <div className="font-bold text-xs text-white truncate">{user.name}</div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] font-extrabold text-[#D4AF37] bg-[#D4AF37]/20 border border-[#D4AF37]/40 px-2 py-0.2 rounded-full uppercase tracking-wider">
-                    {user.role}
-                  </span>
-                </div>
+              <div className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">
+                OVERVIEW
               </div>
             )}
+
+            <div className="space-y-1">
+              {/* Home / Step 1 */}
+              <div
+                onClick={() => handleStepClick(1)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl cursor-pointer transition-all ${
+                  currentStep === 1 
+                    ? 'bg-blue-600/30 text-white font-bold border-l-4 border-[#D4AF37]' 
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+                title="Home (Session Initialization)"
+              >
+                <span className="text-base">🏠</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Home</span>}
+              </div>
+
+              {/* Schedule / Step 5 */}
+              <div
+                onClick={() => handleStepClick(5)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl transition-all ${
+                  !sessionId ? 'opacity-40 cursor-not-allowed text-slate-400' : 'cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white'
+                } ${currentStep === 5 ? 'bg-blue-600/30 text-white font-bold border-l-4 border-[#D4AF37]' : ''}`}
+                title="Schedule (Timetable & Matrix)"
+              >
+                <span className="text-base">📅</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Schedule</span>}
+              </div>
+
+              {/* Analytics / Step 3 */}
+              <div
+                onClick={() => handleStepClick(3)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl transition-all ${
+                  !sessionId ? 'opacity-40 cursor-not-allowed text-slate-400' : 'cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white'
+                } ${currentStep === 3 ? 'bg-blue-600/30 text-white font-bold border-l-4 border-[#D4AF37]' : ''}`}
+                title="Analytics & Conflict Inspection"
+              >
+                <span className="text-base">📈</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Analytics</span>}
+              </div>
+            </div>
           </div>
 
-          {!isSidebarCollapsed && (
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => setShowUserModal(true)}
-                className="flex-1 py-1.5 px-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all border border-white/10 flex items-center justify-center gap-1"
-                title="Manage authorized user accounts"
-              >
-                👥 Accounts
-              </button>
+          {/* SECTION 2: DATA SETUP */}
+          <div>
+            {!isSidebarCollapsed && (
+              <div className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">
+                DATA SETUP
+              </div>
+            )}
 
-              <button
-                onClick={logout}
-                className="py-1.5 px-3 bg-rose-500/20 hover:bg-rose-500/40 text-rose-200 hover:text-white rounded-lg text-[10px] font-bold transition-all border border-rose-500/30 flex items-center justify-center gap-1"
-                title="Sign out of your account"
+            <div className="space-y-1">
+              {/* Staff / Accounts Modal */}
+              <div
+                onClick={() => setShowUserModal(true)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white transition-all`}
+                title="Staff User Management"
               >
-                🚪 Sign Out
-              </button>
+                <span className="text-base">👥</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Staff</span>}
+              </div>
+
+              {/* Rooms */}
+              <div
+                onClick={() => setShowSettingsModal(true)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white transition-all`}
+                title="Rooms & Capacity Setup"
+              >
+                <span className="text-base">🏢</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Rooms</span>}
+              </div>
+
+              {/* Exams / Step 2 File Upload */}
+              <div
+                onClick={() => handleStepClick(2)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl transition-all ${
+                  !sessionId ? 'opacity-40 cursor-not-allowed text-slate-400' : 'cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white'
+                } ${currentStep === 2 ? 'bg-blue-600/30 text-white font-bold border-l-4 border-[#D4AF37]' : ''}`}
+                title="Exams Data (Upload Courses & Conflict Matrices)"
+              >
+                <span className="text-base">📋</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Exams</span>}
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 3: OPERATIONS */}
+          <div>
+            {!isSidebarCollapsed && (
+              <div className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">
+                OPERATIONS
+              </div>
+            )}
+
+            <div className="space-y-1">
+              {/* Auto-Assign / Step 4 */}
+              <div
+                onClick={() => handleStepClick(4)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl transition-all ${
+                  !sessionId ? 'opacity-40 cursor-not-allowed text-slate-400' : 'cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white'
+                } ${currentStep === 4 ? 'bg-blue-600/30 text-white font-bold border-l-4 border-[#D4AF37]' : ''}`}
+                title="Auto-Assign & Pre-Scheduling"
+              >
+                <span className="text-base">⚡</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Auto-Assign</span>}
+              </div>
+
+              {/* Reports / PDF Studio Modal */}
+              <div
+                onClick={() => setShowPdfModal(true)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white transition-all`}
+                title="Reports & PDF Export Studio"
+              >
+                <span className="text-base">📄</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Reports</span>}
+              </div>
+
+              {/* Settings Tab */}
+              <div
+                onClick={() => setShowSettingsModal(true)}
+                className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3.5 py-2.5'} rounded-xl cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white transition-all`}
+                title="System & PDF Settings"
+              >
+                <span className="text-base">⚙️</span>
+                {!isSidebarCollapsed && <span className="text-xs font-semibold">Settings</span>}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer Section */}
+        <div className={`p-4 border-t border-white/10 flex flex-col gap-3 ${isSidebarCollapsed ? 'items-center p-2' : ''}`}>
+          
+          {/* Sign Out Button */}
+          <button
+            onClick={logout}
+            className={`flex items-center justify-center gap-2 ${isSidebarCollapsed ? 'p-2' : 'py-2 px-3'} bg-rose-500/20 hover:bg-rose-500/40 text-rose-200 hover:text-white rounded-xl text-xs font-bold transition-all border border-rose-500/30`}
+            title="Sign Out"
+          >
+            <span className="text-base">🚪</span>
+            {!isSidebarCollapsed && <span>Sign Out</span>}
+          </button>
+
+          {/* Profile / Institution Badge */}
+          {!isSidebarCollapsed && (
+            <div className="pt-1 border-t border-white/5 text-center">
+              <div className="text-xs font-bold text-white truncate">
+                Horus University — Egypt
+              </div>
+              <div className="text-[10px] text-slate-400 font-medium">
+                v2.0 · Session Master
+              </div>
+
+              {/* Developer Credits */}
+              <div className="mt-2 pt-2 border-t border-white/10 text-[9.5px]">
+                <div className="text-slate-400">Designed & Executed by</div>
+                <div className="font-extrabold text-[#D4AF37] tracking-wide mt-0.5">
+                  Prof. Mahmoud Elkhoudary
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Steps Navigation */}
-        <div className={`flex-1 ${isSidebarCollapsed ? 'px-2' : 'px-4'} py-5 flex flex-col gap-2 overflow-y-auto`}>
-          {[
-            { num: 1, label: 'Create Session', desc: 'Initialize dates' },
-            { num: 2, label: 'Upload Files', desc: 'Courses & matrices' },
-            { num: 3, label: 'Audit & Validate', desc: 'Inspect metadata & conflicts' },
-            { num: 4, label: 'Pre-Schedule', desc: 'Level & manual locks' },
-            { num: 5, label: 'Generate', desc: 'AI conflict resolution' }
-          ].map((step) => {
-            const isActive = currentStep === step.num;
-            const isCompleted = currentStep > step.num;
-            const isDisabled = step.num > 1 && !sessionId;
-            
-            return (
-              <div key={step.num} 
-                onClick={() => handleStepClick(step.num)}
-                title={isSidebarCollapsed ? `Step ${step.num}: ${step.label} (${step.desc})` : undefined}
-                className={`
-                flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'} rounded-xl transition-all duration-300 relative group
-                ${!isDisabled ? 'cursor-pointer hover:bg-white/5' : 'cursor-not-allowed'}
-                ${isActive ? 'bg-white/10 text-white shadow-glow-primary border border-white/20' : 
-                  isCompleted ? 'text-white border border-transparent' : 'text-white/40 border border-transparent'}
-              `}>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-hue-gold rounded-r-full shadow-glow-gold"></div>
-                )}
-                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center font-bold text-xs shadow-inner transition-colors duration-300
-                  ${isActive ? 'bg-gradient-gold text-hue-navy shadow-glow-gold' : 
-                    isCompleted ? 'bg-semantic-success text-white' : 'bg-white/10 text-white/50'}`}>
-                  {isCompleted ? (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                  ) : step.num}
-                </div>
-                {!isSidebarCollapsed && (
-                  <div className="overflow-hidden transition-all duration-300">
-                    <div className={`font-semibold text-xs whitespace-nowrap ${isActive ? 'text-white' : isCompleted ? 'text-white/90' : 'text-white/50'}`}>
-                      {step.label}
-                    </div>
-                    <div className={`text-[10px] whitespace-nowrap ${isActive ? 'text-white/70' : 'text-white/40'}`}>
-                      {step.desc}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Sidebar Footer */}
-        <div className={`${isSidebarCollapsed ? 'p-3' : 'p-4'} mt-auto border-t border-white/10 flex flex-col items-center`}>
-          <button 
-            onClick={resetApp}
-            title={isSidebarCollapsed ? "Start Over / Reset" : undefined}
-            className={`w-full flex items-center justify-center gap-2 ${isSidebarCollapsed ? 'p-2.5' : 'py-2 px-3'} rounded-xl font-bold text-xs bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 hover:text-white transition-all shadow-sm`}
-          >
-            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            {!isSidebarCollapsed && <span>Start Over / Reset</span>}
-          </button>
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -297,6 +367,59 @@ function App() {
       {/* Accounts Management Modal */}
       {showUserModal && (
         <UserManagementModal onClose={() => setShowUserModal(false)} />
+      )}
+
+      {/* PDF Export Studio Modal */}
+      {showPdfModal && (
+        <PdfExportModal
+          sessionId={sessionId}
+          scheduleData={schedule ? { schedule } : { schedule: [] }}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+              <h3 className="text-lg font-black text-[#0B1E36] font-outfit flex items-center gap-2">
+                <span>⚙️</span> System & PDF Settings
+              </h3>
+              <button 
+                onClick={() => setShowSettingsModal(false)}
+                className="text-slate-400 hover:text-slate-700 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="py-4 space-y-4 text-xs">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="font-bold text-[#0B1E36] mb-1">🏢 Room Allocation & Capacity Limit</div>
+                <p className="text-slate-500 leading-relaxed">
+                  Default period slot limit is configured at 1,000 students per period slot. Auto-overflow directs remaining students to Period 2.
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="font-bold text-[#0B1E36] mb-1">📄 PDF Export Settings</div>
+                <p className="text-slate-500 leading-relaxed">
+                  You can configure Semester, Periods (Period 1 / Period 2 times), and custom signatory names/titles directly in the Reports studio.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="px-5 py-2 bg-[#0B1E36] text-white font-bold rounded-xl text-xs hover:bg-slate-800 transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
