@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from './context/AuthContext';
+import Login from './components/Login';
+import UserManagementModal from './components/UserManagementModal';
 import SessionForm from './components/SessionForm';
 import FileUpload from './components/FileUpload';
 import DataValidator from './components/DataValidator';
@@ -6,6 +9,8 @@ import ManualScheduler from './components/ManualScheduler';
 import ScheduleViewer from './components/ScheduleViewer';
 
 function App() {
+  const { user, logout } = useAuth();
+
   const [currentStep, setCurrentStep] = useState(() => {
     const saved = localStorage.getItem('scheduler_currentStep');
     return saved ? parseInt(saved) : 1;
@@ -15,6 +20,7 @@ function App() {
   });
   const [lockedAssignments, setLockedAssignments] = useState({});
   const [schedule, setSchedule] = useState(null);
+  const [showUserModal, setShowUserModal] = useState(false);
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('scheduler_sidebarCollapsed') === 'true';
@@ -36,6 +42,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('scheduler_sidebarCollapsed', isSidebarCollapsed);
   }, [isSidebarCollapsed]);
+
+  // If user is not authenticated, render Login screen
+  if (!user) {
+    return <Login />;
+  }
 
   const handleSessionCreated = (id) => {
     setSessionId(id);
@@ -116,8 +127,48 @@ function App() {
           </h1>
         </div>
 
+        {/* User Account Profile Card */}
+        <div className={`border-b border-white/10 ${isSidebarCollapsed ? 'p-2' : 'p-4'} bg-white/5`}>
+          <div className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+            <div className="w-10 h-10 rounded-full bg-[#D4AF37] text-[#0B1E36] font-black text-sm flex items-center justify-center shrink-0 shadow-lg border border-white/30">
+              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+
+            {!isSidebarCollapsed && (
+              <div className="overflow-hidden flex-1">
+                <div className="font-bold text-xs text-white truncate">{user.name}</div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] font-extrabold text-[#D4AF37] bg-[#D4AF37]/20 border border-[#D4AF37]/40 px-2 py-0.2 rounded-full uppercase tracking-wider">
+                    {user.role}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!isSidebarCollapsed && (
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => setShowUserModal(true)}
+                className="flex-1 py-1.5 px-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all border border-white/10 flex items-center justify-center gap-1"
+                title="Manage authorized user accounts"
+              >
+                👥 Accounts
+              </button>
+
+              <button
+                onClick={logout}
+                className="py-1.5 px-3 bg-rose-500/20 hover:bg-rose-500/40 text-rose-200 hover:text-white rounded-lg text-[10px] font-bold transition-all border border-rose-500/30 flex items-center justify-center gap-1"
+                title="Sign out of your account"
+              >
+                🚪 Sign Out
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Steps Navigation */}
-        <div className={`flex-1 ${isSidebarCollapsed ? 'px-2' : 'px-4'} py-6 flex flex-col gap-2.5 overflow-y-auto`}>
+        <div className={`flex-1 ${isSidebarCollapsed ? 'px-2' : 'px-4'} py-5 flex flex-col gap-2 overflow-y-auto`}>
           {[
             { num: 1, label: 'Create Session', desc: 'Initialize dates' },
             { num: 2, label: 'Upload Files', desc: 'Courses & matrices' },
@@ -142,11 +193,11 @@ function App() {
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-hue-gold rounded-r-full shadow-glow-gold"></div>
                 )}
-                <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center font-bold text-xs shadow-inner transition-colors duration-300
+                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center font-bold text-xs shadow-inner transition-colors duration-300
                   ${isActive ? 'bg-gradient-gold text-hue-navy shadow-glow-gold' : 
                     isCompleted ? 'bg-semantic-success text-white' : 'bg-white/10 text-white/50'}`}>
                   {isCompleted ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
                   ) : step.num}
                 </div>
                 {!isSidebarCollapsed && (
@@ -165,18 +216,11 @@ function App() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className={`${isSidebarCollapsed ? 'p-3' : 'p-5'} mt-auto border-t border-white/10 flex flex-col items-center`}>
-          {!isSidebarCollapsed && (
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10 mb-3 w-full">
-              <p className="text-[11px] text-white/60 font-medium leading-relaxed">
-                Intelligent exam scheduling with automated conflict resolution engine.
-              </p>
-            </div>
-          )}
+        <div className={`${isSidebarCollapsed ? 'p-3' : 'p-4'} mt-auto border-t border-white/10 flex flex-col items-center`}>
           <button 
             onClick={resetApp}
             title={isSidebarCollapsed ? "Start Over / Reset" : undefined}
-            className={`w-full flex items-center justify-center gap-2 ${isSidebarCollapsed ? 'p-3' : 'py-2.5 px-3'} rounded-xl font-bold text-xs bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 hover:text-white transition-all shadow-sm`}
+            className={`w-full flex items-center justify-center gap-2 ${isSidebarCollapsed ? 'p-2.5' : 'py-2 px-3'} rounded-xl font-bold text-xs bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 hover:text-white transition-all shadow-sm`}
           >
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             {!isSidebarCollapsed && <span>Start Over / Reset</span>}
@@ -240,9 +284,13 @@ function App() {
           </div>
         </div>
       </main>
+
+      {/* Accounts Management Modal */}
+      {showUserModal && (
+        <UserManagementModal onClose={() => setShowUserModal(false)} />
+      )}
     </div>
   );
 }
 
 export default App;
-
