@@ -25,7 +25,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
     setShowChoiceModal(false);
 
     try {
-      const activeLocks = ignoreStep3 ? {} : (lockedAssignments || {});
+      const activeLocks = (ignoreStep3 === true) ? {} : (lockedAssignments || {});
       const response = await axios.post(`/api/scheduler/generate/${sessionId}`, {
         lockedAssignments: activeLocks
       });
