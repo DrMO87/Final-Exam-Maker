@@ -288,86 +288,51 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
       courseGroups.push(matchingSameName);
     });
 
+    // Sort course groups to improve greedy scheduling success:
+    // 1. Oral exams first (since they MUST be in Period 1, they are harder to place).
+    // 2. Larger student count first (harder to place without conflicts).
+    courseGroups.sort((a, b) => {
+      const aHasOral = a.some(c => c.has_oral_exam) ? 1 : 0;
+      const bHasOral = b.some(c => c.has_oral_exam) ? 1 : 0;
+      if (aHasOral !== bHasOral) {
+        return bHasOral - aHasOral;
+      }
+      const aStudents = a.reduce((sum, c) => sum + (c.student_count || 0), 0);
+      const bStudents = b.reduce((sum, c) => sum + (c.student_count || 0), 0);
+      return bStudents - aStudents;
+    });
+
     // Group A/B day preference (Odd levels 1,3,5 -> Group A, Even levels 2,4 -> Group B)
     const isOddLevel = Number(targetLevel) % 2 !== 0;
     const preferredGroup = isOddLevel ? 'A' : 'B';
     const primaryDays = calendar.filter(d => d.groupType === preferredGroup);
-    const candidateDays = primaryDays.length > 0 ? primaryDays : calendar;
-    const searchDays = [...candidateDays, ...calendar.filter(d => !candidateDays.includes(d))];
+    const nonPreferredDays = calendar.filter(d => !candidateDays.includes(d));
 
     courseGroups.forEach(group => {
       let chosenDay = null;
       let chosenPeriod = 1;
 
-      // FIRST PASS: Try to find a day where Period 1 is FREE in the level column for all courses in group
-      for (const day of searchDays) {
-        let isDayValid = true;
-
-        for (const course of group) {
-          const plKey = `${course.program}|Level ${course.level}`;
-
-          // Check if Period 1 in this level column is already occupied
-          const p1OccupiedInColumn = Object.entries(nextAssignments).some(([cId, a]) => {
-            const c = courses.find(item => String(item.id) === String(cId));
-            return c && a.dayIndex === day.dayIndex && a.period === 1 && `${c.program}|Level ${c.level}` === plKey;
-          });
-
-          if (p1OccupiedInColumn) {
-            isDayValid = false;
-            break;
-          }
-
-          // Same-day student conflict check against all courses assigned to this day
-          const dayAssignedIds = Object.entries(nextAssignments)
-            .filter(([_, a]) => a.dayIndex === day.dayIndex)
-            .map(([cId]) => cId);
-
-          const hasConflictWithAssigned = dayAssignedIds.some(assignedId => {
-            const overlap = getOverlap(course.id, assignedId);
-            return allowMinorConflicts ? overlap >= 5 : overlap > 0;
-          });
-
-          // Conflict check within the same group
-          const hasConflictWithinGroup = group.some(otherInGroup => {
-            if (otherInGroup.id === course.id) return false;
-            const overlap = getOverlap(course.id, otherInGroup.id);
-            return allowMinorConflicts ? overlap >= 5 : overlap > 0;
-          });
-
-          if (hasConflictWithAssigned || hasConflictWithinGroup) {
-            isDayValid = false;
-            break;
-          }
-        }
-
-        if (isDayValid) {
-          chosenDay = day;
-          chosenPeriod = 1;
-          break;
-        }
-      }
-
-      // SECOND PASS: If Period 1 is occupied on all candidate days, try Period 2 (unless course has oral exam)
-      if (!chosenDay) {
-        for (const day of searchDays) {
+      // Helper function to try placing a group in a specific set of days and a specific period
+      const tryPlacement = (daysToSearch, periodToTry) => {
+        for (const day of daysToSearch) {
           let isDayValid = true;
 
           for (const course of group) {
             // Oral exams MUST be in Period 1
-            if (course.has_oral_exam) {
+            if (periodToTry === 2 && course.has_oral_exam) {
               isDayValid = false;
               break;
             }
 
             const plKey = `${course.program}|Level ${course.level}`;
 
-            // Check if Period 2 in this level column is already occupied
-            const p2OccupiedInColumn = Object.entries(nextAssignments).some(([cId, a]) => {
+            // Check if the period in this level column is already occupied
+            const periodOccupiedInColumn = Object.entries(nextAssignments).some(([cId, a]) => {
               const c = courses.find(item => String(item.id) === String(cId));
-              return c && a.dayIndex === day.dayIndex && a.period === 2 && `${c.program}|Level ${c.level}` === plKey;
+              return c && a.dayIndex === day.dayIndex && a.period === periodToTry && `${c.program}|Level ${c.level}` === plKey;
             });
 
-            if (p2OccupiedInColumn) {
+            if (periodOccupiedInColumn) {
               isDayValid = false;
               break;
             }
@@ -397,11 +362,23 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
 
           if (isDayValid) {
             chosenDay = day;
-            chosenPeriod = 2;
-            break;
+            chosenPeriod = periodToTry;
+            return true; // Found a valid placement
           }
         }
-      }
+        return false; // Could not place in these days/period
+      };
+
+      // PASS 1: Preferred Days, Period 1
+      if (!chosenDay) tryPlacement(candidateDays, 1);
+      // PASS 2: Preferred Days, Period 2
+      if (!chosenDay) tryPlacement(candidateDays, 2);
+      // PASS 3: Non-Preferred Days, Period 1
+      if (!chosenDay) tryPlacement(nonPreferredDays, 1);
+      // PASS 4: Non-Preferred Days, Period 2
+      if (!chosenDay) tryPlacement(nonPreferredDays, 2);
+
+
 
       if (chosenDay) {
         group.forEach(course => {
