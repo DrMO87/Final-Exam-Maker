@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react';
 import html2pdf from 'html2pdf.js';
-import { LOGO_HUE, LOGO_PHARMACY, LOGO_DTU } from '../assets/logos';
+
+const LOGO_HUE = '/assets/logo_hue.png';
+const LOGO_PHARMACY = '/assets/logo_pharmacy.png';
+const LOGO_DTU = '/assets/logo_dtu.png';
 
 function PdfExportModal({ sessionId, session, scheduleData, onClose }) {
   const [layoutMode, setLayoutMode] = useState('matrix'); // 'matrix' or 'chronological'
