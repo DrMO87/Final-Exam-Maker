@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  getAbbreviatedCourseName,
+  exportValidationMatrixToExcel,
+  exportValidationMatrixToCSV
+} from '../utils/courseUtils';
 
 function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }) {
   const [loading, setLoading] = useState(true);
@@ -228,6 +233,24 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
             <option value="CONFLICTS_ONLY">Has Conflicts Only</option>
             <option value="ORAL_ONLY">Oral Exams Only</option>
           </select>
+
+          {/* Download Buttons */}
+          <div className="flex items-center gap-2 border-l border-slate-300 pl-2">
+            <button
+              onClick={() => exportValidationMatrixToExcel(filteredCourses, conflictMap, sessionId)}
+              className="btn text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+              title="Download Data Validation Table as Excel (.xlsx)"
+            >
+              📊 Download Excel (.xlsx)
+            </button>
+            <button
+              onClick={() => exportValidationMatrixToCSV(filteredCourses, conflictMap, sessionId)}
+              className="btn text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+              title="Download Data Validation Table as CSV"
+            >
+              📄 Download CSV
+            </button>
+          </div>
         </div>
       </div>
 
@@ -328,9 +351,9 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
                               <span 
                                 key={idx} 
                                 className="bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded px-2 py-0.5 text-[11px] font-medium text-slate-700"
-                                title={`Course: ${item.target.course_title} (${item.target.program})`}
+                                title={`Code: ${item.target.course_code} | Title: ${item.target.course_title} (${item.target.program})`}
                               >
-                                <strong className="text-hue-navy">{item.target.course_code}</strong> ({item.target.program}): <span className="text-red-600 font-bold">{item.overlap} overlap</span>
+                                <strong className="text-hue-navy">{getAbbreviatedCourseName(item.target.course_title)}</strong> ({item.target.program}): <span className="text-red-600 font-bold">{item.overlap} overlap</span>
                               </span>
                             ))}
                           </div>

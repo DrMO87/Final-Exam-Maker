@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { addDays, format, parseISO } from 'date-fns';
+import { getAbbreviatedCourseName } from '../utils/courseUtils';
 
 function ManualScheduler({ sessionId, onComplete, onBack }) {
   const [loading, setLoading] = useState(true);
@@ -629,7 +630,7 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
                                         const c = courses.find(item => String(item.id) === String(cd.id));
                                         return (
                                           <li key={cd.id}>
-                                            <span className="font-bold text-white">{c ? c.course_code : cd.id}</span> ({c ? c.program : ''}): <span className="underline decoration-red-400 font-bold">{cd.overlap} students</span>
+                                            <span className="font-bold text-white">{c ? getAbbreviatedCourseName(c.course_title) : cd.id}</span> ({c ? c.program : ''}): <span className="underline decoration-red-400 font-bold">{cd.overlap} students</span>
                                           </li>
                                         );
                                       })}
