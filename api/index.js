@@ -30,6 +30,17 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Import and mount auth routes
+try {
+  const { default: authRoutes } = await import('../backend/routes/auth.js');
+  app.use('/api/auth', authRoutes);
+} catch (err) {
+  console.error('Failed to load auth routes:', err);
+  app.use('/api/auth', (req, res) => {
+    res.status(500).json({ success: false, error: 'Auth route load error: ' + err.message });
+  });
+}
+
 // Import and mount scheduler routes
 try {
   const { default: schedulerRoutes } = await import('../backend/routes/scheduler.js');

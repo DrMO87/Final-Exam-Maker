@@ -34,7 +34,11 @@ export function AuthProvider({ children }) {
       }
     } catch (err) {
       console.error('Login request error:', err);
-      const msg = err.response?.data?.error || 'Invalid credentials or server error';
+      const serverMsg = err.response?.data?.error;
+      const statusMsg = err.response?.status === 404 
+        ? 'Auth API route missing (404). Please redeploy server.' 
+        : 'Invalid credentials or server connection error';
+      const msg = serverMsg || statusMsg;
       setError(msg);
       return { success: false, error: msg };
     } finally {
