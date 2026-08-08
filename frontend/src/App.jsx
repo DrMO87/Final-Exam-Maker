@@ -119,14 +119,21 @@ function App() {
           </svg>
         </button>
 
-        {/* Top Logo Container */}
-        <div className="px-5 py-5 border-b border-white/10 flex items-center justify-center">
-          <img
-            src="/assets/session_master_shield_logo.png"
-            alt="Session Master Logo"
-            className={`${isSidebarCollapsed ? 'w-10 h-10' : 'h-14'} w-auto object-contain transition-all duration-300 drop-shadow-lg cursor-pointer hover:scale-105`}
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          />
+        {/* Top Logo Container matching Supervisors Automated Assign navigation.tsx */}
+        <div 
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className={`border-b border-white/10 flex items-center justify-center cursor-pointer transition-all duration-300 ${
+            isSidebarCollapsed ? 'px-2 py-4' : 'px-5 py-5'
+          }`}
+          title="Session Master - Final Exam Maker"
+        >
+          <div className={`relative w-full ${isSidebarCollapsed ? 'max-w-[40px]' : 'aspect-[1024/558]'} hover:scale-[1.03] transition-transform duration-300`}>
+            <img
+              src="/assets/sidebar_session_master_logo.png"
+              alt="Session Master Logo"
+              className="w-full h-full object-contain drop-shadow-md"
+            />
+          </div>
         </div>
 
         {/* Navigation Items Scroll Area */}
