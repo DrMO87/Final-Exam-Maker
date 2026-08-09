@@ -694,16 +694,28 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                           onDragLeave={handleDragLeaveSlot}
                           onDrop={(e) => handleDropOnSlot(e, day.dayIndex, periodNum, pl)}
                           onClick={() => handleSlotClick(day.dayIndex, periodNum, pl)}
-                          className={`p-1 rounded-lg transition-all border min-h-[55px] ${
+                          className={`p-1.5 rounded-lg transition-all border min-h-[60px] flex flex-col justify-between ${
                             isSlotHovered 
-                              ? 'bg-amber-100/70 border-amber-400 ring-2 ring-amber-300' 
+                              ? 'bg-amber-100/80 border-amber-500 ring-2 ring-amber-300 shadow-md' 
                               : isSelectable 
-                                ? 'bg-blue-50/50 border-blue-200 cursor-pointer hover:bg-blue-100/70' 
-                                : 'bg-slate-50/50 border-slate-200'
+                                ? 'bg-blue-50/70 border-blue-300 border-dashed cursor-pointer hover:bg-blue-100/80' 
+                                : 'bg-slate-50/70 border-slate-200/80'
                           }`}
                         >
+                          {/* Period Label Header */}
+                          <div className="flex items-center justify-between gap-1 mb-1 pb-1 border-b border-slate-200/60 text-[9px] font-bold text-slate-500">
+                            <span className={`px-1.5 py-0.2 rounded text-[8.5px] font-extrabold ${
+                              periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'
+                            }`}>
+                              P{periodNum}
+                            </span>
+                            <span className="text-[8px] font-medium text-slate-400">
+                              {assignments.length > 0 ? `${assignments.length} course${assignments.length > 1 ? 's' : ''}` : 'Empty'}
+                            </span>
+                          </div>
+
                           {assignments.length > 0 ? (
-                            <div className="space-y-1">
+                            <div className="space-y-1.5 flex-1">
                               {assignments.map(assignment => {
                                 const { hasConflict, conflictDetails } = isCourseConflicting(assignment.course.id, day.dayIndex);
                                 const isSelected = selectedCourse?.id === assignment.course.id;
@@ -717,10 +729,10 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                       e.stopPropagation();
                                       handleCourseClick(assignment.course);
                                     }}
-                                    className={`group/card p-1.5 rounded border relative cursor-grab active:cursor-grabbing transition-all ${
-                                      isSelected ? 'ring-2 ring-hue-gold' : ''
+                                    className={`group/card p-1.5 rounded-md border relative cursor-grab active:cursor-grabbing transition-all ${
+                                      isSelected ? 'ring-2 ring-hue-gold shadow-md' : ''
                                     } ${
-                                      hasConflict ? 'bg-red-50 border-red-300 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-white border-slate-200 shadow-2xs'
+                                      hasConflict ? 'bg-red-50 border-red-300 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-xs'
                                     }`}
                                   >
                                     {/* Hover Tooltip */}
@@ -769,23 +781,26 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                       &times;
                                     </button>
 
-                                    <div className="flex items-center gap-1 mb-0.5">
-                                      <span className={`badge ${hasConflict ? 'badge-danger' : 'badge-gray'} text-[8px] px-1 py-0`}>P{periodNum}</span>
+                                    <div className="flex items-center justify-between gap-1 mb-0.5">
                                       <span className={`font-extrabold text-[11px] ${hasConflict ? 'text-red-700' : 'text-hue-navy'}`}>{assignment.course.course_code}</span>
+                                      <span className="text-[8.5px] bg-slate-100 text-slate-700 font-bold px-1 py-0.2 rounded border border-slate-200 shrink-0">
+                                        👥 {assignment.course.student_count || 0}
+                                      </span>
                                     </div>
-                                    <div className="text-[9.5px] text-slate-600 truncate mb-1 font-semibold">{assignment.course.course_title}</div>
+                                    <div className="text-[9.5px] text-slate-700 truncate font-semibold leading-tight">{assignment.course.course_title}</div>
                                     
-                                    <div className="flex items-center justify-between gap-1 text-[8.5px] bg-slate-100 px-1 py-0.5 rounded border border-slate-200/60 font-semibold text-slate-600">
-                                      <span>👥 {assignment.course.student_count || 0}</span>
-                                      {assignment.course.has_oral_exam && <span className="text-amber-700 font-bold">🎤 Oral</span>}
-                                    </div>
+                                    {assignment.course.has_oral_exam && (
+                                      <div className="mt-1 text-[8px] bg-amber-100 text-amber-900 font-bold px-1 py-0.2 rounded border border-amber-300 inline-block">
+                                        🎤 Oral Exam
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })}
                             </div>
                           ) : (
-                            <div className="h-full min-h-[45px] flex items-center justify-center text-slate-300 text-[10px] font-light">
-                              {isSelectable ? 'Click to assign' : '—'}
+                            <div className="py-2 flex items-center justify-center text-slate-300 text-[10px] font-medium">
+                              {isSlotHovered ? `Drop to P${periodNum}` : isSelectable ? `+ Place in P${periodNum}` : `Period ${periodNum}`}
                             </div>
                           )}
                         </div>
