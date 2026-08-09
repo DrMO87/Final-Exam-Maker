@@ -118,9 +118,10 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
       }
 
       // Update assignment (moves course from bank or re-positions from another period/day)
+      const targetDay = calendar[dayIndex];
       setLockedAssignments(prev => ({
         ...prev,
-        [course.id]: { dayIndex, period }
+        [course.id]: { dayIndex, period, dateStr: targetDay?.dateStr }
       }));
     } catch (err) {
       console.error('Drop error:', err);
@@ -423,8 +424,8 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
 
 
       if (chosenDay) {
-        group.forEach(course => {
-          nextAssignments[course.id] = { dayIndex: chosenDay.dayIndex, period: chosenPeriod };
+        group.forEach(c => {
+          nextAssignments[c.id] = { dayIndex: chosenDay.dayIndex, period: chosenPeriod, dateStr: chosenDay.dateStr };
         });
       }
     });
@@ -478,7 +479,7 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
           >
             📄 Export Branded PDF
           </button>
-          <button className="btn btn-primary shadow-glow-primary" onClick={() => onComplete(lockedAssignments)}>
+          <button className="btn btn-primary shadow-glow-primary" onClick={() => onComplete(lockedAssignments, getPdfScheduleData())}>
             Proceed to Generate
           </button>
         </div>

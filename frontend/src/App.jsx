@@ -97,8 +97,11 @@ function App() {
     setCurrentStep(5); // Proceed directly to Auto-Generate
   };
 
-  const handleManualSchedulingComplete = (lockedData) => {
+  const handleManualSchedulingComplete = (lockedData, scheduleData) => {
     setLockedAssignments(lockedData);
+    if (scheduleData) {
+      setSchedule(scheduleData);
+    }
     setCurrentStep(5);
   };
 

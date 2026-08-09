@@ -276,6 +276,20 @@ class AdvancedScheduler {
     return penalty;
   }
 
+  getLock(courseId) {
+    if (!this.lockedAssignments) return null;
+    return this.lockedAssignments[courseId] || this.lockedAssignments[String(courseId)] || this.lockedAssignments[Number(courseId)];
+  }
+
+  getLockedDayIndex(lock) {
+    if (!lock) return -1;
+    if (lock.dateStr) {
+      const idx = this.calendar.findIndex(d => d.dateStr === lock.dateStr);
+      if (idx !== -1) return idx;
+    }
+    return typeof lock.dayIndex === 'number' ? lock.dayIndex : -1;
+  }
+
   /**
    * Create initial population with greedy heuristics
    */
@@ -288,11 +302,11 @@ class AdvancedScheduler {
 
       // Initialize all positions
       for (let i = 0; i < this.courses.length; i++) {
-        const courseId = String(this.courses[i].id);
-        if (this.lockedAssignments[courseId]) {
+        const lock = this.getLock(this.courses[i].id);
+        if (lock) {
           schedule[i] = { 
-            dayIndex: this.lockedAssignments[courseId].dayIndex, 
-            period: this.lockedAssignments[courseId].period,
+            dayIndex: this.getLockedDayIndex(lock), 
+            period: lock.period || 1,
             isLocked: true 
           };
         } else {
@@ -554,13 +568,13 @@ class AdvancedScheduler {
   }
 
   generateSchedule() {
-    const unassignedCount = this.courses.filter(c => !this.lockedAssignments[c.id]).length;
-    if (unassignedCount === 0 && Object.keys(this.lockedAssignments).length > 0) {
+    const unassignedCount = this.courses.filter(c => !this.getLock(c.id)).length;
+    if (unassignedCount === 0 && Object.keys(this.lockedAssignments || {}).length > 0) {
       console.log('⚡ All courses are pre-scheduled/locked! Skipping GA/SA and returning schedule instantly.');
       const schedule = this.courses.map(course => {
-        const lock = this.lockedAssignments[course.id];
+        const lock = this.getLock(course.id);
         return {
-          dayIndex: lock ? lock.dayIndex : 0,
+          dayIndex: this.getLockedDayIndex(lock),
           period: lock ? lock.period : 1,
           isLocked: true
         };
