@@ -460,30 +460,39 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                           return (
                                             <div 
                                               key={c.course_id || c.course_code} 
-                                              className="bg-white rounded border border-slate-300 p-1 shadow-2xs break-inside-avoid"
-                                              style={{ wordBreak: 'break-word', overflowWrap: 'break-word', marginBottom: '3px' }}
+                                              className="bg-white rounded-md border border-slate-300 shadow-2xs break-inside-avoid"
+                                              style={{ 
+                                                backgroundColor: '#ffffff', 
+                                                border: '1px solid #cbd5e1', 
+                                                borderRadius: '5px', 
+                                                padding: '4px 5px', 
+                                                marginBottom: '4px',
+                                                boxSizing: 'border-box',
+                                                overflow: 'visible'
+                                              }}
                                             >
-                                              {/* Card Header: Course Code + Dead-Centered Student Count Badge */}
+                                              {/* Card Header Row: Course Code + Student Count Micro Badge */}
                                               <div 
                                                 style={{ 
                                                   display: 'flex', 
                                                   alignItems: 'center', 
                                                   justifyContent: 'space-between', 
+                                                  gap: '4px',
                                                   borderBottom: '1px solid #e2e8f0', 
-                                                  paddingBottom: '2px', 
+                                                  paddingBottom: '3px', 
                                                   marginBottom: '3px',
-                                                  width: '100%'
+                                                  width: '100%',
+                                                  lineHeight: '1.2'
                                                 }}
                                               >
                                                 <span 
                                                   style={{ 
-                                                    fontSize: '8.5px', 
+                                                    fontSize: '9px', 
                                                     fontWeight: '900', 
                                                     color: '#002147', 
-                                                    lineHeight: '12px', 
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis'
+                                                    letterSpacing: '-0.01em',
+                                                    display: 'inline-block',
+                                                    verticalAlign: 'middle'
                                                   }}
                                                 >
                                                   {c.course_code}
@@ -491,28 +500,27 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                 
                                                 <span 
                                                   style={{ 
-                                                    display: 'inline-flex', 
-                                                    alignItems: 'center', 
-                                                    justifyContent: 'center', 
-                                                    height: '13px', 
-                                                    padding: '0 4px', 
+                                                    display: 'inline-block', 
+                                                    textAlign: 'center',
+                                                    padding: '1px 4px', 
                                                     fontSize: '7px', 
                                                     fontWeight: '800', 
-                                                    lineHeight: '13px', 
+                                                    lineHeight: '1.1', 
                                                     color: '#1e293b', 
                                                     backgroundColor: '#f1f5f9', 
                                                     border: '1px solid #cbd5e1', 
                                                     borderRadius: '3px',
                                                     flexShrink: 0
                                                   }}
+                                                  title={`${c.student_count} Enrolled Students`}
                                                 >
                                                   {c.student_count}
                                                 </span>
                                               </div>
                                               
                                               {matrixColumnMode === 'unified' && (
-                                                <div className="mb-1">
-                                                  <span className={`text-[6.5px] font-bold px-1 py-0.5 rounded border ${
+                                                <div style={{ marginBottom: '3px' }}>
+                                                  <span className={`text-[6.5px] font-extrabold px-1 py-0.2 rounded border ${
                                                     isClinical ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
                                                   }`}>
                                                     {c.program}
@@ -523,12 +531,13 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               {/* Course Title */}
                                               <div 
                                                 style={{ 
-                                                  fontSize: '7.5px', 
+                                                  fontSize: '8px', 
                                                   fontWeight: '700', 
                                                   color: '#0f172a', 
-                                                  lineHeight: '1.2', 
+                                                  lineHeight: '1.25', 
                                                   marginTop: '2px', 
                                                   wordBreak: 'break-word',
+                                                  overflowWrap: 'break-word',
                                                   textAlign: 'left'
                                                 }}
                                               >
@@ -537,25 +546,22 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
                                               {/* Oral Exam Badge */}
                                               {c.has_oral_exam && (
-                                                <div 
-                                                  style={{ 
-                                                    display: 'inline-flex', 
-                                                    alignItems: 'center', 
-                                                    justifyContent: 'center',
-                                                    gap: '2px', 
-                                                    height: '13px', 
-                                                    padding: '0 4px', 
-                                                    fontSize: '6.5px', 
-                                                    fontWeight: '800', 
-                                                    lineHeight: '13px', 
-                                                    color: '#78350f', 
-                                                    backgroundColor: '#fef3c7', 
-                                                    border: '1px solid #fcd34d', 
-                                                    borderRadius: '9999px', 
-                                                    marginTop: '3px' 
-                                                  }}
-                                                >
-                                                  🎤 Oral
+                                                <div style={{ marginTop: '3px' }}>
+                                                  <span 
+                                                    style={{ 
+                                                      display: 'inline-block', 
+                                                      padding: '1px 5px', 
+                                                      fontSize: '6.5px', 
+                                                      fontWeight: '800', 
+                                                      lineHeight: '1.1', 
+                                                      color: '#78350f', 
+                                                      backgroundColor: '#fef3c7', 
+                                                      border: '1px solid #fcd34d', 
+                                                      borderRadius: '9999px' 
+                                                    }}
+                                                  >
+                                                    🎤 Oral
+                                                  </span>
                                                 </div>
                                               )}
                                             </div>
