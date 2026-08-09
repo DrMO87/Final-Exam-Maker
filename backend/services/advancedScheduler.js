@@ -277,6 +277,17 @@ class AdvancedScheduler {
       }
     });
 
+    // COMPACTNESS BONUS: Prefer fewer unique exam days (more free rest days for students)
+    // Count how many unique days are used in the schedule
+    const usedDays = new Set();
+    schedule.forEach(assignment => {
+      if (assignment && typeof assignment.dayIndex === 'number' && assignment.dayIndex >= 0) {
+        usedDays.add(assignment.dayIndex);
+      }
+    });
+    // Each additional unique day used adds a small penalty to encourage compaction
+    penalty += usedDays.size * 30;
+
     return penalty;
   }
 

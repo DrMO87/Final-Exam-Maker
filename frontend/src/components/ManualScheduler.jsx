@@ -334,85 +334,79 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
       let chosenDay = null;
       let chosenPeriod = 1;
 
-      // Helper function to try placing a group in a specific set of days and a specific period
-      const tryPlacement = (daysToSearch, periodToTry) => {
-        for (const day of daysToSearch) {
-          let isDayValid = true;
-
-          for (const course of group) {
-            // Oral exams MUST be in Period 1
-            if (periodToTry === 2 && course.has_oral_exam) {
-              isDayValid = false;
-              break;
-            }
-
-            const plKey = `${course.program}|Level ${course.level}`;
-
-            // Check if the period in this level column is already occupied
-            // Check if there is a direct student conflict in this period
-            const periodConflictInColumn = Object.entries(nextAssignments).some(([cId, a]) => {
-              if (a.dayIndex !== day.dayIndex || a.period !== periodToTry) return false;
-              const overlap = getOverlap(course.id, cId);
-              return allowMinorConflicts ? overlap >= 5 : overlap > 0;
-            });
-
-            if (periodConflictInColumn) {
-              isDayValid = false;
-              break;
-            }
-
-            // Check global capacity for the period (1000 students max)
-            const assignedCoursesInPeriod = Object.entries(nextAssignments)
-              .filter(([_, a]) => a.dayIndex === day.dayIndex && a.period === periodToTry)
-              .map(([cId]) => courses.find(item => String(item.id) === String(cId)))
-              .filter(Boolean);
-            const totalStudentsInPeriod = assignedCoursesInPeriod.reduce((sum, c) => sum + (c.student_count || 0), 0);
-            const courseStudents = course.student_count || 0;
-            
-            if (totalStudentsInPeriod + courseStudents > 1000) {
-              isDayValid = false;
-              break;
-            }
-
-            // Same-day student conflict check against all courses assigned to this day
-            const dayAssignedIds = Object.entries(nextAssignments)
-              .filter(([_, a]) => a.dayIndex === day.dayIndex)
-              .map(([cId]) => cId);
-
-            const hasConflictWithAssigned = dayAssignedIds.some(assignedId => {
-              const overlap = getOverlap(course.id, assignedId);
-              return allowMinorConflicts ? overlap >= 5 : overlap > 0;
-            });
-
-            // Conflict check within the same group
-            const hasConflictWithinGroup = group.some(otherInGroup => {
-              if (otherInGroup.id === course.id) return false;
-              const overlap = getOverlap(course.id, otherInGroup.id);
-              return allowMinorConflicts ? overlap >= 5 : overlap > 0;
-            });
-
-            if (hasConflictWithAssigned || hasConflictWithinGroup) {
-              isDayValid = false;
-              break;
-            }
-          }
-
-          if (isDayValid) {
-            chosenDay = day;
-            chosenPeriod = periodToTry;
-            return true; // Found a valid placement
-          }
-        }
-        return false; // Could not place in these days/period
+      // Helper: count how many courses are already assigned to a given day
+      const getDayOccupancy = (dayIndex) => {
+        return Object.values(nextAssignments).filter(a => a.dayIndex === dayIndex).length;
       };
 
-      // PASS 1: Preferred Days, Period 1
+      // Sort candidate days: busiest first (compact schedule = more free rest days)
+      const sortByOccupancy = (days) => {
+        return [...days].sort((a, b) => getDayOccupancy(b.dayIndex) - getDayOccupancy(a.dayIndex));
+      };
+
+      // Helper function to validate and try placing a group on a specific day and period
+      const isDayPeriodValid = (day, periodToTry) => {
+        for (const course of group) {
+          // Oral exams MUST be in Period 1
+          if (periodToTry === 2 && course.has_oral_exam) return false;
+
+          // Check if there is a direct student conflict in this specific period
+          const periodConflict = Object.entries(nextAssignments).some(([cId, a]) => {
+            if (a.dayIndex !== day.dayIndex || a.period !== periodToTry) return false;
+            const overlap = getOverlap(course.id, cId);
+            return allowMinorConflicts ? overlap >= 5 : overlap > 0;
+          });
+          if (periodConflict) return false;
+
+          // Check global capacity for the period (1000 students max)
+          const assignedCoursesInPeriod = Object.entries(nextAssignments)
+            .filter(([_, a]) => a.dayIndex === day.dayIndex && a.period === periodToTry)
+            .map(([cId]) => courses.find(item => String(item.id) === String(cId)))
+            .filter(Boolean);
+          const totalStudentsInPeriod = assignedCoursesInPeriod.reduce((sum, c) => sum + (c.student_count || 0), 0);
+          if (totalStudentsInPeriod + (course.student_count || 0) > 1000) return false;
+
+          // Same-day student conflict check (different period on same day)
+          const dayAssignedIds = Object.entries(nextAssignments)
+            .filter(([_, a]) => a.dayIndex === day.dayIndex)
+            .map(([cId]) => cId);
+          const hasConflictWithAssigned = dayAssignedIds.some(assignedId => {
+            const overlap = getOverlap(course.id, assignedId);
+            return allowMinorConflicts ? overlap >= 5 : overlap > 0;
+          });
+          if (hasConflictWithAssigned) return false;
+
+          // Conflict check within the same group
+          const hasConflictWithinGroup = group.some(otherInGroup => {
+            if (otherInGroup.id === course.id) return false;
+            const overlap = getOverlap(course.id, otherInGroup.id);
+            return allowMinorConflicts ? overlap >= 5 : overlap > 0;
+          });
+          if (hasConflictWithinGroup) return false;
+        }
+        return true;
+      };
+
+      // Try placement: busiest days first (to compact schedule and create more rest days)
+      const tryPlacement = (daysToSearch, periodToTry) => {
+        const sorted = sortByOccupancy(daysToSearch);
+        for (const day of sorted) {
+          if (isDayPeriodValid(day, periodToTry)) {
+            chosenDay = day;
+            chosenPeriod = periodToTry;
+            return true;
+          }
+        }
+        return false;
+      };
+
+      // PASS 1: Preferred Days, Period 1 (busiest first)
       if (!chosenDay) tryPlacement(candidateDays, 1);
-      // PASS 2: Preferred Days, Period 2
+      // PASS 2: Preferred Days, Period 2 (busiest first)
       if (!chosenDay) tryPlacement(candidateDays, 2);
-      // PASS 3: Non-Preferred Days, Period 1
+      // PASS 3: Non-Preferred Days, Period 1 (busiest first)
       if (!chosenDay) tryPlacement(nonPreferredDays, 1);
-      // PASS 4: Non-Preferred Days, Period 2
+      // PASS 4: Non-Preferred Days, Period 2 (busiest first)
       if (!chosenDay) tryPlacement(nonPreferredDays, 2);
 
 
