@@ -23,6 +23,13 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const [activeDragSlot, setActiveDragSlot] = useState(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
 
+  // Course Bank Search, Filter & Sort State
+  const [bankSearch, setBankSearch] = useState('');
+  const [bankProgramFilter, setBankProgramFilter] = useState('ALL');
+  const [bankLevelFilter, setBankLevelFilter] = useState('ALL');
+  const [bankOralOnly, setBankOralOnly] = useState(false);
+  const [bankSortBy, setBankSortBy] = useState('default'); // 'default', 'code', 'title', 'students_desc', 'students_asc'
+
   const getPdfScheduleData = () => {
     const scheduleItems = Object.entries(lockedAssignments).map(([courseId, assignment]) => {
       const course = courses.find(c => String(c.id) === String(courseId));
@@ -548,15 +555,151 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           onDrop={handleDropOnBank}
           className="w-80 shrink-0 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden"
         >
-          <div className="p-4 border-b border-slate-100 bg-slate-50 shrink-0">
-            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Course Bank ({unassignedCourses.length})</h3>
-            <p className="text-[10px] text-slate-400 mt-1">Drag course to matrix, or click to place.</p>
+          {/* Course Bank Header & Filter Bar */}
+          <div className="p-3 border-b border-slate-200 bg-slate-50 shrink-0 space-y-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xs font-extrabold text-[#002147] uppercase tracking-wider">
+                  Course Bank ({(() => {
+                    const unassigned = courses.filter(c => !lockedAssignments[c.id]);
+                    const filtered = unassigned.filter(c => {
+                      if (bankSearch) {
+                        const q = bankSearch.toLowerCase().trim();
+                        const codeMatch = String(c.course_code || '').toLowerCase().includes(q);
+                        const titleMatch = String(c.course_title || '').toLowerCase().includes(q);
+                        const progMatch = String(c.program || '').toLowerCase().includes(q);
+                        if (!codeMatch && !titleMatch && !progMatch) return false;
+                      }
+                      if (bankProgramFilter !== 'ALL' && c.program !== bankProgramFilter) return false;
+                      if (bankLevelFilter !== 'ALL' && String(c.level) !== String(bankLevelFilter)) return false;
+                      if (bankOralOnly && !c.has_oral_exam) return false;
+                      return true;
+                    });
+                    return `${filtered.length}/${unassigned.length}`;
+                  })()})
+                </h3>
+                <p className="text-[10px] text-slate-500 font-medium">Drag to grid or click to select</p>
+              </div>
+
+              {(bankSearch || bankProgramFilter !== 'ALL' || bankLevelFilter !== 'ALL' || bankOralOnly || bankSortBy !== 'default') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBankSearch('');
+                    setBankProgramFilter('ALL');
+                    setBankLevelFilter('ALL');
+                    setBankOralOnly(false);
+                    setBankSortBy('default');
+                  }}
+                  className="text-[10px] text-rose-600 font-bold hover:underline"
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                value={bankSearch}
+                onChange={(e) => setBankSearch(e.target.value)}
+                placeholder="🔍 Search code, title..."
+                className="w-full h-7 pl-2.5 pr-6 rounded-lg border border-slate-300 bg-white text-xs font-medium focus:border-hue-navy focus:outline-none"
+              />
+              {bankSearch && (
+                <button
+                  onClick={() => setBankSearch('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Filter Controls Row */}
+            <div className="grid grid-cols-2 gap-1.5 text-[10.5px]">
+              {/* Program Filter */}
+              <select
+                value={bankProgramFilter}
+                onChange={(e) => setBankProgramFilter(e.target.value)}
+                className="h-7 px-1.5 rounded-md border border-slate-300 bg-white font-semibold text-slate-700 text-[11px]"
+              >
+                <option value="ALL">All Programs</option>
+                {[...new Set(courses.map(c => c.program))].map(prog => (
+                  <option key={prog} value={prog}>{prog}</option>
+                ))}
+              </select>
+
+              {/* Level Filter */}
+              <select
+                value={bankLevelFilter}
+                onChange={(e) => setBankLevelFilter(e.target.value)}
+                className="h-7 px-1.5 rounded-md border border-slate-300 bg-white font-semibold text-slate-700 text-[11px]"
+              >
+                <option value="ALL">All Levels</option>
+                {availableLevels.map(lvl => (
+                  <option key={lvl} value={lvl}>Level {lvl}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort & Oral Filter Row */}
+            <div className="flex items-center justify-between gap-1 text-[10.5px]">
+              <select
+                value={bankSortBy}
+                onChange={(e) => setBankSortBy(e.target.value)}
+                className="h-7 px-1.5 rounded-md border border-slate-300 bg-white font-bold text-[#002147] text-[11px] flex-1"
+              >
+                <option value="default">Sort: Default (Program)</option>
+                <option value="code">Sort: Code (A-Z)</option>
+                <option value="title">Sort: Title (A-Z)</option>
+                <option value="students_desc">Sort: Students (High → Low)</option>
+                <option value="students_asc">Sort: Students (Low → High)</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={() => setBankOralOnly(!bankOralOnly)}
+                className={`h-7 px-2 rounded-md border text-[10.5px] font-bold transition-all shrink-0 ${
+                  bankOralOnly ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+                }`}
+                title="Toggle Oral Exams Only"
+              >
+                🎤 Oral
+              </button>
+            </div>
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
             {(() => {
+              const unassigned = courses.filter(c => !lockedAssignments[c.id]);
+
+              const filtered = unassigned.filter(c => {
+                if (bankSearch) {
+                  const q = bankSearch.toLowerCase().trim();
+                  const codeMatch = String(c.course_code || '').toLowerCase().includes(q);
+                  const titleMatch = String(c.course_title || '').toLowerCase().includes(q);
+                  const progMatch = String(c.program || '').toLowerCase().includes(q);
+                  if (!codeMatch && !titleMatch && !progMatch) return false;
+                }
+                if (bankProgramFilter !== 'ALL' && c.program !== bankProgramFilter) return false;
+                if (bankLevelFilter !== 'ALL' && String(c.level) !== String(bankLevelFilter)) return false;
+                if (bankOralOnly && !c.has_oral_exam) return false;
+                return true;
+              });
+
+              const sorted = [...filtered].sort((a, b) => {
+                if (bankSortBy === 'code') return String(a.course_code || '').localeCompare(String(b.course_code || ''));
+                if (bankSortBy === 'title') return String(a.course_title || '').localeCompare(String(b.course_title || ''));
+                if (bankSortBy === 'students_desc') return (b.student_count || 0) - (a.student_count || 0);
+                if (bankSortBy === 'students_asc') return (a.student_count || 0) - (b.student_count || 0);
+                if (a.program !== b.program) return String(a.program).localeCompare(String(b.program));
+                return Number(a.level || 0) - Number(b.level || 0);
+              });
+
               const grouped = {};
-              unassignedCourses.forEach(c => {
+              sorted.forEach(c => {
                 const prog = String(c.program || 'Unknown Program').trim();
                 const lvl = String(c.level || '1').trim();
                 if (!grouped[prog]) grouped[prog] = {};
@@ -576,8 +719,16 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                 );
               }
 
-              if (Object.keys(grouped).length === 0) {
-                return <div className="text-center text-slate-400 text-sm mt-10">All courses assigned!</div>;
+              if (unassigned.length === 0) {
+                return <div className="text-center text-slate-400 text-sm mt-10 font-medium">🎉 All courses assigned to schedule!</div>;
+              }
+
+              if (sorted.length === 0) {
+                return (
+                  <div className="text-center text-slate-400 text-xs mt-10 p-4 border border-dashed rounded-xl">
+                    🔍 No courses match your search or filter criteria.
+                  </div>
+                );
               }
 
               const levelColors = {
