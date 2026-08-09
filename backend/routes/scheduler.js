@@ -190,7 +190,7 @@ router.post('/load-sample', async (req, res) => {
         if (!curriculumCourse) {
           curriculumCourse = primaryCurriculum.find(c => 
             !c.course_code.toLowerCase().includes('00x') &&
-            (normalizeStr(c.course_title).includes(titleStr) || titleStr.includes(normalizeStr(c.course_title)))
+            (normalizeStr(c.course_title) === titleStr)
           );
         }
 
@@ -198,20 +198,13 @@ router.post('/load-sample', async (req, res) => {
           curriculumCourse = secondaryCurriculum.find(c => normalizeStr(c.course_code) === codeStr);
         }
 
-        if (!curriculumCourse && !codeStr.includes('00x')) {
-          curriculumCourse = secondaryCurriculum.find(c => 
-            !c.course_code.toLowerCase().includes('00x') &&
-            (normalizeStr(c.course_title) === titleStr || normalizeStr(c.course_title).includes(titleStr) || titleStr.includes(normalizeStr(c.course_title)))
-          );
-        }
-
-        const targetProgram = curriculumCourse ? curriculumCourse.program : mappedProgram;
-        const targetCode = curriculumCourse ? normalizeStr(curriculumCourse.course_code) : codeStr;
-        const targetTitle = curriculumCourse ? normalizeStr(curriculumCourse.course_title) : titleStr;
+        const targetProgram = mappedProgram || (curriculumCourse ? curriculumCourse.program : 'Unknown');
+        const targetCode = courseCode || (curriculumCourse ? curriculumCourse.course_code : '');
+        const targetTitle = courseName || (curriculumCourse ? curriculumCourse.course_title : '');
 
         const existingIdx = scheduledCourses.findIndex(c => 
           c.program === targetProgram &&
-          (normalizeStr(c.course_code) === targetCode || normalizeStr(c.course_title) === targetTitle)
+          (normalizeStr(c.course_code) === normalizeStr(targetCode) || (normalizeStr(c.course_title) === normalizeStr(targetTitle) && normalizeStr(c.course_code) === normalizeStr(targetCode)))
         );
 
         if (existingIdx !== -1) {
@@ -219,12 +212,14 @@ router.post('/load-sample', async (req, res) => {
         } else if (curriculumCourse) {
           scheduledCourses.push({
             ...curriculumCourse,
-            program: curriculumCourse.program,
+            program: targetProgram,
+            course_code: courseCode || curriculumCourse.course_code,
+            course_title: courseName || curriculumCourse.course_title,
             student_count: studentCount
           });
         } else {
           scheduledCourses.push({
-            program: mappedProgram || 'Unknown',
+            program: targetProgram,
             level: inferLevelFromCode(courseCode, courseName),
             course_code: courseCode,
             course_title: courseName || courseCode,
@@ -377,18 +372,21 @@ router.post('/upload', upload.fields([
       for (const entry of studentEntries) {
         const { courseCode, courseName, studentCount, program } = entry;
         const codeStr = normalizeStr(courseCode);
+        const nameStr = normalizeStr(courseName);
         const mappedProgram = normalizeProgramName(program);
         
+        // Search ONLY within matching program first
+        const sameProgramCourses = allCourses.filter(c => c.program === mappedProgram);
+
         // 1. Try exact match on code + same program
-        let curriculumCourse = allCourses.find(c => 
-          normalizeStr(c.course_code) === codeStr && c.program === mappedProgram
+        let curriculumCourse = sameProgramCourses.find(c => 
+          normalizeStr(c.course_code) === codeStr
         );
 
         // 2. Try exact match on title + same program
         if (!curriculumCourse) {
-          const nameStr = normalizeStr(courseName);
-          curriculumCourse = allCourses.find(c => 
-            normalizeStr(c.course_title) === nameStr && c.program === mappedProgram
+          curriculumCourse = sameProgramCourses.find(c => 
+            normalizeStr(c.course_title) === nameStr
           );
         }
 
@@ -401,53 +399,18 @@ router.post('/upload', upload.fields([
 
         // 4. Try exact match on title (any program)
         if (!curriculumCourse) {
-          const nameStr = normalizeStr(courseName);
           curriculumCourse = allCourses.find(c => 
             normalizeStr(c.course_title) === nameStr
           );
         }
 
-        // 5. Try Fuzzy Match (Typos or Substrings) - EXCLUDE generic placeholders like 00X
-        if (!curriculumCourse && !codeStr.includes('00x')) {
-          let bestMatch = null;
-          let lowestDistance = Infinity;
-
-          for (const c of allCourses) {
-            const cCode = normalizeStr(c.course_code);
-            const cTitle = normalizeStr(c.course_title);
-
-            if (cCode.includes('00x')) continue; // Skip generic placeholders like UE-00X, FE-00X
-
-            if (cCode.includes(codeStr) || codeStr.includes(cCode) || 
-                cTitle.includes(codeStr) || codeStr.includes(cTitle)) {
-              bestMatch = c;
-              lowestDistance = 0;
-              break;
-            }
-
-            const distCode = getEditDistance(codeStr, cCode);
-            const distTitle = getEditDistance(codeStr, cTitle);
-            const minD = Math.min(distCode, distTitle);
-
-            if (minD < lowestDistance && minD <= 2) {
-              lowestDistance = minD;
-              bestMatch = c;
-            }
-          }
-
-          if (bestMatch) {
-            console.log(`  🔍 Fuzzy matched "${courseCode}" to "${bestMatch.course_code}" (Distance: ${lowestDistance})`);
-            curriculumCourse = bestMatch;
-          }
-        }
-
-        const targetProgram = curriculumCourse ? curriculumCourse.program : mappedProgram;
-        const targetCode = curriculumCourse ? normalizeStr(curriculumCourse.course_code) : codeStr;
-        const targetTitle = curriculumCourse ? normalizeStr(curriculumCourse.course_title) : normalizeStr(courseName);
+        const targetProgram = mappedProgram || (curriculumCourse ? curriculumCourse.program : 'Unknown');
+        const targetCode = courseCode || (curriculumCourse ? curriculumCourse.course_code : '');
+        const targetTitle = courseName || (curriculumCourse ? curriculumCourse.course_title : '');
 
         const existingIdx = scheduledCourses.findIndex(c => 
           c.program === targetProgram &&
-          (normalizeStr(c.course_code) === targetCode || normalizeStr(c.course_title) === targetTitle)
+          (normalizeStr(c.course_code) === normalizeStr(targetCode) || (normalizeStr(c.course_title) === normalizeStr(targetTitle) && normalizeStr(c.course_code) === normalizeStr(targetCode)))
         );
 
         if (existingIdx !== -1) {
@@ -456,14 +419,15 @@ router.post('/upload', upload.fields([
         } else if (curriculumCourse) {
           scheduledCourses.push({
             ...curriculumCourse,
-            program: curriculumCourse.program,
+            program: targetProgram,
+            course_code: courseCode || curriculumCourse.course_code,
+            course_title: courseName || curriculumCourse.course_title,
             student_count: studentCount
           });
         } else {
-          // Instead of throwing, create a new course entry from student file data
           console.log(`  ⚠️  Course "${courseCode}" (${courseName}) not found in curriculum files. Creating from student data.`);
           scheduledCourses.push({
-            program: mappedProgram || 'Unknown',
+            program: targetProgram,
             level: inferLevelFromCode(courseCode, courseName),
             course_code: courseCode,
             course_title: courseName || courseCode,
