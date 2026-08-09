@@ -5,7 +5,7 @@ import { addDays, format, parseISO, differenceInDays } from 'date-fns';
  * Implements the PharmD Master Prompt constraints with optimization
  */
 class AdvancedScheduler {
-  constructor(courses, conflicts, startDate, endDate, lockedAssignments = {}) {
+  constructor(courses, conflicts, startDate, endDate, lockedAssignments = {}, excludedDates = []) {
     this.courses = courses;
     this.conflicts = conflicts;
     this.startDate = parseISO(startDate);
@@ -16,6 +16,7 @@ class AdvancedScheduler {
     if (isNaN(this.endDate.getTime())) this.endDate = new Date(endDate);
 
     this.lockedAssignments = lockedAssignments;
+    this.excludedDates = excludedDates;
     this.conflictMap = this.buildConflictMap();
     this.calendar = this.generateCalendar();
 
@@ -56,14 +57,24 @@ class AdvancedScheduler {
     let isGroupA = true;
     let dayIndex = 0;
 
+    let excludedList = [];
+    try {
+      excludedList = typeof this.excludedDates === 'string'
+        ? JSON.parse(this.excludedDates || '[]')
+        : (Array.isArray(this.excludedDates) ? this.excludedDates : []);
+    } catch (e) {}
+
+    const excludedSet = new Set(excludedList);
+
     while (currentDate <= this.endDate) {
       const dayOfWeek = format(currentDate, 'EEEE');
+      const dateStr = format(currentDate, 'yyyy-MM-dd');
       
-      if (dayOfWeek !== 'Friday') {
+      if (dayOfWeek !== 'Friday' && !excludedSet.has(dateStr)) {
         calendar.push({
           index: dayIndex++,
           date: currentDate,
-          dateStr: format(currentDate, 'yyyy-MM-dd'),
+          dateStr,
           dayOfWeek,
           groupType: isGroupA ? 'A' : 'B',
           allowedLevels: isGroupA ? [1, 3, 5] : [2, 4]

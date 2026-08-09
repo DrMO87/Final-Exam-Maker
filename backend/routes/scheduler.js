@@ -68,12 +68,13 @@ const upload = multer({
 // Create a new scheduling session
 router.post('/session', async (req, res) => {
   try {
-    const { session_name, semester, start_date, end_date } = req.body;
+    const { session_name, semester, start_date, end_date, excluded_dates } = req.body;
+    const excludedStr = typeof excluded_dates === 'string' ? excluded_dates : JSON.stringify(excluded_dates || []);
 
     const result = await pool.query(
-      `INSERT INTO scheduling_sessions (session_name, semester, start_date, end_date)
-       VALUES (?, ?, ?, ?) RETURNING *`,
-      [session_name, semester, start_date, end_date]
+      `INSERT INTO scheduling_sessions (session_name, semester, start_date, end_date, excluded_dates)
+       VALUES (?, ?, ?, ?, ?) RETURNING *`,
+      [session_name, semester, start_date, end_date, excludedStr]
     );
 
     res.json({ success: true, session: result.rows[0] });
@@ -639,7 +640,8 @@ router.post('/generate/:sessionId', async (req, res) => {
         conflictsResult.rows,
         session.start_date,
         session.end_date,
-        lockedAssignments
+        lockedAssignments,
+        session.excluded_dates
       );
       
       console.log(`🧠 Engine Initialized. Calendar Length: ${engine.calendar.length}`);

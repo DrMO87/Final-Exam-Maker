@@ -447,36 +447,6 @@ function App() {
             </div>
             
             <div className="py-4 space-y-4 text-xs">
-              
-              {/* Semester & Academic Year Setup */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <div className="font-bold text-[#002147] text-xs">📅 Semester & Academic Year</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Semester</label>
-                    <select
-                      value={pdfSettings.semester}
-                      onChange={(e) => setPdfSettings({ ...pdfSettings, semester: e.target.value })}
-                      className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
-                    >
-                      <option value="Fall Semester">Fall Semester</option>
-                      <option value="Spring Semester">Spring Semester</option>
-                      <option value="Summer Semester">Summer Semester</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Academic Year</label>
-                    <input
-                      type="text"
-                      value={pdfSettings.academicYear}
-                      onChange={(e) => setPdfSettings({ ...pdfSettings, academicYear: e.target.value })}
-                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
-                      placeholder="2025-2026"
-                    />
-                  </div>
-                </div>
-              </div>
 
               {/* Periods Config Setup */}
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">

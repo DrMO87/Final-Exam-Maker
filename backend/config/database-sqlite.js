@@ -37,6 +37,10 @@ db.exec(`
   );
 `);
 
+try {
+  db.exec("ALTER TABLE scheduling_sessions ADD COLUMN excluded_dates TEXT DEFAULT '[]'");
+} catch (e) {}
+
 // Seed default accounts if empty
 try {
   const userCheck = db.prepare('SELECT COUNT(*) as count FROM users').get();

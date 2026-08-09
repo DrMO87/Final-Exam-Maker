@@ -23,9 +23,12 @@ if (connectionString) {
             semester VARCHAR(100) NOT NULL,
             start_date DATE NOT NULL,
             end_date DATE NOT NULL,
+            excluded_dates TEXT DEFAULT '[]',
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
+
+        ALTER TABLE scheduling_sessions ADD COLUMN IF NOT EXISTS excluded_dates TEXT DEFAULT '[]';
 
         CREATE TABLE IF NOT EXISTS courses (
             id SERIAL PRIMARY KEY,
