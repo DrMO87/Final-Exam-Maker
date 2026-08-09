@@ -76,15 +76,6 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
   // Unique dates for matrix view
   const dates = [...new Set(schedule.map(item => item.exam_date).filter(Boolean))].sort();
 
-  // Program-level combinations
-  const programLevelSet = new Set();
-  schedule.forEach(item => {
-    const c = getCourseInfo(item);
-    if (c.course_code) {
-      programLevelSet.add(`${c.program}|Level ${c.level}`);
-    }
-  });
-  
   const defaultProgramLevels = [
     'PharmD|Level 1', 'PharmD Clinical|Level 1',
     'PharmD|Level 2', 'PharmD Clinical|Level 2',
@@ -93,16 +84,23 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
     'PharmD|Level 5', 'PharmD Clinical|Level 5'
   ];
 
-  const programLevels = programLevelSet.size > 0 
-    ? [...programLevelSet].sort((a, b) => {
-        const [progA, lvlStrA] = a.split('|Level ');
-        const [progB, lvlStrB] = b.split('|Level ');
-        const lvlA = Number(lvlStrA) || 0;
-        const lvlB = Number(lvlStrB) || 0;
-        if (lvlA !== lvlB) return lvlA - lvlB;
-        return progA.localeCompare(progB);
-      })
-    : defaultProgramLevels;
+  // Program-level combinations (always include all 10 official faculty columns L1-L5)
+  const programLevelSet = new Set(defaultProgramLevels);
+  schedule.forEach(item => {
+    const c = getCourseInfo(item);
+    if (c.course_code && c.program && c.level) {
+      programLevelSet.add(`${c.program}|Level ${c.level}`);
+    }
+  });
+
+  const programLevels = [...programLevelSet].sort((a, b) => {
+    const [progA, lvlStrA] = a.split('|Level ');
+    const [progB, lvlStrB] = b.split('|Level ');
+    const lvlA = Number(lvlStrA) || 0;
+    const lvlB = Number(lvlStrB) || 0;
+    if (lvlA !== lvlB) return lvlA - lvlB;
+    return progA.localeCompare(progB);
+  });
 
   const unifiedLevels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 
