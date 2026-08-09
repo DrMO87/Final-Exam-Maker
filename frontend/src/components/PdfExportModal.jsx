@@ -134,10 +134,16 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
     try {
       const opt = {
-        margin: [5, 5, 5, 5],
+        margin: [3, 3, 3, 3],
         filename: `HUE_Exam_Timetable_${(pdfSettings.semester || 'Semester').replace(/\s+/g, '_')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: false,
+          scrollY: 0,
+          scrollX: 0
+        },
         jsPDF: { unit: 'mm', format: pageSize, orientation: orientation },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
@@ -295,15 +301,27 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
             <div 
               ref={printAreaRef}
               id="pdf-document-content" 
-              className="bg-white text-slate-900 shadow-2xl rounded-none p-6 md:p-8 border border-slate-300 font-sans text-xs flex flex-col justify-between"
+              className="bg-white text-slate-900 shadow-2xl rounded-none p-3 sm:p-4 border border-slate-300 font-sans text-xs flex flex-col justify-between"
               style={{
-                width: orientation === 'landscape' ? '1100px' : '780px',
-                minHeight: '800px'
+                width: orientation === 'landscape' ? '1280px' : '920px',
+                minHeight: '800px',
+                boxSizing: 'border-box'
               }}
             >
+              {/* PRINT CSS TO FORCE TABLE HEADER REPETITION & REFINED MARGINS */}
+              <style>{`
+                @media print {
+                  @page { margin: 3mm; }
+                  thead { display: table-header-group !important; }
+                  tr { page-break-inside: avoid !important; }
+                }
+                thead { display: table-header-group; }
+                tr { page-break-inside: avoid; }
+              `}</style>
+
               <div>
                 {/* TOP BRANDING HEADER MATCHING REPORT_BRANDING */}
-                <div className="border-b-2 border-[#002147] pb-3 mb-5">
+                <div className="border-b-2 border-[#002147] pb-3 mb-4">
                   <div className="flex justify-center items-center gap-8 mb-2">
                     <img src={LOGO_HUE} alt="HUE Logo" className="h-14 w-auto object-contain" />
                     <img src={LOGO_PHARMACY} alt="Pharmacy Seal" className="h-14 w-14 object-contain" />
@@ -322,7 +340,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 </div>
 
                 {/* DOCUMENT HEADING & REPORT META CONTAINER */}
-                <div className="text-center mb-5">
+                <div className="text-center mb-4">
                   <h1 className="text-2xl font-black tracking-wide text-[#002147] m-0 uppercase font-outfit">
                     HORUS UNIVERSITY — EGYPT (HUE)
                   </h1>
@@ -330,7 +348,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                     FACULTY OF PHARMACY
                   </h2>
 
-                  <div className="mt-3 bg-[#F8FAFC] border border-[#E2E8F0] p-3 rounded-xl max-w-2xl mx-auto shadow-2xs">
+                  <div className="mt-2.5 bg-[#F8FAFC] border border-[#E2E8F0] p-2.5 rounded-xl max-w-2xl mx-auto shadow-2xs">
                     <div className="font-extrabold text-[#002147] text-xs uppercase tracking-wider">
                       FINAL EXAMINATION TIMETABLE — {(pdfSettings.semester || 'SEMESTER').toUpperCase()} — ACADEMIC YEAR {pdfSettings.academicYear}
                     </div>
@@ -341,16 +359,16 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 </div>
 
                 {/* MASTER TIMETABLE MATRIX */}
-                <div className="mb-6 overflow-hidden">
+                <div className="mb-4 overflow-hidden">
                     
                     {/* Matrix Table with Navy/Gold Styling */}
                     <table className="w-full border-collapse border border-slate-300 text-[9px] table-fixed">
-                      <thead>
+                      <thead className="bg-[#002147] text-white">
                         <tr className="bg-[#002147] text-white">
-                          <th className="border border-slate-400 p-2 text-center w-[8.5%] uppercase font-bold text-[9px] text-[#FFB81C] border-l-4 border-l-[#FFB81C]">
+                          <th className="border border-slate-400 p-1.5 text-center w-[8.5%] uppercase font-bold text-[8.5px] text-[#FFB81C] border-l-4 border-l-[#FFB81C]">
                             Date & Day
                           </th>
-                          <th className="border border-slate-400 p-2 text-center w-[6%] uppercase font-bold text-[8px] text-[#FFB81C]">
+                          <th className="border border-slate-400 p-1.5 text-center w-[5.5%] uppercase font-bold text-[8px] text-[#FFB81C]">
                             Period
                           </th>
                           {columnsToUse.map(colKey => {
@@ -413,7 +431,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                   <td 
                                     key={colKey} 
                                     style={{ backgroundColor: periodNum === 1 ? '#ffffff' : '#f1f5f9' }}
-                                    className={`border border-slate-300 p-1 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}
+                                    className={`border border-slate-300 p-0.5 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}
                                   >
                                     {assignedItems.length > 0 ? (
                                       <div className="space-y-1">
@@ -424,14 +442,30 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                             <div 
                                               key={c.course_id || c.course_code} 
                                               className="bg-white rounded border border-slate-300 p-1 shadow-2xs break-inside-avoid"
-                                              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                                              style={{ wordBreak: 'break-word', overflowWrap: 'break-word', marginBottom: '3px' }}
                                             >
                                               {/* Card Header: Course Code + Dead-Centered Student Count Badge */}
                                               <div 
-                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '3px', marginBottom: '3px' }}
+                                                style={{ 
+                                                  display: 'flex', 
+                                                  alignItems: 'center', 
+                                                  justifyContent: 'space-between', 
+                                                  borderBottom: '1px solid #e2e8f0', 
+                                                  paddingBottom: '2px', 
+                                                  marginBottom: '3px',
+                                                  width: '100%'
+                                                }}
                                               >
                                                 <span 
-                                                  style={{ fontSize: '8.5px', fontWeight: '900', color: '#002147', lineHeight: '1', letterSpacing: '-0.02em', display: 'inline-block' }}
+                                                  style={{ 
+                                                    fontSize: '8.5px', 
+                                                    fontWeight: '900', 
+                                                    color: '#002147', 
+                                                    lineHeight: '12px', 
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis'
+                                                  }}
                                                 >
                                                   {c.course_code}
                                                 </span>
@@ -445,8 +479,8 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                     padding: '0 4px', 
                                                     fontSize: '7px', 
                                                     fontWeight: '800', 
-                                                    lineHeight: '1', 
-                                                    color: '#334155', 
+                                                    lineHeight: '13px', 
+                                                    color: '#1e293b', 
                                                     backgroundColor: '#f1f5f9', 
                                                     border: '1px solid #cbd5e1', 
                                                     borderRadius: '3px',
@@ -469,7 +503,15 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
                                               {/* Course Title */}
                                               <div 
-                                                style={{ fontSize: '8px', fontWeight: '700', color: '#1e293b', lineHeight: '1.25', marginTop: '2px', wordBreak: 'break-word' }}
+                                                style={{ 
+                                                  fontSize: '7.5px', 
+                                                  fontWeight: '700', 
+                                                  color: '#0f172a', 
+                                                  lineHeight: '1.2', 
+                                                  marginTop: '2px', 
+                                                  wordBreak: 'break-word',
+                                                  textAlign: 'left'
+                                                }}
                                               >
                                                 {c.course_title}
                                               </div>
@@ -480,12 +522,13 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                   style={{ 
                                                     display: 'inline-flex', 
                                                     alignItems: 'center', 
+                                                    justifyContent: 'center',
                                                     gap: '2px', 
                                                     height: '13px', 
                                                     padding: '0 4px', 
                                                     fontSize: '6.5px', 
                                                     fontWeight: '800', 
-                                                    lineHeight: '1', 
+                                                    lineHeight: '13px', 
                                                     color: '#78350f', 
                                                     backgroundColor: '#fef3c7', 
                                                     border: '1px solid #fcd34d', 
