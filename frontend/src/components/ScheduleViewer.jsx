@@ -12,12 +12,12 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   const lockedCount = Object.keys(lockedAssignments || {}).length;
-  const [showChoiceModal, setShowChoiceModal] = useState(!schedule && lockedCount > 0);
+  const [showChoiceModal, setShowChoiceModal] = useState(false);
 
   useEffect(() => {
-    // If no schedule exists yet and no locked assignments, auto-generate directly
-    if (!generatedSchedule && lockedCount === 0) {
-      handleGenerateSchedule(true);
+    // Automatically generate/load schedule keeping pre-scheduled locks from Step 4 seamlessly
+    if (!generatedSchedule) {
+      handleGenerateSchedule(false);
     }
   }, []);
 

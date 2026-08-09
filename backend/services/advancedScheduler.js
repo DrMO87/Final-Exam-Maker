@@ -543,6 +543,20 @@ class AdvancedScheduler {
   }
 
   generateSchedule() {
+    const unassignedCount = this.courses.filter(c => !this.lockedAssignments[c.id]).length;
+    if (unassignedCount === 0 && Object.keys(this.lockedAssignments).length > 0) {
+      console.log('⚡ All courses are pre-scheduled/locked! Skipping GA/SA and returning schedule instantly.');
+      const schedule = this.courses.map(course => {
+        const lock = this.lockedAssignments[course.id];
+        return {
+          dayIndex: lock ? lock.dayIndex : 0,
+          period: lock ? lock.period : 1,
+          isLocked: true
+        };
+      });
+      const fitness = this.calculateFitness(schedule);
+      return this.convertToSchedule(schedule, fitness);
+    }
     return this.optimize();
   }
 }
