@@ -470,16 +470,25 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                           return [1, 2].map((periodNum) => (
                             <tr 
                               key={`${dateStr}-${periodNum}`} 
-                              className={periodNum === 2 ? 'border-b-2 border-slate-400 bg-slate-100/80 break-inside-avoid' : 'bg-white border-b border-slate-200 break-inside-avoid'}
+                              className={periodNum === 2 ? 'border-b-2 border-slate-400 break-inside-avoid' : 'border-b border-slate-200 break-inside-avoid'}
                             >
                               {periodNum === 1 && (
-                                <td rowSpan={2} className="border border-slate-300 p-1 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight">
-                                  <div className="text-[10px] text-[#002147] font-extrabold">{dayName}</div>
-                                  <div className="text-[7.5px] text-slate-500 font-medium mt-0.5">{formattedDate}</div>
+                                <td 
+                                  rowSpan={2} 
+                                  style={{ backgroundColor: '#f8fafc', position: 'relative', zIndex: 10 }}
+                                  className="border border-slate-300 p-1 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight"
+                                >
+                                  <div className="flex flex-col items-center justify-center h-full py-1">
+                                    <div className="text-[10px] text-[#002147] font-extrabold">{dayName}</div>
+                                    <div className="text-[7.5px] text-slate-600 font-bold mt-0.5 whitespace-nowrap">{formattedDate}</div>
+                                  </div>
                                 </td>
                               )}
 
-                              <td className={`border border-slate-300 p-0.5 text-center font-bold align-middle ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}>
+                              <td 
+                                style={{ backgroundColor: periodNum === 1 ? '#ffffff' : '#f1f5f9' }}
+                                className={`border border-slate-300 p-0.5 text-center font-bold align-middle ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}
+                              >
                                 <span className={`inline-block px-1 py-0.5 rounded text-[7.5px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
                                   P{periodNum}
                                 </span>
@@ -489,7 +498,11 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                 const assignedItems = matrixData[dateStr]?.[periodNum]?.[colKey] || [];
 
                                 return (
-                                  <td key={colKey} className={`border border-slate-300 p-1 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}>
+                                  <td 
+                                    key={colKey} 
+                                    style={{ backgroundColor: periodNum === 1 ? '#ffffff' : '#f1f5f9' }}
+                                    className={`border border-slate-300 p-1 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}
+                                  >
                                     {assignedItems.length > 0 ? (
                                       <div className="space-y-1">
                                         {assignedItems.map(item => {
