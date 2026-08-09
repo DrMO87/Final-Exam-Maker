@@ -514,16 +514,40 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               className="bg-white rounded border border-slate-300 p-1 shadow-2xs break-inside-avoid"
                                               style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
                                             >
-                                              <div className="font-extrabold text-[#002147] text-[8.5px] leading-tight flex justify-between items-center gap-0.5 border-b border-slate-200 pb-0.5 mb-1">
-                                                <span className="font-black text-[#002147] tracking-tight">{c.course_code}</span>
-                                                <span className="text-[7px] bg-slate-100 text-slate-700 font-bold px-1 py-0.2 rounded border border-slate-200 shrink-0">
+                                              {/* Card Header: Course Code + Dead-Centered Student Count Badge */}
+                                              <div 
+                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '3px', marginBottom: '3px' }}
+                                              >
+                                                <span 
+                                                  style={{ fontSize: '8.5px', fontWeight: '900', color: '#002147', lineHeight: '1', letterSpacing: '-0.02em', display: 'inline-block' }}
+                                                >
+                                                  {c.course_code}
+                                                </span>
+                                                
+                                                <span 
+                                                  style={{ 
+                                                    display: 'inline-flex', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center', 
+                                                    height: '13px', 
+                                                    padding: '0 4px', 
+                                                    fontSize: '7px', 
+                                                    fontWeight: '800', 
+                                                    lineHeight: '1', 
+                                                    color: '#334155', 
+                                                    backgroundColor: '#f1f5f9', 
+                                                    border: '1px solid #cbd5e1', 
+                                                    borderRadius: '3px',
+                                                    flexShrink: 0
+                                                  }}
+                                                >
                                                   {c.student_count}
                                                 </span>
                                               </div>
                                               
                                               {matrixColumnMode === 'unified' && (
                                                 <div className="mb-1">
-                                                  <span className={`text-[6.5px] font-bold px-1 py-0.2 rounded border ${
+                                                  <span className={`text-[6.5px] font-bold px-1 py-0.5 rounded border ${
                                                     isClinical ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
                                                   }`}>
                                                     {c.program}
@@ -531,12 +555,32 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                 </div>
                                               )}
 
-                                              <div className="text-[8px] text-slate-800 font-bold leading-[11px] break-words">
+                                              {/* Course Title */}
+                                              <div 
+                                                style={{ fontSize: '8px', fontWeight: '700', color: '#1e293b', lineHeight: '1.25', marginTop: '2px', wordBreak: 'break-word' }}
+                                              >
                                                 {c.course_title}
                                               </div>
 
+                                              {/* Oral Exam Badge */}
                                               {c.has_oral_exam && (
-                                                <div className="mt-1 inline-flex items-center gap-0.5 text-[6.5px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-1 py-0.2 rounded leading-none">
+                                                <div 
+                                                  style={{ 
+                                                    display: 'inline-flex', 
+                                                    alignItems: 'center', 
+                                                    gap: '2px', 
+                                                    height: '13px', 
+                                                    padding: '0 4px', 
+                                                    fontSize: '6.5px', 
+                                                    fontWeight: '800', 
+                                                    lineHeight: '1', 
+                                                    color: '#78350f', 
+                                                    backgroundColor: '#fef3c7', 
+                                                    border: '1px solid #fcd34d', 
+                                                    borderRadius: '9999px', 
+                                                    marginTop: '3px' 
+                                                  }}
+                                                >
                                                   🎤 Oral
                                                 </div>
                                               )}
