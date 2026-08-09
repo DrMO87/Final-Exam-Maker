@@ -106,13 +106,14 @@
   }
 }
 
-/* Print Styles for Branded PDF Export (Vector Exact Match) */
-@media print {
-  @page {
-    size: A4 landscape;
-    margin: 4mm;
-  }
+/* Top-level Page Setup (forces Chrome Print to default to Landscape orientation) */
+@page {
+  size: A4 landscape;
+  margin: 4mm;
+}
 
+/* Print Styles for Branded PDF Export */
+@media print {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;

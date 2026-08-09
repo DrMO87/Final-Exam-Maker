@@ -128,14 +128,51 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
     }
   });
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
+    if (!printAreaRef.current) return;
     setExporting(true);
+
     try {
-      window.print();
+      const element = printAreaRef.current;
+      
+      // Clone element off-screen for pristine rendering without modal scrollbar distortion
+      const clone = element.cloneNode(true);
+      const targetWidth = orientation === 'landscape' ? '1280px' : '920px';
+      clone.style.width = targetWidth;
+      clone.style.transform = 'none';
+      clone.style.padding = '16px';
+      clone.style.boxSizing = 'border-box';
+      clone.style.background = '#ffffff';
+
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = targetWidth;
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      const opt = {
+        margin: [3, 3, 3, 3],
+        filename: `HUE_Exam_Timetable_${(pdfSettings.semester || 'Semester').replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: false,
+          windowWidth: orientation === 'landscape' ? 1280 : 920
+        },
+        jsPDF: { unit: 'mm', format: pageSize, orientation: orientation },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      await html2pdf().set(opt).from(clone).save();
+      document.body.removeChild(container);
     } catch (err) {
       console.error('PDF export error:', err);
+      window.print();
     } finally {
-      setTimeout(() => setExporting(false), 500);
+      setExporting(false);
     }
   };
 
