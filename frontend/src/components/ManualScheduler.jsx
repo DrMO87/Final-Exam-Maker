@@ -93,21 +93,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         return;
       }
 
-      // Check if target slot is occupied by ANOTHER course in the SAME program-level column
-      const occupied = Object.entries(lockedAssignments).find(([cId, a]) => {
-        if (String(cId) === String(course.id)) return false;
-        const assignedCourse = courses.find(item => String(item.id) === String(cId));
-        if (!assignedCourse) return false;
-        const assignedPLKey = `${assignedCourse.program}|Level ${assignedCourse.level}`;
-        return a.dayIndex === dayIndex && a.period === period && assignedPLKey === programLevelKey;
-      });
-
-      if (occupied) {
-        alert("This period slot is already occupied by another course in this column. Unassign the existing course first.");
-        return;
-      }
-
-      // Same-day conflict check
+      // Same-day conflict check (allows multiple courses in same period if 0 student conflict)
       const { hasConflict, conflictDetails } = isCourseConflicting(course.id, dayIndex);
       if (hasConflict) {
         const conflictNames = conflictDetails.map(cd => {
@@ -259,20 +245,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
       return;
     }
 
-    // Check if slot is already occupied by another course in the SAME program-level column
-    const occupied = Object.entries(lockedAssignments).find(([cId, a]) => {
-      if (String(cId) === String(selectedCourse.id)) return false;
-      const assignedCourse = courses.find(item => String(item.id) === String(cId));
-      if (!assignedCourse) return false;
-      const assignedPLKey = `${assignedCourse.program}|Level ${assignedCourse.level}`;
-      return a.dayIndex === dayIndex && a.period === period && assignedPLKey === programLevelKey;
-    });
-    if (occupied) {
-       alert("This period slot is already occupied by another course in this column. Unassign the existing course first.");
-       return;
-    }
-
-    // Check for same-day conflict alerting
+    // Same-day conflict check (allows multiple courses in same period if 0 student conflict)
     const { hasConflict, conflictDetails } = isCourseConflicting(selectedCourse.id, dayIndex);
     if (hasConflict) {
        const conflictNames = conflictDetails.map(cd => {
@@ -369,12 +342,14 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             const plKey = `${course.program}|Level ${course.level}`;
 
             // Check if the period in this level column is already occupied
-            const periodOccupiedInColumn = Object.entries(nextAssignments).some(([cId, a]) => {
-              const c = courses.find(item => String(item.id) === String(cId));
-              return c && a.dayIndex === day.dayIndex && a.period === periodToTry && `${c.program}|Level ${c.level}` === plKey;
+            // Check if there is a direct student conflict in this period
+            const periodConflictInColumn = Object.entries(nextAssignments).some(([cId, a]) => {
+              if (a.dayIndex !== day.dayIndex || a.period !== periodToTry) return false;
+              const overlap = getOverlap(course.id, cId);
+              return allowMinorConflicts ? overlap >= 5 : overlap > 0;
             });
 
-            if (periodOccupiedInColumn) {
+            if (periodConflictInColumn) {
               isDayValid = false;
               break;
             }
@@ -705,107 +680,123 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                       })
                       .map(([cId, a]) => ({ course: courses.find(c => String(c.id) === cId), period: a.period }));
 
-                    const p1 = assignedHere.find(x => x.period === 1);
-                    const p2 = assignedHere.find(x => x.period === 2);
+                    const p1List = assignedHere.filter(x => x.period === 1);
+                    const p2List = assignedHere.filter(x => x.period === 2);
 
-                    const renderSlot = (periodNum, assignment) => {
+                    const renderSlot = (periodNum, assignments) => {
                       const slotKey = `${day.dayIndex}-${periodNum}-${pl}`;
                       const isSlotHovered = activeDragSlot === slotKey;
+                      const isSelectable = selectedCourse && `${selectedCourse.program}|Level ${selectedCourse.level}` === pl;
 
-                      if (assignment) {
-                        const { hasConflict, conflictDetails } = isCourseConflicting(assignment.course.id, day.dayIndex);
-                        const isSelected = selectedCourse?.id === assignment.course.id;
+                      return (
+                        <div 
+                          onDragOver={(e) => handleDragOverSlot(e, day.dayIndex, periodNum, pl)}
+                          onDragLeave={handleDragLeaveSlot}
+                          onDrop={(e) => handleDropOnSlot(e, day.dayIndex, periodNum, pl)}
+                          onClick={() => handleSlotClick(day.dayIndex, periodNum, pl)}
+                          className={`p-1 rounded-lg transition-all border min-h-[55px] ${
+                            isSlotHovered 
+                              ? 'bg-amber-100/70 border-amber-400 ring-2 ring-amber-300' 
+                              : isSelectable 
+                                ? 'bg-blue-50/50 border-blue-200 cursor-pointer hover:bg-blue-100/70' 
+                                : 'bg-slate-50/50 border-slate-200'
+                          }`}
+                        >
+                          {assignments.length > 0 ? (
+                            <div className="space-y-1">
+                              {assignments.map(assignment => {
+                                const { hasConflict, conflictDetails } = isCourseConflicting(assignment.course.id, day.dayIndex);
+                                const isSelected = selectedCourse?.id === assignment.course.id;
 
-                        return (
-                          <div 
-                            draggable={true}
-                            onDragStart={(e) => handleDragStart(e, assignment.course, { type: 'GRID', dayIndex: day.dayIndex, period: periodNum })}
-                            onClick={() => handleCourseClick(assignment.course)}
-                            className={`group/card p-2 rounded border relative cursor-grab active:cursor-grabbing transition-all ${isSelected ? 'ring-2 ring-hue-gold' : ''} ${hasConflict ? 'bg-red-50 border-red-300 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-50 border-slate-200'}`}
-                          >
-                            {/* Hover Reason Bubble / Tooltip */}
-                            <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 opacity-0 invisible group-hover/card:opacity-100 group-hover/card:visible transition-all duration-200 pointer-events-none">
-                              <div className={`p-2.5 rounded-xl text-xs shadow-2xl border ${
-                                hasConflict 
-                                  ? 'bg-red-950 text-white border-red-500 shadow-red-950/50' 
-                                  : isSelected 
-                                    ? 'bg-amber-950 text-white border-amber-500 shadow-amber-950/50'
-                                    : 'bg-slate-900 text-white border-slate-700 shadow-slate-900/50'
-                              }`}>
-                                <div className="font-bold flex items-center justify-between gap-1 mb-1">
-                                  <span>{hasConflict ? '⚠️ Student Conflict' : isSelected ? '📌 Selected Course' : '✅ Conflict-Free'}</span>
-                                  <span className="text-[10px] opacity-75 font-mono">{assignment.course.course_code}</span>
-                                </div>
+                                return (
+                                  <div 
+                                    key={assignment.course.id}
+                                    draggable={true}
+                                    onDragStart={(e) => handleDragStart(e, assignment.course, { type: 'GRID', dayIndex: day.dayIndex, period: periodNum })}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCourseClick(assignment.course);
+                                    }}
+                                    className={`group/card p-1.5 rounded border relative cursor-grab active:cursor-grabbing transition-all ${
+                                      isSelected ? 'ring-2 ring-hue-gold' : ''
+                                    } ${
+                                      hasConflict ? 'bg-red-50 border-red-300 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-white border-slate-200 shadow-2xs'
+                                    }`}
+                                  >
+                                    {/* Hover Tooltip */}
+                                    <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 opacity-0 invisible group-hover/card:opacity-100 group-hover/card:visible transition-all duration-200 pointer-events-none">
+                                      <div className={`p-2.5 rounded-xl text-xs shadow-2xl border ${
+                                        hasConflict 
+                                          ? 'bg-red-950 text-white border-red-500 shadow-red-950/50' 
+                                          : isSelected 
+                                            ? 'bg-amber-950 text-white border-amber-500 shadow-amber-950/50'
+                                            : 'bg-slate-900 text-white border-slate-700 shadow-slate-900/50'
+                                      }`}>
+                                        <div className="font-bold flex items-center justify-between gap-1 mb-1">
+                                          <span>{hasConflict ? '⚠️ Student Conflict' : isSelected ? '📌 Selected Course' : '✅ Conflict-Free'}</span>
+                                          <span className="text-[10px] opacity-75 font-mono">{assignment.course.course_code}</span>
+                                        </div>
 
-                                {hasConflict ? (
-                                  <div className="space-y-1 text-[11px] leading-snug">
-                                    <p className="text-red-200 font-medium">Overlaps with course(s) on {day.dateStr}:</p>
-                                    <ul className="list-disc pl-3.5 text-red-100 space-y-0.5 font-medium">
-                                      {conflictDetails.map(cd => {
-                                        const c = courses.find(item => String(item.id) === String(cd.id));
-                                        return (
-                                          <li key={cd.id}>
-                                            <span className="font-bold text-white">{c ? getAbbreviatedCourseName(c.course_title) : cd.id}</span> ({c ? c.program : ''}): <span className="underline decoration-red-400 font-bold">{cd.overlap} students</span>
-                                          </li>
-                                        );
-                                      })}
-                                    </ul>
+                                        {hasConflict ? (
+                                          <div className="space-y-1 text-[11px] leading-snug">
+                                            <p className="text-red-200 font-medium">Overlaps with course(s) on {day.dateStr}:</p>
+                                            <ul className="list-disc pl-3.5 text-red-100 space-y-0.5 font-medium">
+                                              {conflictDetails.map(cd => {
+                                                const c = courses.find(item => String(item.id) === String(cd.id));
+                                                return (
+                                                  <li key={cd.id}>
+                                                    <span className="font-bold text-white">{c ? getAbbreviatedCourseName(c.course_title) : cd.id}</span> ({c ? c.program : ''}): <span className="underline decoration-red-400 font-bold">{cd.overlap} students</span>
+                                                  </li>
+                                                );
+                                              })}
+                                            </ul>
+                                          </div>
+                                        ) : (
+                                          <p className="text-slate-300 text-[11px] leading-relaxed">
+                                            {isSelected 
+                                              ? 'Course selected. Click any empty slot or drag to move.' 
+                                              : 'Zero student overlaps detected on this exam date.'}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <button 
+                                      onClick={(e) => handleUnassign(assignment.course.id, e)}
+                                      className="absolute -top-1.5 -right-1.5 bg-white text-slate-400 hover:text-red-500 rounded-full w-4 h-4 flex items-center justify-center border shadow-xs text-[10px] z-10"
+                                      title="Unassign course"
+                                    >
+                                      &times;
+                                    </button>
+
+                                    <div className="flex items-center gap-1 mb-0.5">
+                                      <span className={`badge ${hasConflict ? 'badge-danger' : 'badge-gray'} text-[8px] px-1 py-0`}>P{periodNum}</span>
+                                      <span className={`font-extrabold text-[11px] ${hasConflict ? 'text-red-700' : 'text-hue-navy'}`}>{assignment.course.course_code}</span>
+                                    </div>
+                                    <div className="text-[9.5px] text-slate-600 truncate mb-1 font-semibold">{assignment.course.course_title}</div>
+                                    
+                                    <div className="flex items-center justify-between gap-1 text-[8.5px] bg-slate-100 px-1 py-0.5 rounded border border-slate-200/60 font-semibold text-slate-600">
+                                      <span>👥 {assignment.course.student_count || 0}</span>
+                                      {assignment.course.has_oral_exam && <span className="text-amber-700 font-bold">🎤 Oral</span>}
+                                    </div>
                                   </div>
-                                ) : (
-                                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                                    {isSelected 
-                                      ? 'Course selected. Click any empty slot or drag to move.' 
-                                      : 'Zero student overlaps detected on this exam date.'}
-                                  </p>
-                                )}
-
-                                {/* Arrow */}
-                                <div className={`absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent ${
-                                  hasConflict ? 'border-t-red-950' : isSelected ? 'border-t-amber-950' : 'border-t-slate-900'
-                                }`} />
-                              </div>
+                                );
+                              })}
                             </div>
-
-                            <button 
-                              onClick={(e) => handleUnassign(assignment.course.id, e)}
-                              className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-red-500 rounded-full w-5 h-5 flex items-center justify-center border shadow-sm z-10"
-                            >
-                              &times;
-                            </button>
-                            <div className="flex items-center gap-1 mb-1">
-                              <span className={`badge ${hasConflict ? 'badge-danger' : 'badge-gray'} text-[9px] px-1 py-0`}>P{periodNum}</span>
-                              <span className={`font-bold text-xs ${hasConflict ? 'text-red-700' : 'text-hue-navy'}`}>{assignment.course.course_code}</span>
+                          ) : (
+                            <div className="h-full min-h-[45px] flex items-center justify-center text-slate-300 text-[10px] font-light">
+                              {isSelectable ? 'Click to assign' : '—'}
                             </div>
-                            <div className="text-[10px] text-slate-500 truncate mb-1.5">{assignment.course.course_title}</div>
-                            
-                            <div className="flex items-center justify-between gap-1 text-[9px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60 font-semibold text-slate-600">
-                              <span>👥 {assignment.course.student_count || 0} Students</span>
-                              {assignment.course.has_oral_exam && <span className="text-amber-700 font-bold">🎤</span>}
-                            </div>
-                          </div>
-                        );
-                      } else {
-                        const isSelectable = selectedCourse && `${selectedCourse.program}|Level ${selectedCourse.level}` === pl;
-                        return (
-                          <div 
-                            onClick={() => handleSlotClick(day.dayIndex, periodNum, pl)}
-                            onDragOver={(e) => handleDragOverSlot(e, day.dayIndex, periodNum, pl)}
-                            onDragLeave={handleDragLeaveSlot}
-                            onDrop={(e) => handleDropOnSlot(e, day.dayIndex, periodNum, pl)}
-                            className={`h-12 rounded border border-dashed flex items-center justify-center text-[10px] transition-all
-                              ${isSlotHovered ? 'border-hue-gold bg-hue-gold/20 text-hue-navy font-bold scale-[1.03] shadow-md' : isSelectable ? 'border-hue-gold/50 bg-hue-gold/5 text-hue-gold hover:bg-hue-gold/20 cursor-pointer' : 'border-slate-200 bg-slate-50/50 text-slate-300'}`}
-                          >
-                            {isSlotHovered ? `Drop P${periodNum}` : isSelectable ? `Place in P${periodNum}` : `Period ${periodNum}`}
-                          </div>
-                        );
-                      }
+                          )}
+                        </div>
+                      );
                     };
 
                     return (
                       <td key={pl} className="p-2 border-l border-slate-100 align-top">
                         <div className="flex flex-col gap-2">
-                          {renderSlot(1, p1)}
-                          {renderSlot(2, p2)}
+                          {renderSlot(1, p1List)}
+                          {renderSlot(2, p2List)}
                         </div>
                       </td>
                     );

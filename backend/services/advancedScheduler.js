@@ -187,15 +187,19 @@ class AdvancedScheduler {
         }
       });
       
-      // HIGH PRIORITY: Same level, same program, same day
-      const levelProgramMap = new Map();
-      coursesOnDay.forEach(({ course }) => {
-        const key = `${course.program}-${course.level}`;
-        if (levelProgramMap.has(key)) {
-          penalty += 1000; // Multiple exams for same level/program
+      // Same level & program on same day: ONLY penalize if student overlap exists
+      for (let i = 0; i < coursesOnDay.length; i++) {
+        for (let j = i + 1; j < coursesOnDay.length; j++) {
+          const c1 = coursesOnDay[i].course;
+          const c2 = coursesOnDay[j].course;
+          if (c1.program === c2.program && c1.level === c2.level) {
+            const overlap = this.getConflictCount(c1.id, c2.id);
+            if (overlap > 0) {
+              penalty += 1000 + (overlap * 500); // Heavy penalty if student conflict exists
+            }
+          }
         }
-        levelProgramMap.set(key, true);
-      });
+      }
     }
 
     // Check minimum gaps between conflicting courses
