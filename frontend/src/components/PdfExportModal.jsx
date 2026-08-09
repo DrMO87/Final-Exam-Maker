@@ -11,7 +11,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
   const [matrixColumnMode, setMatrixColumnMode] = useState('detailed'); // 'detailed' (10 Program Columns), 'unified' (5 Level Columns)
   const [orientation, setOrientation] = useState('landscape'); // 'landscape' or 'portrait'
   const [pageSize, setPageSize] = useState('a4'); // 'a4' or 'a3'
-  const [zoomLevel, setZoomLevel] = useState(100); // 80, 90, 100, 110, 120
+  const [zoomLevel, setZoomLevel] = useState(85); // Default 85% (Fit Page Margins)
 
   // Local or external settings state with fallback
   const [localSettings, setLocalSettings] = useState(() => {
@@ -273,15 +273,28 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
               <div className="flex items-center gap-1 h-8">
                 <button
                   type="button"
-                  onClick={() => setZoomLevel(prev => Math.max(60, prev - 10))}
+                  onClick={() => setZoomLevel(prev => Math.max(50, prev - 10))}
                   className="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50"
+                  title="Zoom Out"
                 >
                   ➖
                 </button>
                 <button
                   type="button"
+                  onClick={() => setZoomLevel(85)}
+                  className={`px-2 h-8 rounded-lg border font-bold text-[11px] transition-colors ${
+                    zoomLevel === 85 ? 'bg-[#002147] text-white border-[#002147]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                  }`}
+                  title="Fit Table to Page Margins"
+                >
+                  📐 Fit Page (85%)
+                </button>
+                <button
+                  type="button"
                   onClick={() => setZoomLevel(100)}
-                  className="px-2 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 text-[11px]"
+                  className={`px-2 h-8 rounded-lg border font-semibold text-[11px] transition-colors ${
+                    zoomLevel === 100 ? 'bg-[#002147] text-white border-[#002147]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                  }`}
                 >
                   100%
                 </button>
@@ -289,6 +302,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                   type="button"
                   onClick={() => setZoomLevel(prev => Math.min(150, prev + 10))}
                   className="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50"
+                  title="Zoom In"
                 >
                   ➕
                 </button>
