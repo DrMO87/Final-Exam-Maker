@@ -8,6 +8,7 @@ const LOGO_SESSION_MASTER = '/assets/session_master_shield_logo.png';
 
 function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externalPdfSettings, onUpdatePdfSettings, onClose }) {
   const [layoutMode, setLayoutMode] = useState('matrix'); // 'matrix', 'supervision'
+  const [matrixColumnMode, setMatrixColumnMode] = useState('unified'); // 'unified' (5 Level Columns), 'detailed' (10 Program Columns)
   const [orientation, setOrientation] = useState('landscape'); // 'landscape' or 'portrait'
   const [pageSize, setPageSize] = useState('a4'); // 'a4' or 'a3'
   const [zoomLevel, setZoomLevel] = useState(100); // 80, 90, 100, 110, 120
@@ -111,13 +112,21 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
       })
     : defaultProgramLevels;
 
+  const unifiedLevels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
+
+  const columnsToUse = matrixColumnMode === 'unified' ? unifiedLevels : programLevels;
+
   // Matrix grouping
   const matrixData = {};
   dates.forEach(d => { matrixData[d] = { 1: {}, 2: {} }; });
   schedule.forEach(item => {
     const c = getCourseInfo(item);
     if (!c.course_code || !item.exam_date) return;
-    const plKey = `${c.program}|Level ${c.level}`;
+
+    const plKey = matrixColumnMode === 'unified' 
+      ? `Level ${c.level}` 
+      : `${c.program}|Level ${c.level}`;
+
     const period = item.period || 1;
     if (matrixData[item.exam_date] && matrixData[item.exam_date][period]) {
       if (!matrixData[item.exam_date][period][plKey]) {
@@ -196,6 +205,21 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <option value="supervision">Hall Supervision Schedule</option>
               </select>
             </div>
+
+            {/* Matrix Column Format */}
+            {layoutMode === 'matrix' && (
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Column Format</label>
+                <select
+                  value={matrixColumnMode}
+                  onChange={(e) => setMatrixColumnMode(e.target.value)}
+                  className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147]"
+                >
+                  <option value="unified">Unified 5 Levels (Wider Cards)</option>
+                  <option value="detailed">10 Program Levels (Detailed)</option>
+                </select>
+              </div>
+            )}
 
             {/* Page Orientation & Size */}
             <div>
@@ -417,22 +441,24 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                           <th className="border border-slate-400 p-2 text-center w-[6%] uppercase font-bold text-[8px] text-[#FFB81C]">
                             Period
                           </th>
-                          {programLevels.length > 0 ? programLevels.map(pl => {
-                            const [prog, lvl] = pl.split('|');
+                          {columnsToUse.map(colKey => {
+                            if (matrixColumnMode === 'unified') {
+                              return (
+                                <th key={colKey} className="border border-slate-400 p-2 text-center font-bold bg-[#002147] text-white">
+                                  <div className="text-[10px] font-black text-[#FFB81C] uppercase tracking-wider">{colKey}</div>
+                                  <div className="text-slate-300 font-medium text-[7.5px]">PharmD & Clinical</div>
+                                </th>
+                              );
+                            }
+                            const [prog, lvl] = colKey.split('|');
                             const isClinical = prog.includes('Clinical');
                             return (
-                              <th key={pl} className="border border-slate-400 p-1.5 text-center font-bold">
+                              <th key={colKey} className="border border-slate-400 p-1.5 text-center font-bold bg-[#002147]">
                                 <div className={`text-[8.5px] font-black ${isClinical ? 'text-[#FFB81C]' : 'text-white'}`}>{prog}</div>
                                 <div className="text-slate-200 font-semibold text-[8px]">{lvl}</div>
                               </th>
                             );
-                          }) : (
-                            ['PharmD Level 1', 'PharmD Level 2', 'PharmD Level 3', 'PharmD Level 4', 'PharmD Level 5', 'Clinical Level 1', 'Clinical Level 2', 'Clinical Level 3'].map(pl => (
-                              <th key={pl} className="border border-slate-400 p-1 text-center font-bold text-[#FFB81C]">
-                                <div className="text-[8px] font-bold">{pl}</div>
-                              </th>
-                            ))
-                          )}
+                          })}
                         </tr>
                       </thead>
                       <tbody>
@@ -442,7 +468,10 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                           const formattedDate = isNaN(dateObj.getTime()) ? dateStr : dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
                           return [1, 2].map((periodNum) => (
-                            <tr key={`${dateStr}-${periodNum}`} className={periodNum === 2 ? 'border-b border-slate-400 bg-slate-50/60 break-inside-avoid' : 'bg-white break-inside-avoid'}>
+                            <tr 
+                              key={`${dateStr}-${periodNum}`} 
+                              className={periodNum === 2 ? 'border-b-2 border-slate-400 bg-slate-100/70 break-inside-avoid' : 'bg-white border-b border-slate-200 break-inside-avoid'}
+                            >
                               {periodNum === 1 && (
                                 <td rowSpan={2} className="border border-slate-300 p-1.5 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight">
                                   <div className="text-[10.5px] text-[#002147] font-extrabold">{dayName}</div>
@@ -450,41 +479,56 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                 </td>
                               )}
 
-                              <td className="border border-slate-300 p-1 text-center font-bold text-slate-700 bg-slate-50 align-middle">
+                              <td className={`border border-slate-300 p-1 text-center font-bold align-middle ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/70'}`}>
                                 <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
                                   P{periodNum}
                                 </span>
                               </td>
 
-                              {programLevels.map(pl => {
-                                const assignedItems = matrixData[dateStr]?.[periodNum]?.[pl] || [];
+                              {columnsToUse.map(colKey => {
+                                const assignedItems = matrixData[dateStr]?.[periodNum]?.[colKey] || [];
 
                                 return (
-                                  <td key={pl} className="border border-slate-300 p-1 align-top bg-white">
+                                  <td key={colKey} className={`border border-slate-300 p-1.5 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/70'}`}>
                                     {assignedItems.length > 0 ? (
-                                      assignedItems.map(item => {
-                                        const c = item.courseObj || getCourseInfo(item);
-                                        return (
-                                          <div key={c.course_id || c.course_code} className="bg-white rounded border border-slate-300 p-1.5 mb-1 last:mb-0 shadow-2xs">
-                                            <div className="font-extrabold text-[#002147] text-[9.5px] leading-tight flex justify-between items-center gap-1 border-b border-slate-200 pb-0.5 mb-1">
-                                              <span>{c.course_code}</span>
-                                              <span className="text-[7.5px] bg-slate-100 text-slate-700 font-bold px-1 rounded border border-slate-200">
-                                                {c.student_count} stds
-                                              </span>
-                                            </div>
-                                            <div className="text-[8.5px] text-slate-800 font-semibold leading-[12px]">
-                                              {c.course_title}
-                                            </div>
-                                            {c.has_oral_exam && (
-                                              <div className="mt-1 inline-flex items-center gap-0.5 text-[7.5px] font-bold text-amber-900 bg-yellow-100 border border-yellow-300 px-1 py-0.5 rounded leading-none">
-                                                🎤 Oral Exam
+                                      <div className="space-y-1">
+                                        {assignedItems.map(item => {
+                                          const c = item.courseObj || getCourseInfo(item);
+                                          const isClinical = c.program.toLowerCase().includes('clinical');
+                                          return (
+                                            <div key={c.course_id || c.course_code} className="bg-white rounded-md border border-slate-300 p-1.5 shadow-2xs break-inside-avoid">
+                                              <div className="font-extrabold text-[#002147] text-[9.5px] leading-tight flex justify-between items-center gap-1 border-b border-slate-200 pb-1 mb-1">
+                                                <span className="font-black text-[#002147]">{c.course_code}</span>
+                                                <span className="text-[7.5px] bg-slate-100 text-slate-700 font-bold px-1.5 py-0.2 rounded border border-slate-200 shrink-0">
+                                                  {c.student_count} stds
+                                                </span>
                                               </div>
-                                            )}
-                                          </div>
-                                        );
-                                      })
+                                              
+                                              {matrixColumnMode === 'unified' && (
+                                                <div className="mb-1">
+                                                  <span className={`text-[7px] font-bold px-1 py-0.2 rounded border ${
+                                                    isClinical ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
+                                                  }`}>
+                                                    {c.program}
+                                                  </span>
+                                                </div>
+                                              )}
+
+                                              <div className="text-[8.5px] text-slate-800 font-bold leading-snug break-words">
+                                                {c.course_title}
+                                              </div>
+
+                                              {c.has_oral_exam && (
+                                                <div className="mt-1 inline-flex items-center gap-0.5 text-[7px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-1 py-0.2 rounded leading-none">
+                                                  🎤 Oral Exam
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
                                     ) : (
-                                      <div className="text-slate-300 text-center py-1 text-[8px] font-light">—</div>
+                                      <div className="text-slate-300 text-center py-2 text-[8px] font-light">—</div>
                                     )}
                                   </td>
                                 );
