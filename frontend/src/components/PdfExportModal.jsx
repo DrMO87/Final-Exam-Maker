@@ -128,32 +128,14 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
     }
   });
 
-  const handleDownloadPdf = async () => {
-    if (!printAreaRef.current) return;
+  const handleDownloadPdf = () => {
     setExporting(true);
-
     try {
-      const opt = {
-        margin: [3, 3, 3, 3],
-        filename: `HUE_Exam_Timetable_${(pdfSettings.semester || 'Semester').replace(/\s+/g, '_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
-          logging: false,
-          scrollY: 0,
-          scrollX: 0
-        },
-        jsPDF: { unit: 'mm', format: pageSize, orientation: orientation },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      await html2pdf().set(opt).from(printAreaRef.current).save();
+      window.print();
     } catch (err) {
       console.error('PDF export error:', err);
-      window.print();
     } finally {
-      setExporting(false);
+      setTimeout(() => setExporting(false), 500);
     }
   };
 
@@ -416,8 +398,8 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                               )}
 
                               <td 
-                                style={{ backgroundColor: periodNum === 1 ? '#ffffff' : '#f1f5f9' }}
-                                className={`border border-slate-300 p-0.5 text-center font-bold align-middle ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}
+                                style={{ backgroundColor: '#ffffff' }}
+                                className="border border-slate-300 p-0.5 text-center font-bold align-middle bg-white"
                               >
                                 <span className={`inline-block px-1 py-0.5 rounded text-[7.5px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
                                   P{periodNum}
@@ -430,8 +412,8 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                 return (
                                   <td 
                                     key={colKey} 
-                                    style={{ backgroundColor: periodNum === 1 ? '#ffffff' : '#f1f5f9' }}
-                                    className={`border border-slate-300 p-0.5 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}
+                                    style={{ backgroundColor: '#ffffff' }}
+                                    className="border border-slate-300 p-0.5 align-top bg-white"
                                   >
                                     {assignedItems.length > 0 ? (
                                       <div className="space-y-1">

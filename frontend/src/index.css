@@ -106,8 +106,13 @@
   }
 }
 
-/* Print Styles for Branded PDF Export */
+/* Print Styles for Branded PDF Export (Vector Exact Match) */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 4mm;
+  }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -129,16 +134,21 @@
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 10mm !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: white !important;
+    transform: none !important;
   }
 
   table {
     page-break-inside: auto;
     width: 100% !important;
     table-layout: fixed !important;
+  }
+
+  thead {
+    display: table-header-group !important;
   }
 
   tr {
@@ -153,6 +163,11 @@
     word-break: break-word !important;
   }
 
+  .break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
   /* Reset line-clamp in print mode to avoid cutting off text lines in Chrome Print */
   .line-clamp-1, .line-clamp-2, .line-clamp-3 {
     display: block !important;
@@ -160,11 +175,6 @@
     -webkit-box-orient: horizontal !important;
     overflow: visible !important;
     max-height: none !important;
-  }
-
-  @page {
-    size: landscape;
-    margin: 6mm;
   }
 }
 
