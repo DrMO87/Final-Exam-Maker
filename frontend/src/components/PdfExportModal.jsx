@@ -8,7 +8,7 @@ const LOGO_SESSION_MASTER = '/assets/session_master_shield_logo.png';
 
 function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externalPdfSettings, onUpdatePdfSettings, onClose }) {
   const [layoutMode, setLayoutMode] = useState('matrix'); // 'matrix', 'supervision'
-  const [matrixColumnMode, setMatrixColumnMode] = useState('unified'); // 'unified' (5 Level Columns), 'detailed' (10 Program Columns)
+  const [matrixColumnMode, setMatrixColumnMode] = useState('detailed'); // 'detailed' (10 Program Columns), 'unified' (5 Level Columns)
   const [orientation, setOrientation] = useState('landscape'); // 'landscape' or 'portrait'
   const [pageSize, setPageSize] = useState('a4'); // 'a4' or 'a3'
   const [zoomLevel, setZoomLevel] = useState(100); // 80, 90, 100, 110, 120
@@ -444,18 +444,18 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                           {columnsToUse.map(colKey => {
                             if (matrixColumnMode === 'unified') {
                               return (
-                                <th key={colKey} className="border border-slate-400 p-2 text-center font-bold bg-[#002147] text-white">
-                                  <div className="text-[10px] font-black text-[#FFB81C] uppercase tracking-wider">{colKey}</div>
+                                <th key={colKey} className="border border-slate-400 p-1.5 text-center font-bold bg-[#002147] text-white">
+                                  <div className="text-[9.5px] font-black text-[#FFB81C] uppercase tracking-wider">{colKey}</div>
                                   <div className="text-slate-300 font-medium text-[7.5px]">PharmD & Clinical</div>
                                 </th>
                               );
                             }
                             const [prog, lvl] = colKey.split('|');
-                            const isClinical = prog.includes('Clinical');
+                            const isClinical = prog.toLowerCase().includes('clinical');
                             return (
-                              <th key={colKey} className="border border-slate-400 p-1.5 text-center font-bold bg-[#002147]">
-                                <div className={`text-[8.5px] font-black ${isClinical ? 'text-[#FFB81C]' : 'text-white'}`}>{prog}</div>
-                                <div className="text-slate-200 font-semibold text-[8px]">{lvl}</div>
+                              <th key={colKey} className="border border-slate-400 p-1 text-center font-bold bg-[#002147]">
+                                <div className={`text-[8px] font-black leading-tight ${isClinical ? 'text-[#FFB81C]' : 'text-white'}`}>{prog}</div>
+                                <div className="text-slate-200 font-bold text-[8px]">{lvl}</div>
                               </th>
                             );
                           })}
@@ -470,17 +470,17 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                           return [1, 2].map((periodNum) => (
                             <tr 
                               key={`${dateStr}-${periodNum}`} 
-                              className={periodNum === 2 ? 'border-b-2 border-slate-400 bg-slate-100/70 break-inside-avoid' : 'bg-white border-b border-slate-200 break-inside-avoid'}
+                              className={periodNum === 2 ? 'border-b-2 border-slate-400 bg-slate-100/80 break-inside-avoid' : 'bg-white border-b border-slate-200 break-inside-avoid'}
                             >
                               {periodNum === 1 && (
-                                <td rowSpan={2} className="border border-slate-300 p-1.5 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight">
-                                  <div className="text-[10.5px] text-[#002147] font-extrabold">{dayName}</div>
-                                  <div className="text-[8px] text-slate-500 font-medium mt-0.5">{formattedDate}</div>
+                                <td rowSpan={2} className="border border-slate-300 p-1 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight">
+                                  <div className="text-[10px] text-[#002147] font-extrabold">{dayName}</div>
+                                  <div className="text-[7.5px] text-slate-500 font-medium mt-0.5">{formattedDate}</div>
                                 </td>
                               )}
 
-                              <td className={`border border-slate-300 p-1 text-center font-bold align-middle ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/70'}`}>
-                                <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
+                              <td className={`border border-slate-300 p-0.5 text-center font-bold align-middle ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}>
+                                <span className={`inline-block px-1 py-0.5 rounded text-[7.5px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
                                   P{periodNum}
                                 </span>
                               </td>
@@ -489,24 +489,28 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                 const assignedItems = matrixData[dateStr]?.[periodNum]?.[colKey] || [];
 
                                 return (
-                                  <td key={colKey} className={`border border-slate-300 p-1.5 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/70'}`}>
+                                  <td key={colKey} className={`border border-slate-300 p-1 align-top ${periodNum === 1 ? 'bg-white' : 'bg-slate-100/80'}`}>
                                     {assignedItems.length > 0 ? (
                                       <div className="space-y-1">
                                         {assignedItems.map(item => {
                                           const c = item.courseObj || getCourseInfo(item);
                                           const isClinical = c.program.toLowerCase().includes('clinical');
                                           return (
-                                            <div key={c.course_id || c.course_code} className="bg-white rounded-md border border-slate-300 p-1.5 shadow-2xs break-inside-avoid">
-                                              <div className="font-extrabold text-[#002147] text-[9.5px] leading-tight flex justify-between items-center gap-1 border-b border-slate-200 pb-1 mb-1">
-                                                <span className="font-black text-[#002147]">{c.course_code}</span>
-                                                <span className="text-[7.5px] bg-slate-100 text-slate-700 font-bold px-1.5 py-0.2 rounded border border-slate-200 shrink-0">
-                                                  {c.student_count} stds
+                                            <div 
+                                              key={c.course_id || c.course_code} 
+                                              className="bg-white rounded border border-slate-300 p-1 shadow-2xs break-inside-avoid"
+                                              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                                            >
+                                              <div className="font-extrabold text-[#002147] text-[8.5px] leading-tight flex justify-between items-center gap-0.5 border-b border-slate-200 pb-0.5 mb-1">
+                                                <span className="font-black text-[#002147] tracking-tight">{c.course_code}</span>
+                                                <span className="text-[7px] bg-slate-100 text-slate-700 font-bold px-1 py-0.2 rounded border border-slate-200 shrink-0">
+                                                  {c.student_count}
                                                 </span>
                                               </div>
                                               
                                               {matrixColumnMode === 'unified' && (
                                                 <div className="mb-1">
-                                                  <span className={`text-[7px] font-bold px-1 py-0.2 rounded border ${
+                                                  <span className={`text-[6.5px] font-bold px-1 py-0.2 rounded border ${
                                                     isClinical ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
                                                   }`}>
                                                     {c.program}
@@ -514,13 +518,13 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                 </div>
                                               )}
 
-                                              <div className="text-[8.5px] text-slate-800 font-bold leading-snug break-words">
+                                              <div className="text-[8px] text-slate-800 font-bold leading-[11px] break-words">
                                                 {c.course_title}
                                               </div>
 
                                               {c.has_oral_exam && (
-                                                <div className="mt-1 inline-flex items-center gap-0.5 text-[7px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-1 py-0.2 rounded leading-none">
-                                                  🎤 Oral Exam
+                                                <div className="mt-1 inline-flex items-center gap-0.5 text-[6.5px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-1 py-0.2 rounded leading-none">
+                                                  🎤 Oral
                                                 </div>
                                               )}
                                             </div>
@@ -528,7 +532,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                         })}
                                       </div>
                                     ) : (
-                                      <div className="text-slate-300 text-center py-2 text-[8px] font-light">—</div>
+                                      <div className="text-slate-300 text-center py-1 text-[7.5px] font-light">—</div>
                                     )}
                                   </td>
                                 );
