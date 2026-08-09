@@ -87,14 +87,24 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
     }
   });
   
-  const programLevels = [...programLevelSet].sort((a, b) => {
-    const [progA, lvlStrA] = a.split('|Level ');
-    const [progB, lvlStrB] = b.split('|Level ');
-    const lvlA = Number(lvlStrA) || 0;
-    const lvlB = Number(lvlStrB) || 0;
-    if (lvlA !== lvlB) return lvlA - lvlB;
-    return progA.localeCompare(progB);
-  });
+  const defaultProgramLevels = [
+    'PharmD|Level 1', 'PharmD Clinical|Level 1',
+    'PharmD|Level 2', 'PharmD Clinical|Level 2',
+    'PharmD|Level 3', 'PharmD Clinical|Level 3',
+    'PharmD|Level 4', 'PharmD Clinical|Level 4',
+    'PharmD|Level 5', 'PharmD Clinical|Level 5'
+  ];
+
+  const programLevels = programLevelSet.size > 0 
+    ? [...programLevelSet].sort((a, b) => {
+        const [progA, lvlStrA] = a.split('|Level ');
+        const [progB, lvlStrB] = b.split('|Level ');
+        const lvlA = Number(lvlStrA) || 0;
+        const lvlB = Number(lvlStrB) || 0;
+        if (lvlA !== lvlB) return lvlA - lvlB;
+        return progA.localeCompare(progB);
+      })
+    : defaultProgramLevels;
 
   // Matrix grouping
   const matrixData = {};

@@ -37,7 +37,7 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
         student_count: course.student_count,
         has_oral_exam: course.has_oral_exam,
         course: course,
-        exam_date: day.date,
+        exam_date: day.dateStr || day.date,
         period: assignment.period,
         day_of_week: day.dayOfWeek
       };
