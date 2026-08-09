@@ -287,19 +287,7 @@ function App() {
                 </button>
               </li>
 
-              {/* PDF Reports Studio */}
-              <li>
-                <button
-                  onClick={() => setShowPdfModal(true)}
-                  className={`
-                    relative flex items-center gap-3 w-full text-left transition-all duration-150 rounded-xl text-white/70 hover:bg-white/10 hover:text-white
-                    ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
-                  `}
-                >
-                  <span className="text-sm">📄</span>
-                  {!isSidebarCollapsed && <span className="text-xs font-medium flex-1">PDF Reports Studio</span>}
-                </button>
-              </li>
+
 
               {/* Help & Guide Modal Trigger */}
               <li>
