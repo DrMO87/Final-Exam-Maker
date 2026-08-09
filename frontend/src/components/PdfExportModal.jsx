@@ -161,10 +161,10 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
             <span className="text-2xl">📄</span>
             <div>
               <h3 className="font-extrabold text-base tracking-wide font-outfit text-white">
-                PDF Export Studio — Horus University Egypt (HUE)
+                Official Examination Timetable — Horus University Egypt (HUE)
               </h3>
               <p className="text-xs text-[#FFB81C] font-semibold">
-                Generate Official Faculty Examination Timetable PDF Document
+                Export & Print Official Faculty Examination Timetable
               </p>
             </div>
           </div>
