@@ -46,14 +46,6 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
     }
   };
 
-  // Supervision mode controls state
-  const [roomName, setRoomName] = useState('Computer Lab A 416');
-  const [buildingName, setBuildingName] = useState('A');
-  const [floorNum, setFloorNum] = useState('4');
-  const [roomCapacity, setRoomCapacity] = useState('38');
-  const [supervisor1, setSupervisor1] = useState('Dr. Amira El-Metwally (ComSupervisor)');
-  const [supervisor2, setSupervisor2] = useState('Eng. Engy Ayman (ExSuper)');
-
   const [exporting, setExporting] = useState(false);
   const printAreaRef = useRef(null);
 
@@ -172,7 +164,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 PDF Export Studio — Horus University Egypt (HUE)
               </h3>
               <p className="text-xs text-[#FFB81C] font-semibold">
-                Generate Official Timetable & Supervision PDF Documents
+                Generate Official Faculty Examination Timetable PDF Document
               </p>
             </div>
           </div>
@@ -189,37 +181,18 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             
-            {/* Layout Preset */}
+            {/* Matrix Column Format */}
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Layout Preset</label>
+              <label className="block text-slate-700 font-bold mb-1">Column Format</label>
               <select
-                value={layoutMode}
-                onChange={(e) => {
-                  setLayoutMode(e.target.value);
-                  if (e.target.value === 'supervision') setOrientation('portrait');
-                  else setOrientation('landscape');
-                }}
+                value={matrixColumnMode}
+                onChange={(e) => setMatrixColumnMode(e.target.value)}
                 className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147]"
               >
-                <option value="matrix">Generated Timetable Matrix</option>
-                <option value="supervision">Hall Supervision Schedule</option>
+                <option value="detailed">10 Program Levels (Detailed)</option>
+                <option value="unified">Unified 5 Levels (Wider Cards)</option>
               </select>
             </div>
-
-            {/* Matrix Column Format */}
-            {layoutMode === 'matrix' && (
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">Column Format</label>
-                <select
-                  value={matrixColumnMode}
-                  onChange={(e) => setMatrixColumnMode(e.target.value)}
-                  className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147]"
-                >
-                  <option value="unified">Unified 5 Levels (Wider Cards)</option>
-                  <option value="detailed">10 Program Levels (Detailed)</option>
-                </select>
-              </div>
-            )}
 
             {/* Page Orientation & Size */}
             <div>
@@ -307,66 +280,6 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
           </div>
 
-          {/* Supervision Mode Custom Inputs */}
-          {layoutMode === 'supervision' && (
-            <div className="pt-2 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-6 gap-2 text-[11px]">
-              <div>
-                <label className="block font-semibold text-slate-600 mb-0.5">Hall Name</label>
-                <input
-                  type="text"
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value)}
-                  className="w-full h-7 px-2 rounded border border-slate-300 text-xs font-bold"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-600 mb-0.5">Building</label>
-                <input
-                  type="text"
-                  value={buildingName}
-                  onChange={(e) => setBuildingName(e.target.value)}
-                  className="w-full h-7 px-2 rounded border border-slate-300 text-xs"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-600 mb-0.5">Floor</label>
-                <input
-                  type="text"
-                  value={floorNum}
-                  onChange={(e) => setFloorNum(e.target.value)}
-                  className="w-full h-7 px-2 rounded border border-slate-300 text-xs"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-600 mb-0.5">Capacity</label>
-                <input
-                  type="text"
-                  value={roomCapacity}
-                  onChange={(e) => setRoomCapacity(e.target.value)}
-                  className="w-full h-7 px-2 rounded border border-slate-300 text-xs"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-600 mb-0.5">Supervisor #1</label>
-                <input
-                  type="text"
-                  value={supervisor1}
-                  onChange={(e) => setSupervisor1(e.target.value)}
-                  className="w-full h-7 px-2 rounded border border-slate-300 text-xs"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-600 mb-0.5">Supervisor #2</label>
-                <input
-                  type="text"
-                  value={supervisor2}
-                  onChange={(e) => setSupervisor2(e.target.value)}
-                  className="w-full h-7 px-2 rounded border border-slate-300 text-xs"
-                />
-              </div>
-            </div>
-          )}
-
         </div>
 
         {/* Live Document Preview Scroll Container */}
@@ -427,9 +340,8 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                   </div>
                 </div>
 
-                {/* LAYOUT 1: MASTER TIMETABLE MATRIX GENERATED BY APP (DEFAULT) */}
-                {layoutMode === 'matrix' && (
-                  <div className="mb-6 overflow-hidden">
+                {/* MASTER TIMETABLE MATRIX */}
+                <div className="mb-6 overflow-hidden">
                     
                     {/* Matrix Table with Navy/Gold Styling */}
                     <table className="w-full border-collapse border border-slate-300 text-[9px] table-fixed">
@@ -606,70 +518,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                       </tbody>
                     </table>
                   </div>
-                )}
-
-                {/* LAYOUT 2: HALL SUPERVISION SCHEDULE */}
-                {layoutMode === 'supervision' && (
-                  <div>
-                    <h2 className="text-2xl font-black text-center text-[#002147] uppercase tracking-wider font-outfit mb-4">
-                      {roomName.toUpperCase()}
-                    </h2>
-
-                    <div className="bg-[#F8FAFC] border border-slate-200 p-4 mb-5 text-xs text-slate-700 font-medium shadow-2xs rounded-xl">
-                      <div className="grid grid-cols-2 gap-y-2">
-                        <div>Hall/Room: <span className="font-bold text-slate-900">{roomName}</span></div>
-                        <div>Building: <span className="font-bold text-slate-900">{buildingName}</span></div>
-                        <div>Floor: <span className="font-bold text-slate-900">{floorNum}</span></div>
-                        <div>Capacity: <span className="font-bold text-slate-900">{roomCapacity} Students</span></div>
-                      </div>
-                    </div>
-
-                    <table className="w-full border-collapse text-xs mb-6">
-                      <thead>
-                        <tr className="bg-[#002147] text-[#FFB81C] font-bold text-left uppercase text-[10px] tracking-wider">
-                          <th className="p-3 w-[15%] border-l-4 border-l-[#FFB81C]">DATE</th>
-                          <th className="p-3 w-[10%]">PERIOD</th>
-                          <th className="p-3 w-[12%]">TIME</th>
-                          <th className="p-3 w-[20%]">SUBJECT</th>
-                          <th className="p-3 w-[13%]">PROGRAM</th>
-                          <th className="p-3 w-[10%]">EXAM TYPE</th>
-                          <th className="p-3 w-[8%] text-center">STUDENTS</th>
-                          <th className="p-3 w-[22%] text-right">SUPERVISORS</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(sortedSchedule.length > 0 ? sortedSchedule : [
-                          { exam_date: '2026-05-23', period: 1, course: { course_title: 'Physical Pharmacy', program: 'PharmD Clinical', student_count: 38 } },
-                          { exam_date: '2026-06-06', period: 1, course: { course_title: 'Pharmacognosy 1', program: 'PharmD Clinical', student_count: 38 } }
-                        ]).map((item, idx) => {
-                          const c = getCourseInfo(item);
-                          const dateObj = new Date(item.exam_date + 'T00:00:00');
-                          const formattedDate = isNaN(dateObj.getTime()) ? item.exam_date : dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-
-                          return (
-                            <tr 
-                              key={c.course_id || idx} 
-                              className="border-b border-slate-200 bg-white break-inside-avoid"
-                            >
-                              <td className="p-3 font-bold text-[#002147] bg-[#F8FAFC] border-l-4 border-l-[#FFB81C]">{formattedDate}</td>
-                              <td className="p-3 text-slate-700 font-medium">Period {item.period || 1}</td>
-                              <td className="p-3 text-slate-700 font-medium">{(item.period || 1) === 1 ? pdfSettings.period1Time : pdfSettings.period2Time}</td>
-                              <td className="p-3 font-semibold text-[#002147]">{c.course_title}</td>
-                              <td className="p-3 text-slate-700 font-medium">{c.program}</td>
-                              <td className="p-3 text-slate-700 font-medium">Final</td>
-                              <td className="p-3 text-center font-bold text-slate-900">{c.student_count || roomCapacity}</td>
-                              <td className="p-3 text-right font-semibold text-slate-800 text-[11px]">
-                                <div>{supervisor1}</div>
-                                {supervisor2 && <div className="text-slate-500 font-normal text-[10px] mt-0.5">{supervisor2}</div>}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                </div>
 
               {/* DYNAMIC CONFIGURABLE SIGNATURES - FIX BUG 1 (Tailwind Dynamic Class) */}
               {pdfSettings.showSignatures && (
