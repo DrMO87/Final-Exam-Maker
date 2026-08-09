@@ -235,7 +235,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                     pdfSettings.showStamp ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-slate-300 text-slate-500'
                   }`}
                 >
-                  {pdfSettings.showStamp ? '💮 Stamp: ON' : '💮 Stamp: OFF'}
+                  {pdfSettings.showStamp ? '🔴 Final Stamp: ON' : '🔴 Final Stamp: OFF'}
                 </button>
               </div>
             </div>
@@ -590,13 +590,21 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 </div>
               )}
 
-              {/* OPTIONAL STAMP */}
+              {/* OPTIONAL STAMP - Tilted Red Rectangular Rubber Stamp */}
               {pdfSettings.showStamp && (
-                <div className="mt-4 flex justify-center break-inside-avoid">
-                  <div className="w-14 h-14 rounded-full border-2 border-dashed border-[#002147]/40 flex flex-col items-center justify-center text-center p-1 rotate-[-6deg] bg-slate-50">
-                    <div className="text-[5.5px] font-bold text-[#002147] uppercase">Horus University</div>
-                    <div className="text-[7px] font-black text-[#FFB81C]">★ NAQAAE ★</div>
-                    <div className="text-[5px] font-semibold text-slate-600">Exam Control</div>
+                <div className="mt-4 flex justify-center break-inside-avoid select-none">
+                  <div className="relative transform rotate-[-12deg] transition-transform duration-200">
+                    <div className="border-2 border-red-600 rounded-sm p-1.5 px-5 text-center bg-red-50/40 shadow-xs border-dashed outline outline-1 outline-offset-2 outline-red-600">
+                      <div className="text-[7px] font-extrabold uppercase tracking-widest text-red-700 leading-tight">
+                        Horus University Egypt
+                      </div>
+                      <div className="text-xs font-black uppercase tracking-widest text-red-600 my-0.5 border-y border-red-600/50 py-0.5 px-2">
+                        ★ FINAL VERSION ★
+                      </div>
+                      <div className="text-[6.5px] font-bold uppercase tracking-wider text-red-700 leading-tight">
+                        Exam Control Committee • Approved
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

@@ -537,8 +537,8 @@ function App() {
               {/* Table Stamp Toggle */}
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-[#002147] text-xs">💮 Official Approval Stamp</div>
-                  <div className="text-slate-500 text-[11px]">Include circular approval seal at bottom of document table</div>
+                  <div className="font-bold text-[#002147] text-xs">🔴 Final Version Stamp</div>
+                  <div className="text-slate-500 text-[11px]">Include tilted red rectangular "FINAL VERSION" rubber stamp at bottom of document</div>
                 </div>
                 <input
                   type="checkbox"
