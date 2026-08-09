@@ -14,7 +14,12 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
   // Local or external settings state with fallback
   const [localSettings, setLocalSettings] = useState(() => {
-    return externalPdfSettings || {
+    if (externalPdfSettings) return externalPdfSettings;
+    try {
+      const saved = localStorage.getItem('hue_pdf_settings');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
       semester: 'Fall Semester',
       academicYear: '2025-2026',
       period1Time: '09:00 AM - 11:00 AM',
@@ -571,21 +576,27 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                       gridTemplateColumns: `repeat(${pdfSettings.numSignatures || 2}, minmax(0, 1fr))`
                     }}
                   >
-                    {Array.from({ length: pdfSettings.numSignatures || 2 }).map((_, idx) => (
-                      <div key={idx} className="flex flex-col items-center">
-                        <div className="h-10 border-b border-slate-400 w-44 mb-1.5 flex items-end justify-center pb-1">
-                          <span className="font-serif italic text-slate-400 text-[10px] opacity-60">
-                            {pdfSettings.signatories?.[idx]?.name || 'Signature'}
-                          </span>
+                    {Array.from({ length: pdfSettings.numSignatures || 2 }).map((_, idx) => {
+                      const sig = pdfSettings.signatories?.[idx] || {};
+                      return (
+                        <div key={idx} className="flex flex-col items-center">
+                          <div className="h-10 border-b border-slate-400 w-44 mb-1.5 flex items-end justify-center pb-1">
+                            <span className="font-serif italic text-slate-300 text-[9px] opacity-40">
+                              (Signature)
+                            </span>
+                          </div>
+                          <div className="font-extrabold text-[#002147] text-[10px]">
+                            {sig.name || `Signatory #${idx + 1}`}
+                          </div>
+                          <div className="text-[8.5px] text-slate-600 font-semibold mt-0.5">
+                            {sig.title || 'Official Title'}
+                          </div>
+                          <div className="text-[7.5px] text-slate-400 font-medium mt-0.5">
+                            Horus University — Egypt
+                          </div>
                         </div>
-                        <div className="font-bold text-[#002147] text-[9.5px]">
-                          {pdfSettings.signatories?.[idx]?.title || `Signatory #${idx + 1}`}
-                        </div>
-                        <div className="text-[7.5px] text-slate-500 font-medium mt-0.5">
-                          Horus University — Egypt
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

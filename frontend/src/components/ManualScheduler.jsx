@@ -4,7 +4,7 @@ import { addDays, format, parseISO } from 'date-fns';
 import { getAbbreviatedCourseName } from '../utils/courseUtils';
 import PdfExportModal from './PdfExportModal';
 
-function ManualScheduler({ sessionId, onComplete, onBack }) {
+function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComplete, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [session, setSession] = useState(null);
@@ -491,6 +491,8 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
           sessionId={sessionId}
           session={session}
           scheduleData={getPdfScheduleData()}
+          externalPdfSettings={pdfSettings}
+          onUpdatePdfSettings={onUpdatePdfSettings}
           onClose={() => setShowPdfModal(false)}
         />
       )}

@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import ScheduleVaultModal from './ScheduleVaultModal';
 import PdfExportModal from './PdfExportModal';
 
-function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGenerated, onBack, onReset }) {
+function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, onUpdatePdfSettings, onScheduleGenerated, onBack, onReset }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedSchedule, setGeneratedSchedule] = useState(schedule);
@@ -318,6 +318,8 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
               sessionId={sessionId}
               session={generatedSchedule?.session}
               scheduleData={generatedSchedule}
+              externalPdfSettings={pdfSettings}
+              onUpdatePdfSettings={onUpdatePdfSettings}
               onClose={() => setShowPdfModal(false)}
             />
           )}

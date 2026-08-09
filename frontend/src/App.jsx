@@ -394,6 +394,8 @@ function App() {
               <div className="pt-4 h-full">
                 <ManualScheduler 
                   sessionId={sessionId}
+                  pdfSettings={pdfSettings}
+                  onUpdatePdfSettings={setPdfSettings}
                   onComplete={handleManualSchedulingComplete}
                   onBack={() => setCurrentStep(3)}
                 />
@@ -406,6 +408,8 @@ function App() {
                   sessionId={sessionId}
                   schedule={schedule}
                   lockedAssignments={lockedAssignments}
+                  pdfSettings={pdfSettings}
+                  onUpdatePdfSettings={setPdfSettings}
                   onScheduleGenerated={handleScheduleGenerated}
                   onBack={() => setCurrentStep(4)}
                   onReset={resetApp}
