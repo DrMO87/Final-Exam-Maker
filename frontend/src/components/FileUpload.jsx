@@ -15,6 +15,25 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
   const [dragActive, setDragActive] = useState({});
   const batchInputRef = useRef(null);
 
+  const handleRemoveFile = (id) => {
+    setFiles(prev => ({
+      ...prev,
+      [id]: null
+    }));
+  };
+
+  const handleClearAll = () => {
+    setFiles({
+      pharmd_courses: null,
+      clinical_courses: null,
+      pharmd_conflicts: null,
+      clinical_conflicts: null,
+      student_numbers: null
+    });
+    setSuccess('');
+    setError('');
+  };
+
   const autoMatchFiles = (fileList) => {
     const arr = Array.from(fileList);
     const newFiles = { ...files };
@@ -191,11 +210,24 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-semantic-success/10 text-semantic-success rounded-lg text-sm font-medium">
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
             <span className="truncate">{fileSelected.name}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveFile(id);
+              }}
+              className="ml-1 text-slate-400 hover:text-red-500 hover:bg-white/60 p-0.5 rounded transition-colors"
+              title="Remove file"
+            >
+              ✕
+            </button>
           </div>
         )}
       </div>
     );
   };
+
+  const hasAnyFile = Object.values(files).some(Boolean);
 
   return (
     <div className="card max-w-3xl mx-auto">
@@ -234,6 +266,18 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
           >
             <span>⚡</span> Auto-Fill Built-in Samples
           </button>
+
+          {hasAnyFile && (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              disabled={loading}
+              className="btn text-xs border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100 flex items-center gap-1.5 shadow-sm font-semibold py-2 px-3"
+              title="Clear all selected files"
+            >
+              <span>🧹</span> Clear All
+            </button>
+          )}
         </div>
       </div>
 

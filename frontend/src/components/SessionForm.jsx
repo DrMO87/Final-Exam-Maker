@@ -57,6 +57,18 @@ function SessionForm({ onSessionCreated }) {
     }
   };
 
+  const handleDeleteSession = async (sessionId, sessionName, e) => {
+    e.stopPropagation();
+    if (!confirm(`Are you sure you want to delete session "${sessionName}"? This action cannot be undone.`)) return;
+
+    try {
+      await axios.delete(`/api/scheduler/session/${sessionId}`);
+      fetchPastSessions();
+    } catch (err) {
+      alert('Failed to delete session: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   return (
     <div className="card max-w-2xl mx-auto">
       <h2 className="mb-2">Create New Scheduling Session</h2>
@@ -148,13 +160,23 @@ function SessionForm({ onSessionCreated }) {
                     {sess.semester} • {sess.start_date} to {sess.end_date}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onSessionCreated(sess.id)}
-                  className="btn btn-secondary btn-sm text-xs font-bold border-hue-gold/50 text-hue-navy hover:bg-hue-gold/15"
-                >
-                  📂 Open Session
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onSessionCreated(sess.id)}
+                    className="btn btn-secondary btn-sm text-xs font-bold border-hue-gold/50 text-hue-navy hover:bg-hue-gold/15"
+                  >
+                    📂 Open Session
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteSession(sess.id, sess.session_name, e)}
+                    className="p-1.5 text-xs text-red-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
+                    title="Delete Session"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -280,10 +280,22 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
             </div>
             <div className="flex flex-wrap gap-2">
               <button 
+                className="btn btn-secondary btn-sm font-bold" 
+                onClick={onBack}
+              >
+                ← Back to Step 4
+              </button>
+              <button 
                 className="btn btn-gold btn-sm font-bold shadow-md hover:shadow-lg flex items-center gap-1.5" 
                 onClick={() => setShowPdfModal(true)}
               >
                 📄 Export Branded PDF
+              </button>
+              <button 
+                className="btn btn-secondary btn-sm border-slate-300 text-slate-700 font-semibold" 
+                onClick={() => window.print()}
+              >
+                🖨️ Quick Print
               </button>
               <button 
                 className="btn btn-secondary btn-sm border-hue-gold/60 text-hue-navy hover:bg-hue-gold/15 font-bold" 

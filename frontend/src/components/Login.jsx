@@ -6,6 +6,8 @@ function Login() {
   const [username, setUsername] = useState('melkhodary@horus.edu.eg');
   const [password, setPassword] = useState('admin123');
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
@@ -89,13 +91,21 @@ function Login() {
                 🔒
               </span>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
-                className="w-full h-12 pl-11 pr-4 rounded-2xl bg-[#EBF3FE] border border-blue-100/80 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 focus:bg-white transition-all font-medium"
+                className="w-full h-12 pl-11 pr-11 rounded-2xl bg-[#EBF3FE] border border-blue-100/80 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 focus:bg-white transition-all font-medium"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm transition-colors"
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? '👁️' : '🙈'}
+              </button>
             </div>
           </div>
 

@@ -404,6 +404,12 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
     setLockedAssignments(nextAssignments);
   };
 
+  const handleAutoScheduleAll = () => {
+    availableLevels.forEach(lvl => {
+      handleAutoScheduleLevel(lvl);
+    });
+  };
+
   const handleClearLevel = (targetLevel) => {
     setLockedAssignments(prev => {
       const next = { ...prev };
@@ -462,7 +468,15 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
             </button>
           </div>
 
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">⚡ Auto-Schedule Level:</span>
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">⚡ Auto-Schedule:</span>
+          <button
+            onClick={handleAutoScheduleAll}
+            className="btn btn-primary btn-sm px-3 text-xs font-bold shadow-glow-primary flex items-center gap-1.5"
+            title="Auto-place remaining unassigned courses across all levels"
+          >
+            ⚡ Auto-Schedule All
+          </button>
+
           {availableLevels.map(lvl => {
             const levelUnassigned = courses.filter(c => String(c.level) === String(lvl) && !lockedAssignments[c.id]).length;
             return (

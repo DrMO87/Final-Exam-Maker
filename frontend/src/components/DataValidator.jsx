@@ -195,6 +195,20 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input-field text-xs py-1.5 flex-1"
           />
+          {(searchQuery || programFilter !== 'ALL' || levelFilter !== 'ALL' || conflictFilter !== 'ALL') && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setProgramFilter('ALL');
+                setLevelFilter('ALL');
+                setConflictFilter('ALL');
+              }}
+              className="btn btn-secondary btn-sm text-xs font-semibold text-slate-600 hover:text-red-600 shrink-0"
+              title="Reset all search & filters"
+            >
+              🔄 Reset Filters
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -238,14 +252,14 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           <div className="flex items-center gap-2 border-l border-slate-300 pl-2">
             <button
               onClick={() => exportValidationMatrixToExcel(filteredCourses, conflictMap, sessionId)}
-              className="btn text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+              className="btn btn-sm text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 flex items-center gap-1.5 shadow-sm"
               title="Download Data Validation Table as Excel (.xlsx)"
             >
               📊 Download Excel (.xlsx)
             </button>
             <button
               onClick={() => exportValidationMatrixToCSV(filteredCourses, conflictMap, sessionId)}
-              className="btn text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 py-1.5 px-3 rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+              className="btn btn-sm text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 flex items-center gap-1.5 shadow-sm"
               title="Download Data Validation Table as CSV"
             >
               📄 Download CSV

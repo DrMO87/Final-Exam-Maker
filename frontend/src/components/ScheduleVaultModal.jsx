@@ -198,7 +198,7 @@ function ScheduleVaultModal({ sessionId, currentSchedule, lockedAssignments, onS
                               </button>
                               <button
                                 onClick={() => handleDelete(item.id, item.name)}
-                                className="text-red-400 hover:text-red-600 px-2 py-1 text-sm transition-colors"
+                                className="text-red-400 hover:text-red-600 p-1.5 text-sm transition-colors rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200"
                                 title="Delete from Vault"
                               >
                                 🗑️

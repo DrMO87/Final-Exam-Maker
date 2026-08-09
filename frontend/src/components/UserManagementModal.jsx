@@ -31,6 +31,24 @@ function UserManagementModal({ onClose }) {
     }
   };
 
+  const handleDeleteUser = async (userId, username) => {
+    if (!confirm(`Are you sure you want to delete user account '${username}'?`)) return;
+
+    try {
+      setError('');
+      setSuccessMsg('');
+      const res = await axios.delete(`/api/auth/users/${userId}`);
+      if (res.data.success) {
+        setSuccessMsg(`User account '${username}' deleted successfully.`);
+        fetchUsers();
+      } else {
+        setError(res.data.error || 'Failed to delete user.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to delete user.');
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -209,6 +227,7 @@ function UserManagementModal({ onClose }) {
                     <th className="p-3 text-left">Username</th>
                     <th className="p-3 text-left">Role</th>
                     <th className="p-3 text-left">Department</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -231,6 +250,15 @@ function UserManagementModal({ onClose }) {
                         </span>
                       </td>
                       <td className="p-3 text-slate-500">{u.department}</td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={() => handleDeleteUser(u.id, u.username)}
+                          className="p-1.5 text-xs text-red-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
+                          title="Delete user account"
+                        >
+                          🗑️
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

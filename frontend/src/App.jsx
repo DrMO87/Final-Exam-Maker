@@ -25,6 +25,7 @@ function App() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // Global PDF & System Settings state
   const [pdfSettings, setPdfSettings] = useState(() => {
@@ -121,6 +122,25 @@ function App() {
     const updated = [...pdfSettings.signatories];
     updated[index][field] = value;
     setPdfSettings({ ...pdfSettings, signatories: updated });
+  };
+
+  const resetPdfSettings = () => {
+    const defaults = {
+      semester: 'Fall Semester',
+      academicYear: '2025-2026',
+      period1Time: '09:00 AM - 11:00 AM',
+      period2Time: '12:00 PM - 02:00 PM',
+      showSignatures: true,
+      numSignatures: 2,
+      signatories: [
+        { name: 'Dr. Exam Control Chair', title: 'Head of Exam Control' },
+        { name: 'Prof. Dean Signature', title: 'Dean of Faculty of Pharmacy' },
+        { name: 'Vice Dean Signature', title: 'Vice Dean of Academic Affairs' },
+        { name: 'Committee Member', title: 'Control Committee Secretary' }
+      ],
+      showStamp: false
+    };
+    setPdfSettings(defaults);
   };
 
   const stepsList = [
@@ -277,6 +297,20 @@ function App() {
                   {!isSidebarCollapsed && <span className="text-xs font-medium flex-1">PDF Reports Studio</span>}
                 </button>
               </li>
+
+              {/* Help & Guide Modal Trigger */}
+              <li>
+                <button
+                  onClick={() => setShowHelpModal(true)}
+                  className={`
+                    relative flex items-center gap-3 w-full text-left transition-all duration-150 rounded-xl text-white/70 hover:bg-white/10 hover:text-white
+                    ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
+                  `}
+                >
+                  <span className="text-sm">❓</span>
+                  {!isSidebarCollapsed && <span className="text-xs font-medium flex-1">Help & Guide</span>}
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -406,7 +440,7 @@ function App() {
               </h3>
               <button 
                 onClick={() => setShowSettingsModal(false)}
-                className="text-slate-400 hover:text-slate-700 font-bold text-base"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition-colors"
               >
                 ✕
               </button>
@@ -543,12 +577,65 @@ function App() {
 
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-end">
+            <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={resetPdfSettings}
+                className="btn btn-secondary btn-sm text-xs font-medium text-slate-500 hover:text-slate-800"
+              >
+                Restore Defaults
+              </button>
               <button
                 onClick={() => setShowSettingsModal(false)}
                 className="px-6 py-2 bg-[#002147] text-white font-bold rounded-xl text-xs hover:bg-[#001530] transition-all shadow-md"
               >
                 Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dedicated Help & Guide Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none">
+          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+              <h3 className="text-lg font-black text-[#002147] font-outfit flex items-center gap-2">
+                <span>❓</span> Help & User Guide — Final Exam Maker
+              </h3>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4 text-xs text-slate-700 leading-relaxed">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl">
+                <div className="font-bold text-[#002147] text-sm mb-1">🚀 Quick Start Workflow</div>
+                <ol className="list-decimal pl-4 space-y-1">
+                  <li><strong>Step 1 (Create Session):</strong> Set up session dates and semester label.</li>
+                  <li><strong>Step 2 (Upload Files):</strong> Upload student numbers, course metadata, and conflict matrix CSV files (or click Auto-Fill Built-in Samples).</li>
+                  <li><strong>Step 3 (Audit & Validate):</strong> Review metadata, student enrollments, oral exam flags, and conflict matrix calculations.</li>
+                  <li><strong>Step 4 (Pre-Scheduling):</strong> Optionally drag & drop courses into fixed exam days or use Auto-Schedule Level.</li>
+                  <li><strong>Step 5 (Generate Schedule):</strong> Let AI auto-generate an optimized, conflict-free final exam schedule and export to PDF/Markdown.</li>
+                </ol>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                <div className="font-bold text-[#002147] text-xs">📋 Required CSV File Formats</div>
+                <p>Ensure file names contain keywords like <code>student</code>, <code>pharmd</code>, <code>clinical</code>, or <code>conflict</code> for auto-matching on upload.</p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="btn btn-primary btn-sm px-5"
+              >
+                Got It
               </button>
             </div>
           </div>

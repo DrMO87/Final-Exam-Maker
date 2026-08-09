@@ -445,7 +445,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-1.5 rounded-lg border border-slate-300 font-bold text-xs text-slate-700 bg-white hover:bg-slate-50 transition-all"
+              className="btn btn-secondary btn-sm font-bold"
             >
               Close
             </button>
@@ -453,7 +453,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
             <button
               onClick={handleDownloadPdf}
               disabled={exporting}
-              className="px-5 py-1.5 rounded-lg font-extrabold text-xs text-[#002147] bg-gradient-to-r from-[#FFB81C] to-[#FFE04A] hover:opacity-90 shadow-md transition-all flex items-center gap-1.5"
+              className="btn btn-gold btn-sm font-extrabold shadow-md flex items-center gap-1.5"
             >
               {exporting ? 'Generating PDF...' : '📄 Export PDF Now'}
             </button>
