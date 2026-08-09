@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { addDays, format, parseISO } from 'date-fns';
 import { getAbbreviatedCourseName } from '../utils/courseUtils';
+import PdfExportModal from './PdfExportModal';
 
 function ManualScheduler({ sessionId, onComplete, onBack }) {
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,33 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
   const [allowMinorConflicts, setAllowMinorConflicts] = useState(false); // false = inhibit ALL conflicts, true = allow <5 overlaps
   const [draggedCourse, setDraggedCourse] = useState(null);
   const [activeDragSlot, setActiveDragSlot] = useState(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+
+  const getPdfScheduleData = () => {
+    const scheduleItems = Object.entries(lockedAssignments).map(([courseId, assignment]) => {
+      const course = courses.find(c => String(c.id) === String(courseId));
+      const day = calendar[assignment.dayIndex];
+      if (!course || !day) return null;
+      return {
+        course_id: course.id,
+        course_code: course.course_code,
+        course_title: course.course_title,
+        program: course.program,
+        level: course.level,
+        student_count: course.student_count,
+        has_oral_exam: course.has_oral_exam,
+        course: course,
+        exam_date: day.date,
+        period: assignment.period,
+        day_of_week: day.dayOfWeek
+      };
+    }).filter(Boolean);
+
+    return {
+      session: session,
+      schedule: scheduleItems
+    };
+  };
 
   useEffect(() => {
     fetchData();
@@ -441,13 +469,30 @@ function ManualScheduler({ sessionId, onComplete, onBack }) {
           <h2 className="mb-1">Manual Pre-Scheduling & Level Assistant <span className="text-slate-400 font-normal text-lg">(Optional)</span></h2>
           <p className="text-sm text-slate-500">Pin courses manually or auto-schedule level by level. Cross-program same courses are automatically placed on the same day.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button className="btn btn-secondary" onClick={onBack}>Back</button>
+          <button 
+            className="btn btn-gold font-bold shadow-md hover:shadow-lg flex items-center gap-1.5 text-xs" 
+            onClick={() => setShowPdfModal(true)}
+            title="Export official branded PDF timetable of current pre-scheduled courses"
+          >
+            📄 Export Branded PDF
+          </button>
           <button className="btn btn-primary shadow-glow-primary" onClick={() => onComplete(lockedAssignments)}>
             Proceed to Generate
           </button>
         </div>
       </div>
+
+      {/* Branded PDF Export Modal */}
+      {showPdfModal && (
+        <PdfExportModal
+          sessionId={sessionId}
+          session={session}
+          scheduleData={getPdfScheduleData()}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
 
       {/* Level Quick Actions Toolbar */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 flex flex-wrap items-center justify-between gap-3 shrink-0">

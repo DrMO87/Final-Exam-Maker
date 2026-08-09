@@ -292,12 +292,6 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, onScheduleGene
                 📄 Export Branded PDF
               </button>
               <button 
-                className="btn btn-secondary btn-sm border-slate-300 text-slate-700 font-semibold" 
-                onClick={() => window.print()}
-              >
-                🖨️ Quick Print
-              </button>
-              <button 
                 className="btn btn-secondary btn-sm border-hue-gold/60 text-hue-navy hover:bg-hue-gold/15 font-bold" 
                 onClick={() => setShowVaultModal(true)}
               >
