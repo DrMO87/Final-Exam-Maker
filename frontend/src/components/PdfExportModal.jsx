@@ -304,11 +304,11 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
               <div>
                 {/* TOP BRANDING HEADER MATCHING REPORT_BRANDING */}
                 <div className="border-b-2 border-[#002147] pb-3 mb-4">
-                  <div className="flex justify-center items-center gap-8 mb-2">
-                    <img src={LOGO_HUE} alt="HUE Logo" className="h-14 w-auto object-contain" />
-                    <img src={LOGO_PHARMACY} alt="Pharmacy Seal" className="h-14 w-14 object-contain" />
-                    <img src={LOGO_DTU} alt="DTU Logo" className="h-14 w-auto object-contain" />
-                    <img src={LOGO_SESSION_MASTER} alt="Session Master Logo" className="h-14 w-auto object-contain" />
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', marginBottom: '8px' }}>
+                    <img src={LOGO_HUE} alt="HUE Logo" height="42" style={{ height: '42px', maxHeight: '42px', width: 'auto', objectFit: 'contain' }} />
+                    <img src={LOGO_PHARMACY} alt="Pharmacy Seal" height="42" style={{ height: '42px', maxHeight: '42px', width: 'auto', objectFit: 'contain' }} />
+                    <img src={LOGO_DTU} alt="DTU Logo" height="42" style={{ height: '42px', maxHeight: '42px', width: 'auto', objectFit: 'contain' }} />
+                    <img src={LOGO_SESSION_MASTER} alt="Session Master Logo" height="42" style={{ height: '42px', maxHeight: '42px', width: 'auto', objectFit: 'contain' }} />
                   </div>
 
                   <div className="text-center">

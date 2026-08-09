@@ -168,6 +168,12 @@
     break-inside: avoid !important;
   }
 
+  img {
+    max-height: 45px !important;
+    width: auto !important;
+    object-fit: contain !important;
+  }
+
   /* Reset line-clamp in print mode to avoid cutting off text lines in Chrome Print */
   .line-clamp-1, .line-clamp-2, .line-clamp-3 {
     display: block !important;
