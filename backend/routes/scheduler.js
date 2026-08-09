@@ -860,9 +860,9 @@ router.post('/restore', async (req, res) => {
 
     // Insert restored session
     const sessionRes = await pool.query(
-      `INSERT INTO scheduling_sessions (session_name, semester, start_date, end_date)
-       VALUES (?, ?, ?, ?) RETURNING *`,
-      [`${session.session_name} (Restored)`, session.semester, session.start_date, session.end_date]
+      `INSERT INTO scheduling_sessions (session_name, semester, start_date, end_date, excluded_dates)
+       VALUES (?, ?, ?, ?, ?) RETURNING *`,
+      [`${session.session_name} (Restored)`, session.semester, session.start_date, session.end_date, session.excluded_dates || '[]']
     );
     const newSessionId = sessionRes.rows[0].id;
 

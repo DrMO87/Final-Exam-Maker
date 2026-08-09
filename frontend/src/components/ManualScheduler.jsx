@@ -165,7 +165,17 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         });
         setConflictMap(map);
 
-        // Build calendar
+        // Build calendar (skipping Fridays and official vacation dates)
+        let excludedList = [];
+        try {
+          const rawEx = response.data.session.excluded_dates;
+          excludedList = typeof rawEx === 'string'
+            ? JSON.parse(rawEx || '[]')
+            : (Array.isArray(rawEx) ? rawEx : []);
+        } catch (e) {}
+
+        const excludedSet = new Set(excludedList.map(d => String(d).trim()));
+
         const cal = [];
         let currentDate = parseISO(response.data.session.start_date);
         const endDate = parseISO(response.data.session.end_date);
@@ -174,10 +184,12 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
 
         while (currentDate <= endDate) {
           const dayOfWeek = format(currentDate, 'EEEE');
-          if (dayOfWeek !== 'Friday') {
+          const dateStr = format(currentDate, 'yyyy-MM-dd');
+
+          if (dayOfWeek !== 'Friday' && !excludedSet.has(dateStr)) {
             cal.push({
               dayIndex: dayIndex++,
-              dateStr: format(currentDate, 'yyyy-MM-dd'),
+              dateStr,
               dayOfWeek,
               groupType: isGroupA ? 'A' : 'B'
             });
