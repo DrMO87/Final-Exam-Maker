@@ -225,4 +225,78 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// DELETE /api/auth/users/:id (Delete user account)
+router.delete('/users/:id', async (req, res) => {
+  try {
+    await initAuthDb();
+    const { id } = req.params;
+
+    await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    res.json({
+      success: true,
+      message: 'User account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete user account' });
+  }
+});
+
+// PUT /api/auth/users/:id (Update user / reset password)
+router.put('/users/:id', async (req, res) => {
+  try {
+    await initAuthDb();
+    const { id } = req.params;
+    const { password, name, role, department } = req.body;
+
+    await pool.query(
+      `UPDATE users SET password = ?, name = ?, role = ?, department = ? WHERE id = ?`,
+      [password, name, role, department, id]
+    );
+
+    res.json({
+      success: true,
+      message: 'User account updated successfully'
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update user account' });
+  }
+});
+
+// GET /api/auth/export-sql (Generate SQL script for Supabase Dashboard SQL Editor)
+router.get('/export-sql', async (req, res) => {
+  try {
+    await initAuthDb();
+    const result = await pool.query('SELECT username, password, name, role, department FROM users ORDER BY id ASC');
+
+    let sql = `-- Supabase PostgreSQL User Accounts & Access Script\n`;
+    sql += `-- Generated on ${new Date().toISOString()}\n\n`;
+    sql += `CREATE TABLE IF NOT EXISTS users (\n`;
+    sql += `  id SERIAL PRIMARY KEY,\n`;
+    sql += `  username VARCHAR(255) UNIQUE NOT NULL,\n`;
+    sql += `  password VARCHAR(255) NOT NULL,\n`;
+    sql += `  name VARCHAR(255) NOT NULL,\n`;
+    sql += `  role VARCHAR(100) NOT NULL DEFAULT 'Staff',\n`;
+    sql += `  department VARCHAR(255) DEFAULT 'Faculty of Pharmacy',\n`;
+    sql += `  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP\n`;
+    sql += `);\n\n`;
+
+    if (result.rows.length > 0) {
+      sql += `INSERT INTO users (username, password, name, role, department) VALUES\n`;
+      const rows = result.rows.map(u => 
+        `('${u.username.replace(/'/g, "''")}', '${u.password.replace(/'/g, "''")}', '${u.name.replace(/'/g, "''")}', '${u.role.replace(/'/g, "''")}', '${u.department.replace(/'/g, "''")}')`
+      );
+      sql += rows.join(',\n') + `\nON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password, role = EXCLUDED.role, name = EXCLUDED.name;\n`;
+    }
+
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', 'attachment; filename="supabase_users_access.sql"');
+    res.send(sql);
+  } catch (error) {
+    console.error('Export SQL error:', error);
+    res.status(500).json({ success: false, error: 'Failed to export Supabase SQL script' });
+  }
+});
+
 export default router;

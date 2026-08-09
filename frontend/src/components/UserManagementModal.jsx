@@ -127,6 +127,20 @@ function UserManagementModal({ onClose }) {
         {/* Content Body */}
         <div className="p-5 max-h-[70vh] overflow-y-auto">
           
+          {/* Supabase Access Note */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex justify-between items-center gap-2">
+            <div>
+              <span className="font-bold">⚡ Supabase Database Sync:</span> All accounts created below are instantly synchronized to your Supabase PostgreSQL database to grant application access.
+            </div>
+            <a
+              href="/api/auth/export-sql"
+              download="supabase_users_access.sql"
+              className="px-2.5 py-1 bg-white border border-blue-300 text-blue-900 hover:bg-blue-100 rounded-lg text-[11px] font-bold shrink-0 transition-colors"
+            >
+              📥 Export SQL for Supabase
+            </a>
+          </div>
+
           {/* Action Bar */}
           <div className="flex justify-between items-center mb-4">
             <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
