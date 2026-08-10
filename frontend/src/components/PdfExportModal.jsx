@@ -9,6 +9,8 @@ const LOGO_SESSION_MASTER = '/assets/session_master_shield_logo.png';
 function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externalPdfSettings, onUpdatePdfSettings, onClose }) {
   const [layoutMode, setLayoutMode] = useState('matrix'); // 'matrix', 'supervision'
   const [matrixColumnMode, setMatrixColumnMode] = useState('detailed'); // 'detailed' (10 Program Columns), 'unified' (5 Level Columns)
+  const [programFilter, setProgramFilter] = useState('all'); // 'all', 'PharmD', 'PharmD Clinical', etc.
+  const [levelFilter, setLevelFilter] = useState('all'); // 'all', '1', '2', '3', '4', '5'
   const [orientation, setOrientation] = useState('landscape'); // 'landscape' or 'portrait'
   const [pageSize, setPageSize] = useState('a4'); // 'a4' or 'a3'
   const [zoomLevel, setZoomLevel] = useState(100); // Default 100% (Fits 1060px A4 Landscape Margins)
@@ -73,8 +75,34 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
     return (a.period || 1) - (b.period || 1);
   });
 
-  // Unique dates for matrix view
-  const dates = [...new Set(schedule.map(item => item.exam_date).filter(Boolean))].sort();
+  // Extract all unique available programs from schedule
+  const availablePrograms = [...new Set([
+    'PharmD',
+    'PharmD Clinical',
+    ...schedule.map(item => getCourseInfo(item).program).filter(Boolean)
+  ])].sort();
+
+  // Filter schedule based on program and level selections
+  const filteredSchedule = schedule.filter(item => {
+    const c = getCourseInfo(item);
+    if (!c.course_code || !item.exam_date) return false;
+
+    if (programFilter !== 'all') {
+      if (c.program.trim().toLowerCase() !== programFilter.trim().toLowerCase()) return false;
+    }
+
+    if (levelFilter !== 'all') {
+      if (String(c.level) !== String(levelFilter)) return false;
+    }
+
+    return true;
+  });
+
+  // Unique dates for matrix view based on active filtered schedule items
+  const activeDates = [...new Set(filteredSchedule.map(item => item.exam_date).filter(Boolean))].sort();
+  const dates = activeDates.length > 0 
+    ? activeDates 
+    : [...new Set(schedule.map(item => item.exam_date).filter(Boolean))].sort();
 
   const defaultProgramLevels = [
     'PharmD|Level 1', 'PharmD Clinical|Level 1',
@@ -104,12 +132,34 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
   const unifiedLevels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'];
 
-  const columnsToUse = matrixColumnMode === 'unified' ? unifiedLevels : programLevels;
+  let columns = matrixColumnMode === 'unified' ? unifiedLevels : programLevels;
 
-  // Matrix grouping
+  // Filter columns by Program (only in detailed mode)
+  if (programFilter !== 'all' && matrixColumnMode !== 'unified') {
+    columns = columns.filter(colKey => {
+      const [prog] = colKey.split('|');
+      return prog.trim().toLowerCase() === programFilter.trim().toLowerCase();
+    });
+  }
+
+  // Filter columns by Level
+  if (levelFilter !== 'all') {
+    columns = columns.filter(colKey => {
+      if (matrixColumnMode === 'unified') {
+        return colKey === `Level ${levelFilter}`;
+      } else {
+        const [_, lvlStr] = colKey.split('|Level ');
+        return String(lvlStr).trim() === String(levelFilter).trim();
+      }
+    });
+  }
+
+  const columnsToUse = columns.length > 0 ? columns : (matrixColumnMode === 'unified' ? unifiedLevels : programLevels);
+
+  // Matrix grouping using filtered schedule items
   const matrixData = {};
   dates.forEach(d => { matrixData[d] = { 1: {}, 2: {} }; });
-  schedule.forEach(item => {
+  filteredSchedule.forEach(item => {
     const c = getCourseInfo(item);
     if (!c.course_code || !item.exam_date) return;
 
@@ -151,9 +201,12 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
       container.appendChild(clone);
       document.body.appendChild(container);
 
+      const progSuffix = programFilter !== 'all' ? `_${programFilter.replace(/\s+/g, '')}` : '';
+      const lvlSuffix = levelFilter !== 'all' ? `_Level${levelFilter}` : '';
+
       const opt = {
         margin: [3, 3, 3, 3],
-        filename: `HUE_Exam_Timetable_${(pdfSettings.semester || 'Semester').replace(/\s+/g, '_')}.pdf`,
+        filename: `HUE_Exam_Timetable_${(pdfSettings.semester || 'Semester').replace(/\s+/g, '_')}${progSuffix}${lvlSuffix}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
           scale: 2, 
@@ -203,15 +256,47 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
         {/* Configuration Controls Bar */}
         <div className="bg-slate-100 border-b border-slate-200 p-3 shrink-0 space-y-3 text-xs">
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5">
             
+            {/* Filter by Program Scope */}
+            <div>
+              <label className="block text-slate-700 font-bold mb-1">Program Scope</label>
+              <select
+                value={programFilter}
+                onChange={(e) => setProgramFilter(e.target.value)}
+                className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147] text-[11px]"
+              >
+                <option value="all">🎓 All Programs (Master)</option>
+                {availablePrograms.map(prog => (
+                  <option key={prog} value={prog}>📚 {prog} Only</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filter by Level Scope */}
+            <div>
+              <label className="block text-slate-700 font-bold mb-1">Level Scope</label>
+              <select
+                value={levelFilter}
+                onChange={(e) => setLevelFilter(e.target.value)}
+                className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147] text-[11px]"
+              >
+                <option value="all">📊 All Levels</option>
+                <option value="1">Level 1 Only</option>
+                <option value="2">Level 2 Only</option>
+                <option value="3">Level 3 Only</option>
+                <option value="4">Level 4 Only</option>
+                <option value="5">Level 5 Only</option>
+              </select>
+            </div>
+
             {/* Matrix Column Format */}
             <div>
               <label className="block text-slate-700 font-bold mb-1">Column Format</label>
               <select
                 value={matrixColumnMode}
                 onChange={(e) => setMatrixColumnMode(e.target.value)}
-                className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147]"
+                className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-[#002147] text-[11px]"
               >
                 <option value="detailed">10 Program Levels (Detailed)</option>
                 <option value="unified">Unified 5 Levels (Wider Cards)</option>
@@ -225,7 +310,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <select
                   value={orientation}
                   onChange={(e) => setOrientation(e.target.value)}
-                  className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+                  className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800 text-[11px]"
                 >
                   <option value="landscape">Landscape</option>
                   <option value="portrait">Portrait</option>
@@ -233,7 +318,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(e.target.value)}
-                  className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800"
+                  className="w-1/2 h-8 px-1 rounded-lg border border-slate-300 bg-white font-semibold text-slate-800 text-[11px]"
                 >
                   <option value="a4">A4</option>
                   <option value="a3">A3</option>
@@ -244,24 +329,24 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
             {/* Document Options Toggles */}
             <div>
               <label className="block text-slate-700 font-bold mb-1">Document Extras</label>
-              <div className="flex items-center gap-2 h-8">
+              <div className="flex items-center gap-1.5 h-8">
                 <button
                   type="button"
                   onClick={() => updateSetting('showSignatures', !pdfSettings.showSignatures)}
-                  className={`px-2 py-1 rounded-lg border text-[11px] font-bold transition-all ${
+                  className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold transition-all ${
                     pdfSettings.showSignatures ? 'bg-blue-50 border-blue-300 text-blue-900' : 'bg-white border-slate-300 text-slate-500'
                   }`}
                 >
-                  {pdfSettings.showSignatures ? '✍️ Signatures: ON' : '✍️ Signatures: OFF'}
+                  {pdfSettings.showSignatures ? '✍️ Signatures: ON' : '✍️ Off'}
                 </button>
                 <button
                   type="button"
                   onClick={() => updateSetting('showStamp', !pdfSettings.showStamp)}
-                  className={`px-2 py-1 rounded-lg border text-[11px] font-bold transition-all ${
+                  className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold transition-all ${
                     pdfSettings.showStamp ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-slate-300 text-slate-500'
                   }`}
                 >
-                  {pdfSettings.showStamp ? '🔴 Final Stamp: ON' : '🔴 Final Stamp: OFF'}
+                  {pdfSettings.showStamp ? '🔴 Stamp: ON' : '🔴 Off'}
                 </button>
               </div>
             </div>
@@ -273,7 +358,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <button
                   type="button"
                   onClick={() => setZoomLevel(prev => Math.max(50, prev - 10))}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50"
+                  className="w-7 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 text-xs"
                   title="Zoom Out"
                 >
                   ➖
@@ -281,17 +366,17 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <button
                   type="button"
                   onClick={() => setZoomLevel(85)}
-                  className={`px-2 h-8 rounded-lg border font-bold text-[11px] transition-colors ${
+                  className={`px-1.5 h-8 rounded-lg border font-bold text-[10px] transition-colors ${
                     zoomLevel === 85 ? 'bg-[#002147] text-white border-[#002147]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                   }`}
                   title="Fit Table to Page Margins"
                 >
-                  📐 Fit Page (85%)
+                  Fit 85%
                 </button>
                 <button
                   type="button"
                   onClick={() => setZoomLevel(100)}
-                  className={`px-2 h-8 rounded-lg border font-semibold text-[11px] transition-colors ${
+                  className={`px-1.5 h-8 rounded-lg border font-semibold text-[10px] transition-colors ${
                     zoomLevel === 100 ? 'bg-[#002147] text-white border-[#002147]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                   }`}
                 >
@@ -300,7 +385,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <button
                   type="button"
                   onClick={() => setZoomLevel(prev => Math.min(150, prev + 10))}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50"
+                  className="w-7 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 text-xs"
                   title="Zoom In"
                 >
                   ➕
@@ -308,16 +393,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
               </div>
             </div>
 
-            {/* Active Semester Info */}
-            <div>
-              <label className="block text-slate-700 font-bold mb-1">Active Semester</label>
-              <div className="h-8 px-2.5 rounded-lg border border-slate-200 bg-white font-bold text-[#002147] flex items-center text-[11px] truncate">
-                {pdfSettings.semester} ({pdfSettings.academicYear})
-              </div>
-            </div>
-
           </div>
-
         </div>
 
         {/* Live Document Preview Scroll Container */}
@@ -394,6 +470,8 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                   <div className="mt-2.5 bg-[#F8FAFC] border border-[#E2E8F0] p-2.5 rounded-xl max-w-2xl mx-auto shadow-2xs">
                     <div className="font-extrabold text-[#002147] text-xs uppercase tracking-wider">
                       FINAL EXAMINATION TIMETABLE — {(pdfSettings.semester || 'SEMESTER').toUpperCase()} — ACADEMIC YEAR {pdfSettings.academicYear}
+                      {programFilter !== 'all' && <span className="text-[#002147]"> • {programFilter.toUpperCase()}</span>}
+                      {levelFilter !== 'all' && <span className="text-[#002147]"> • LEVEL {levelFilter}</span>}
                     </div>
                     <div className="text-[10.5px] text-slate-600 font-medium mt-1">
                       Period 1: <span className="font-bold text-slate-800">{pdfSettings.period1Time}</span> • Period 2: <span className="font-bold text-slate-800">{pdfSettings.period2Time}</span>
