@@ -24,6 +24,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const [activeDragSlot, setActiveDragSlot] = useState(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showEvaluatorModal, setShowEvaluatorModal] = useState(false);
+  const [showExceptionsSummaryModal, setShowExceptionsSummaryModal] = useState(false);
 
   // Course Bank Search, Filter & Sort State
   const [bankSearch, setBankSearch] = useState('');
@@ -223,18 +224,58 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
 
   const isCourseConflicting = (courseId, dayIndex) => {
     let hasConflict = false;
+    let hasMinorException = false;
     let conflictDetails = [];
+    let minorExceptionDetails = [];
+
     Object.entries(lockedAssignments).forEach(([assignedCourseId, assignment]) => {
       if (assignment.dayIndex === dayIndex && String(assignedCourseId) !== String(courseId)) {
         const overlap = getOverlap(courseId, assignedCourseId);
-        const isConflict = allowMinorConflicts ? overlap >= 5 : overlap > 0;
-        if (isConflict) {
+        
+        if (overlap >= 5 || (!allowMinorConflicts && overlap > 0)) {
           hasConflict = true;
           conflictDetails.push({ id: assignedCourseId, overlap });
+        } else if (allowMinorConflicts && overlap >= 1 && overlap < 5) {
+          hasMinorException = true;
+          minorExceptionDetails.push({ id: assignedCourseId, overlap });
         }
       }
     });
-    return { hasConflict, conflictDetails };
+
+    return { hasConflict, hasMinorException, conflictDetails, minorExceptionDetails };
+  };
+
+  const getAllMinorExceptionsInSchedule = () => {
+    const exceptions = [];
+    const processedPairs = new Set();
+
+    Object.entries(lockedAssignments).forEach(([cId1, a1]) => {
+      Object.entries(lockedAssignments).forEach(([cId2, a2]) => {
+        if (cId1 >= cId2) return;
+        if (a1.dayIndex === a2.dayIndex) {
+          const overlap = getOverlap(cId1, cId2);
+          if (overlap >= 1 && overlap < 5) {
+            const pairKey = `${cId1}_${cId2}`;
+            if (!processedPairs.has(pairKey)) {
+              processedPairs.add(pairKey);
+              const course1 = courses.find(c => String(c.id) === String(cId1));
+              const course2 = courses.find(c => String(c.id) === String(cId2));
+              if (course1 && course2) {
+                const day = calendar[a1.dayIndex];
+                exceptions.push({
+                  course1,
+                  course2,
+                  dateStr: day ? day.dateStr : `Day ${a1.dayIndex + 1}`,
+                  overlap
+                });
+              }
+            }
+          }
+        }
+      });
+    });
+
+    return exceptions;
   };
 
   const handleCourseClick = (course) => {
@@ -513,7 +554,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3 flex-wrap">
           {/* Conflict Policy Toggle */}
-          <div className="flex items-center gap-2 border-r border-slate-200 pr-3">
+          <div className="flex items-center gap-2 border-r border-slate-200 pr-3 flex-wrap">
             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Conflict Rule:</span>
             <button
               onClick={() => setAllowMinorConflicts(!allowMinorConflicts)}
@@ -526,6 +567,26 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             >
               {allowMinorConflicts ? '⚠️ Allow <5 Overlaps' : '🛡️ Inhibit ALL Conflicts'}
             </button>
+
+            {/* Bypassed Minor Conflicts Summary Badge */}
+            {(() => {
+              const activeExceptions = getAllMinorExceptionsInSchedule();
+              if (activeExceptions.length === 0) return null;
+              const totalExcludedStudents = activeExceptions.reduce((sum, item) => sum + item.overlap, 0);
+
+              return (
+                <button
+                  onClick={() => setShowExceptionsSummaryModal(true)}
+                  className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+                  title="Click to view detailed breakdown of all minor student conflict overlaps allowed under exception policy"
+                >
+                  <span>⚠️ {activeExceptions.length} Exception{activeExceptions.length > 1 ? 's' : ''}</span>
+                  <span className="bg-amber-950/40 text-amber-100 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                    ({totalExcludedStudents} Students Bypassed)
+                  </span>
+                </button>
+              );
+            })()}
           </div>
 
           <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">⚡ Auto-Schedule:</span>
@@ -886,7 +947,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                           {assignments.length > 0 ? (
                             <div className="space-y-1.5 flex-1">
                               {assignments.map(assignment => {
-                                const { hasConflict, conflictDetails } = isCourseConflicting(assignment.course.id, day.dayIndex);
+                                const { hasConflict, hasMinorException, conflictDetails, minorExceptionDetails } = isCourseConflicting(assignment.course.id, day.dayIndex);
                                 const isSelected = selectedCourse?.id === assignment.course.id;
 
                                 return (
@@ -901,20 +962,33 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                     className={`group/card p-1.5 rounded-md border relative cursor-grab active:cursor-grabbing transition-all ${
                                       isSelected ? 'ring-2 ring-hue-gold shadow-md' : ''
                                     } ${
-                                      hasConflict ? 'bg-red-50 border-red-300 shadow-sm' : 'bg-white border-slate-200 shadow-2xs hover:shadow-xs'
+                                      hasConflict 
+                                        ? 'bg-red-50 border-red-300 shadow-sm' 
+                                        : hasMinorException 
+                                          ? 'bg-amber-50/90 border-amber-400 ring-1 ring-amber-300 shadow-xs' 
+                                          : 'bg-white border-slate-200 shadow-2xs hover:shadow-xs'
                                     }`}
                                   >
-                                    {/* Hover Tooltip */}
-                                    <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 opacity-0 invisible group-hover/card:opacity-100 group-hover/card:visible transition-all duration-200 pointer-events-none">
+                                    <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 opacity-0 invisible group-hover/card:opacity-100 group-hover/card:visible transition-all duration-200 pointer-events-none">
                                       <div className={`p-2.5 rounded-xl text-xs shadow-2xl border ${
                                         hasConflict 
                                           ? 'bg-red-950 text-white border-red-500 shadow-red-950/50' 
-                                          : isSelected 
+                                          : hasMinorException
                                             ? 'bg-amber-950 text-white border-amber-500 shadow-amber-950/50'
-                                            : 'bg-slate-900 text-white border-slate-700 shadow-slate-900/50'
+                                            : isSelected 
+                                              ? 'bg-[#002147] text-white border-hue-gold shadow-[#002147]/50'
+                                              : 'bg-slate-900 text-white border-slate-700 shadow-slate-900/50'
                                       }`}>
                                         <div className="font-bold flex items-center justify-between gap-1 mb-1">
-                                          <span>{hasConflict ? '⚠️ Student Conflict' : isSelected ? '📌 Selected Course' : '✅ Conflict-Free'}</span>
+                                          <span>
+                                            {hasConflict 
+                                              ? '🚨 Hard Student Conflict' 
+                                              : hasMinorException 
+                                                ? '⚠️ Minor Exception (<5 Overlaps)' 
+                                                : isSelected 
+                                                  ? '📌 Selected Course' 
+                                                  : '✅ Conflict-Free'}
+                                          </span>
                                           <span className="text-[10px] opacity-75 font-mono">{assignment.course.course_code}</span>
                                         </div>
 
@@ -927,6 +1001,20 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                                 return (
                                                   <li key={cd.id}>
                                                     <span className="font-bold text-white">{c ? getAbbreviatedCourseName(c.course_title) : cd.id}</span> ({c ? c.program : ''}): <span className="underline decoration-red-400 font-bold">{cd.overlap} students</span>
+                                                  </li>
+                                                );
+                                              })}
+                                            </ul>
+                                          </div>
+                                        ) : hasMinorException ? (
+                                          <div className="space-y-1 text-[11px] leading-snug">
+                                            <p className="text-amber-200 font-bold">Placed under Minor Exception Policy (&lt;5 Students):</p>
+                                            <ul className="list-disc pl-3.5 text-amber-100 space-y-0.5 font-medium">
+                                              {minorExceptionDetails.map(cd => {
+                                                const c = courses.find(item => String(item.id) === String(cd.id));
+                                                return (
+                                                  <li key={cd.id}>
+                                                    <span className="font-bold text-white">{c ? getAbbreviatedCourseName(c.course_title) : cd.id}</span> ({c ? c.program : ''}): <span className="underline decoration-amber-400 font-bold">{cd.overlap} student overlap</span>
                                                   </li>
                                                 );
                                               })}
@@ -951,12 +1039,22 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                     </button>
 
                                     <div className="flex items-center justify-between gap-1 mb-0.5">
-                                      <span className={`font-extrabold text-[11px] ${hasConflict ? 'text-red-700' : 'text-hue-navy'}`}>{assignment.course.course_code}</span>
+                                      <span className={`font-extrabold text-[11px] ${hasConflict ? 'text-red-700' : hasMinorException ? 'text-amber-900 font-black' : 'text-hue-navy'}`}>
+                                        {assignment.course.course_code}
+                                      </span>
                                       <span className="text-[8.5px] bg-slate-100 text-slate-700 font-bold px-1 py-0.2 rounded border border-slate-200 shrink-0">
                                         👥 {assignment.course.student_count || 0}
                                       </span>
                                     </div>
                                     <div className="text-[9.5px] text-slate-700 truncate font-semibold leading-tight">{assignment.course.course_title}</div>
+
+                                    {hasMinorException && !hasConflict && (
+                                      <div className="mt-1 flex items-center gap-1">
+                                        <span className="text-[8px] bg-amber-200/90 text-amber-950 border border-amber-400/80 rounded px-1 font-black flex items-center gap-0.5">
+                                          ⚠️ Exception: {minorExceptionDetails.reduce((sum, x) => sum + x.overlap, 0)} Overlap
+                                        </span>
+                                      </div>
+                                    )}
                                     
                                     {assignment.course.has_oral_exam && (
                                       <div className="mt-1 text-[8px] bg-amber-100 text-amber-900 font-bold px-1 py-0.2 rounded border border-amber-300 inline-block">
@@ -991,6 +1089,60 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           </table>
         </div>
       </div>
+
+      {/* Excluded Minor Conflicts Breakdown Modal */}
+      {showExceptionsSummaryModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none">
+          <div className="bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 space-y-4">
+            
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⚠️</span>
+                <h3 className="text-base font-extrabold text-amber-900 font-outfit">
+                  Allowed Minor Conflicts Breakdown (&lt;5 Policy)
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowExceptionsSummaryModal(false)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Below is the list of all minor student conflict overlaps (<strong className="text-amber-900">&lt;5 students</strong>) allowed on the same exam date under your current Exception Policy:
+            </p>
+
+            <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+              {getAllMinorExceptionsInSchedule().map((ex, idx) => (
+                <div key={idx} className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-3 text-xs">
+                  <div>
+                    <div className="font-bold text-slate-800">
+                      {ex.course1.course_code} ({ex.course1.program}) &amp; {ex.course2.course_code} ({ex.course2.program})
+                    </div>
+                    <div className="text-[11px] text-slate-500 font-medium mt-0.5">Exam Date: {ex.dateStr}</div>
+                  </div>
+
+                  <div className="px-2.5 py-1 bg-amber-500 text-white rounded-lg font-black text-xs shrink-0 shadow-2xs">
+                    {ex.overlap} Student{ex.overlap > 1 ? 's' : ''} Bypassed
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setShowExceptionsSummaryModal(false)}
+                className="btn btn-primary text-xs px-5 font-bold"
+              >
+                Close Breakdown
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
