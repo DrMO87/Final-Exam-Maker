@@ -134,7 +134,9 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
     reader.onload = (evt) => {
       try {
         const bstr = evt.target?.result;
-        const workbook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+        // Do NOT use cellDates: true to avoid Javascript Date UTC offset bugs. 
+        // We will parse raw serial numbers using XLSX.SSF.
+        const workbook = XLSX.read(bstr, { type: 'binary' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
@@ -197,12 +199,21 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
 
       // Format Date string YYYY-MM-DD
       let dateStr = '';
-      if (dateVal instanceof Date) {
-        // xlsx creates Dates in UTC representing the exact Excel date.
-        // We MUST use getUTCDate() to avoid timezone shifts on machines behind UTC.
-        const y = dateVal.getUTCFullYear();
-        const m = String(dateVal.getUTCMonth() + 1).padStart(2, '0');
-        const d = String(dateVal.getUTCDate()).padStart(2, '0');
+      if (typeof dateVal === 'number') {
+        try {
+          const parsed = XLSX.SSF.parse_date_code(dateVal);
+          if (parsed) {
+            const y = parsed.y;
+            const m = String(parsed.m).padStart(2, '0');
+            const d = String(parsed.d).padStart(2, '0');
+            dateStr = `${y}-${m}-${d}`;
+          }
+        } catch(e) {}
+      } else if (dateVal instanceof Date) {
+        // Fallback if cellDates: true was somehow preserved
+        const y = dateVal.getFullYear();
+        const m = String(dateVal.getMonth() + 1).padStart(2, '0');
+        const d = String(dateVal.getDate()).padStart(2, '0');
         dateStr = `${y}-${m}-${d}`;
       } else if (dateVal) {
         dateStr = String(dateVal).trim().split('T')[0];
