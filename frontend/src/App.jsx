@@ -385,6 +385,8 @@ function App() {
                 <ManualScheduler 
                   sessionId={sessionId}
                   pdfSettings={pdfSettings}
+                  initialAssignments={lockedAssignments}
+                  customCalendar={customCalendar}
                   onUpdatePdfSettings={setPdfSettings}
                   onComplete={handleManualSchedulingComplete}
                   onBack={() => setCurrentStep(3)}

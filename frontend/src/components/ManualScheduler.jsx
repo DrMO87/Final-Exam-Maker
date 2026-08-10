@@ -5,7 +5,7 @@ import { getAbbreviatedCourseName } from '../utils/courseUtils';
 import PdfExportModal from './PdfExportModal';
 import CsvScheduleEvaluator from './CsvScheduleEvaluator';
 
-function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComplete, onBack }) {
+function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComplete, onBack, initialAssignments = {}, customCalendar = null }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [session, setSession] = useState(null);
@@ -17,7 +17,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const [conflictMap, setConflictMap] = useState(new Map());
   
   // State for manual scheduling & drag-and-drop
-  const [lockedAssignments, setLockedAssignments] = useState({}); // course_id -> { dayIndex, period }
+  const [lockedAssignments, setLockedAssignments] = useState(initialAssignments); // course_id -> { dayIndex, period }
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [allowMinorConflicts, setAllowMinorConflicts] = useState(false); // false = inhibit ALL conflicts, true = allow <5 overlaps
   const [draggedCourse, setDraggedCourse] = useState(null);
@@ -193,7 +193,12 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           }
           currentDate = addDays(currentDate, 1);
         }
-        setCalendar(cal);
+        
+        if (customCalendar) {
+          setCalendar(customCalendar);
+        } else {
+          setCalendar(cal);
+        }
 
         // Build program levels (sorted by Level first so same level across programs are consecutive)
         const plSet = new Set();

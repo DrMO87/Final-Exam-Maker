@@ -228,22 +228,10 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       }
 
       if (dateStr && period) {
-        // Find matching calendar dayIndex
-        const dayMatch = calendar.find(d => d.dateStr === dateStr);
-        const dayIndex = dayMatch ? dayMatch.dayIndex : -1;
-
-        assignmentsMap[targetCourse.id] = {
-          dayIndex: dayIndex >= 0 ? dayIndex : 0,
-          period,
-          dateStr
-        };
-
         assignedCoursesList.push({
           course: targetCourse,
           dateStr,
-          period,
-          dayIndex: dayIndex >= 0 ? dayIndex : 0,
-          isDateInCalendar: dayIndex >= 0
+          period
         });
 
         // Remove from unassigned
@@ -252,6 +240,26 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       } else {
         invalidRows.push({ row: idx + 2, reason: `Course ${targetCourse.course_code}: Missing valid Date or Period (1/2).` });
       }
+    });
+
+    // PASS 2: Generate dynamic calendar and assignments map based purely on imported dates
+    const importedDates = [...new Set(assignedCoursesList.map(i => i.dateStr))].sort();
+    
+    const newCalendar = importedDates.map((dStr, idx) => ({
+      dayIndex: idx,
+      dateStr: dStr
+    }));
+
+    assignedCoursesList.forEach(item => {
+      const dayIndex = importedDates.indexOf(item.dateStr);
+      item.dayIndex = dayIndex;
+      item.isDateInCalendar = true; // since we constructed the calendar from these dates
+
+      assignmentsMap[item.course.id] = {
+        dayIndex,
+        period: item.period,
+        dateStr: item.dateStr
+      };
     });
 
     // AUDIT CONFLICTS AND RULES
@@ -351,7 +359,6 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
 
     // 5. Build Matrix Table Preview Structure
     const matrixPreview = {};
-    const importedDates = [...new Set(assignedCoursesList.map(i => i.dateStr))].sort();
 
     importedDates.forEach(d => {
       matrixPreview[d] = { 1: {}, 2: {} };
@@ -380,6 +387,7 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
 
     setEvalResult({
       assignmentsMap,
+      newCalendar, // dynamically constructed calendar
       assignedCoursesCount: totalAssigned,
       totalCourseCount,
       unassignedCourses: unassignedCoursesList,
@@ -529,7 +537,7 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
                   {/* APPLY SCHEDULE ACTION BUTTON */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => onApplySchedule(evalResult.assignmentsMap)}
+                      onClick={() => onApplySchedule(evalResult.assignmentsMap, evalResult.newCalendar)}
                       className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95"
                     >
                       <span>🚀</span> Apply Evaluated Schedule to Application
