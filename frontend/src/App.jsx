@@ -31,6 +31,28 @@ function App() {
   const [showCsvEvaluatorModal, setShowCsvEvaluatorModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Day / Night Theme State & Global Zoom State
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem('hue_theme_mode') || 'day';
+  });
+  const [globalZoom, setGlobalZoom] = useState(() => {
+    const saved = localStorage.getItem('hue_global_zoom');
+    return saved ? parseInt(saved) : 100;
+  });
+
+  useEffect(() => {
+    if (themeMode === 'night') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('hue_theme_mode', themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
+    localStorage.setItem('hue_global_zoom', globalZoom);
+  }, [globalZoom]);
+
   // Global PDF & System Settings state
   const [pdfSettings, setPdfSettings] = useState(() => {
     const saved = localStorage.getItem('hue_pdf_settings');
@@ -163,8 +185,8 @@ function App() {
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans select-none relative">
       
       {/* Mobile Top Navbar (< md) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-13 bg-[#002147] text-white z-40 flex items-center justify-between px-3.5 border-b border-[#FFB81C]/30 shadow-md">
-        <div className="flex items-center gap-2.5">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-13 bg-[#002147] text-white z-40 flex items-center justify-between px-3 border-b border-[#FFB81C]/30 shadow-md">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-base focus:outline-none"
@@ -172,14 +194,46 @@ function App() {
           >
             ☰
           </button>
-          <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-sm tracking-tight font-outfit text-white">Final Exam Maker</span>
-            <span className="text-[9px] font-bold text-[#FFB81C] bg-[#001530] px-1.5 py-0.2 rounded border border-[#FFB81C]/30">HUE</span>
+          <div className="flex items-center gap-1">
+            <span className="font-extrabold text-xs tracking-tight font-outfit text-white">Exam Maker</span>
+            <span className="text-[9px] font-bold text-[#FFB81C] bg-[#001530] px-1 py-0.2 rounded border border-[#FFB81C]/30">HUE</span>
           </div>
         </div>
 
-        <div className="text-[10px] font-extrabold bg-white/10 px-2 py-0.5 rounded-full text-white/90">
-          Step {currentStep} of 5
+        <div className="flex items-center gap-1.5">
+          {/* Day / Night Mode Toggle Button */}
+          <button
+            onClick={() => setThemeMode(themeMode === 'day' ? 'night' : 'day')}
+            className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold transition-all border border-white/10"
+            title="Toggle Day/Night Mode"
+          >
+            {themeMode === 'day' ? '☀️' : '🌙'}
+          </button>
+
+          {/* Global Zoom Controls */}
+          <div className="flex items-center bg-white/10 rounded-lg px-1 py-0.5 text-xs font-bold text-white border border-white/10">
+            <button 
+              onClick={() => setGlobalZoom(Math.max(70, globalZoom - 10))}
+              className="px-1.5 hover:text-[#FFB81C] active:scale-95"
+              title="Zoom Out"
+            >
+              -
+            </button>
+            <span 
+              onClick={() => setGlobalZoom(100)}
+              className="px-1 text-[10px] text-white/90 cursor-pointer" 
+              title="Reset to 100%"
+            >
+              {globalZoom}%
+            </span>
+            <button 
+              onClick={() => setGlobalZoom(Math.min(150, globalZoom + 10))}
+              className="px-1.5 hover:text-[#FFB81C] active:scale-95"
+              title="Zoom In"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 
@@ -253,31 +307,33 @@ function App() {
                       className={`
                         relative flex items-center gap-3 w-full text-left transition-all duration-150 rounded-xl
                         ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
-                        ${isActive ? 'bg-white/15 text-white font-bold' : 
-                          isDisabled ? 'opacity-30 cursor-not-allowed text-white/40' : 'text-white/60 hover:bg-white/10 hover:text-white/90'}
+                        ${isActive 
+                          ? 'bg-gradient-gold text-[#002147] font-bold shadow-glow-gold' 
+                          : isDisabled
+                            ? 'opacity-40 cursor-not-allowed text-white/40'
+                            : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        }
                       `}
                     >
-                      {/* Active Left Gradient Bar Accent */}
-                      {isActive && (
-                        <span 
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full shadow-glow-gold"
-                          style={{ background: 'linear-gradient(135deg, #FFB81C, #FFE04A)' }}
-                        />
+                      <span className="text-base">{step.icon}</span>
+                      
+                      {!isSidebarCollapsed && (
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold truncate">{step.label}</span>
+                            {isCompleted && (
+                              <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold flex items-center justify-center border border-emerald-400/30">✓</span>
+                            )}
+                          </div>
+                          <p className={`text-[10px] truncate ${isActive ? 'text-[#002147]/70' : 'text-white/40'}`}>
+                            {step.desc}
+                          </p>
+                        </div>
                       )}
 
-                      {/* Step Number Circle / Completed Icon */}
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                        isActive ? 'bg-[#FFB81C] text-[#001530]' : 
-                        isCompleted ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white/50'
-                      }`}>
-                        {isCompleted ? '✓' : step.num}
-                      </span>
-
-                      {!isSidebarCollapsed && (
-                        <div className="flex-1 overflow-hidden">
-                          <div className="text-xs leading-tight font-semibold">{step.label}</div>
-                          <div className="text-[10px] text-white/40 truncate font-normal mt-0.5">{step.desc}</div>
-                        </div>
+                      {/* Active Indicator Bar */}
+                      {isActive && (
+                        <span className="absolute right-0 top-2 bottom-2 w-1 bg-[#002147] rounded-l-full" />
                       )}
                     </button>
                   </li>
@@ -286,15 +342,31 @@ function App() {
             </ul>
           </div>
 
-          {/* GROUP 2: SYSTEM TOOLS & SETTINGS */}
+          {/* GROUP 2: UTILITY TOOLS */}
           <div>
             {!isSidebarCollapsed && (
               <p className="px-3 mb-2 text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                SYSTEM & TOOLS
+                TOOLS &amp; UTILITIES
               </p>
             )}
 
             <ul className="space-y-1">
+              {/* CSV Evaluator Quick Trigger */}
+              <li>
+                <button
+                  onClick={() => setShowCsvEvaluatorModal(true)}
+                  disabled={!sessionId}
+                  className={`
+                    relative flex items-center gap-3 w-full text-left transition-all duration-150 rounded-xl
+                    ${isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'}
+                    ${!sessionId ? 'opacity-40 cursor-not-allowed text-white/40' : 'text-purple-200 hover:bg-purple-500/20 hover:text-white'}
+                  `}
+                >
+                  <span className="text-sm">📊</span>
+                  {!isSidebarCollapsed && <span className="text-xs font-medium flex-1">Schedule Evaluator</span>}
+                </button>
+              </li>
+
               {/* Settings Tab Modal Trigger */}
               <li>
                 <button
@@ -323,8 +395,6 @@ function App() {
                 </button>
               </li>
 
-
-
               {/* Help & Guide Modal Trigger */}
               <li>
                 <button
@@ -343,13 +413,66 @@ function App() {
 
         </nav>
 
-        {/* Bottom Section with Sign Out, Version Badge, and Developer Credits */}
-        <div className={`px-5 py-4 border-t border-white/10 space-y-3 ${isSidebarCollapsed ? 'items-center px-2' : ''}`}>
+        {/* Bottom Section with Display Controls, Sign Out, Version Badge, and Developer Credits */}
+        <div className={`px-4 py-3 border-t border-white/10 space-y-2.5 ${isSidebarCollapsed ? 'items-center px-2' : ''}`}>
           
+          {/* Global Theme & Zoom Controls */}
+          <div className="bg-white/5 border border-white/10 rounded-xl p-2 space-y-2">
+            {!isSidebarCollapsed && (
+              <p className="text-[9.5px] font-extrabold text-white/40 uppercase tracking-widest">Display &amp; Zoom</p>
+            )}
+
+            {/* Day / Night Toggle */}
+            <button
+              onClick={() => setThemeMode(themeMode === 'day' ? 'night' : 'day')}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all active:scale-95 ${
+                themeMode === 'night' 
+                  ? 'bg-purple-900/60 text-purple-200 border border-purple-400/40 shadow-xs' 
+                  : 'bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-xs'
+              }`}
+              title="Switch Day/Night Mode"
+            >
+              <div className="flex items-center gap-2">
+                <span>{themeMode === 'day' ? '☀️' : '🌙'}</span>
+                {!isSidebarCollapsed && <span>{themeMode === 'day' ? 'Day Mode' : 'Night Mode'}</span>}
+              </div>
+              {!isSidebarCollapsed && (
+                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-black/40 text-white/90">
+                  {themeMode === 'day' ? 'Light' : 'Dark'}
+                </span>
+              )}
+            </button>
+
+            {/* Global Zoom Control Bar */}
+            <div className="flex items-center justify-between bg-black/40 rounded-lg p-1 text-white border border-white/10">
+              <button
+                onClick={() => setGlobalZoom(Math.max(70, globalZoom - 10))}
+                className="w-6 h-5 rounded flex items-center justify-center hover:bg-white/20 text-xs font-black transition-colors active:scale-95"
+                title="Zoom Out"
+              >
+                -
+              </button>
+              <button
+                onClick={() => setGlobalZoom(100)}
+                className="text-[10px] font-bold px-1 hover:text-[#FFB81C] transition-colors"
+                title="Reset Zoom to 100%"
+              >
+                {globalZoom}%
+              </button>
+              <button
+                onClick={() => setGlobalZoom(Math.min(150, globalZoom + 10))}
+                className="w-6 h-5 rounded flex items-center justify-center hover:bg-white/20 text-xs font-black transition-colors active:scale-95"
+                title="Zoom In"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
           {/* Sign Out Button */}
           <button
             onClick={logout}
-            className="flex w-full items-center justify-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-white/70 bg-white/5 hover:bg-rose-500/20 hover:text-rose-200 transition-colors border border-white/10"
+            className="flex w-full items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-white/80 bg-white/5 hover:bg-rose-500/20 hover:text-rose-200 transition-colors border border-white/10 active:scale-95"
             title="Sign Out"
           >
             <span>🚪</span>
@@ -359,20 +482,20 @@ function App() {
           {/* Version Badge & Developer Credits */}
           {!isSidebarCollapsed && (
             <>
-              <div className="flex items-center gap-2.5 pt-1">
-                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                  <span className="text-white/60 text-[9px] font-black">SM</span>
+              <div className="flex items-center gap-2 pt-1">
+                <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                  <span className="text-white/60 text-[8px] font-black">SM</span>
                 </div>
                 <div>
-                  <p className="text-white/80 text-[11px] font-semibold leading-tight">Horus University — Egypt</p>
-                  <p className="text-white/35 text-[9px] mt-0.5">v2.0 · Session Master</p>
+                  <p className="text-white/80 text-[10px] font-semibold leading-tight">Horus University — Egypt</p>
+                  <p className="text-white/35 text-[8.5px]">v2.0 · Session Master</p>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-white/5">
+              <div className="pt-1.5 border-t border-white/5">
                 <p className="text-white/30 text-[8px] leading-relaxed">
                   Designed &amp; Executed by<br />
-                  <span className="text-[#FFB81C] font-bold text-[9.5px]">Prof. Mahmoud Elkhoudary</span>
+                  <span className="text-[#FFB81C] font-bold text-[9px]">Prof. Mahmoud Elkhoudary</span>
                 </p>
               </div>
             </>
@@ -381,10 +504,13 @@ function App() {
 
       </aside>
 
-      {/* Main Content Area */}
-      <main className={`flex-1 h-screen overflow-y-auto relative transition-all duration-300 pt-13 md:pt-0 ${
-        isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-      }`}>
+      {/* Main Content Area with Global Zoom Scale Support */}
+      <main 
+        className={`flex-1 h-screen overflow-y-auto relative transition-all duration-300 pt-13 md:pt-0 ${
+          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+        }`}
+        style={{ zoom: `${globalZoom}%` }}
+      >
         <div className={`w-full ${currentStep === 4 ? 'px-3 py-3' : 'px-4 py-8 md:px-8 md:py-12'}`}>
           <div className="animate-fade-in">
             {currentStep === 1 && (
