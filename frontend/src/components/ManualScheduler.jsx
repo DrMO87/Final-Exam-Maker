@@ -18,6 +18,14 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   
   // State for manual scheduling & drag-and-drop
   const [lockedAssignments, setLockedAssignments] = useState(initialAssignments); // course_id -> { dayIndex, period }
+  
+  // Sync if initialAssignments changes
+  useEffect(() => {
+    if (Object.keys(initialAssignments).length > 0) {
+      setLockedAssignments(initialAssignments);
+    }
+  }, [initialAssignments]);
+
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [allowMinorConflicts, setAllowMinorConflicts] = useState(false); // false = inhibit ALL conflicts, true = allow <5 overlaps
   const [draggedCourse, setDraggedCourse] = useState(null);
