@@ -491,37 +491,37 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                 backgroundColor: '#ffffff', 
                                                 border: '1px solid #cbd5e1', 
                                                 borderRadius: '4px', 
-                                                padding: '3px 4px', 
+                                                padding: '2px 3px', 
                                                 marginBottom: '3px',
                                                 boxSizing: 'border-box',
-                                                overflow: 'hidden'
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '2px'
                                               }}
                                             >
                                               {/* Card Header Row: Course Code + Student Count Micro Badge */}
                                               <div 
                                                 style={{ 
                                                   display: 'flex', 
-                                                  alignItems: 'center', 
+                                                  alignItems: 'flex-start', 
                                                   justifyContent: 'space-between', 
                                                   gap: '2px',
                                                   borderBottom: '1px solid #e2e8f0', 
                                                   paddingBottom: '2px', 
-                                                  marginBottom: '2.5px',
                                                   width: '100%',
-                                                  lineHeight: '1'
+                                                  lineHeight: '1.2'
                                                 }}
                                               >
                                                 <span 
                                                   style={{ 
-                                                    fontSize: '8.5px', 
+                                                    fontSize: '8px', 
                                                     fontWeight: '900', 
                                                     color: '#002147', 
                                                     letterSpacing: '-0.01em',
-                                                    display: 'inline-block',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    maxWidth: '68%'
+                                                    display: 'block',
+                                                    wordBreak: 'break-word',
+                                                    flex: 1
                                                   }}
                                                 >
                                                   {c.course_code}
@@ -529,11 +529,12 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                 
                                                 <span 
                                                   style={{ 
-                                                    display: 'inline-block', 
-                                                    textAlign: 'center',
+                                                    display: 'inline-flex', 
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
                                                     padding: '1px 3px', 
-                                                    fontSize: '7px', 
-                                                    fontWeight: '800', 
+                                                    fontSize: '7.5px', 
+                                                    fontWeight: '900', 
                                                     lineHeight: '1', 
                                                     color: '#1e293b', 
                                                     backgroundColor: '#f1f5f9', 
@@ -548,8 +549,8 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               </div>
                                               
                                               {matrixColumnMode === 'unified' && (
-                                                <div style={{ marginBottom: '2px' }}>
-                                                  <span className={`text-[6.5px] font-extrabold px-1 py-0.2 rounded border ${
+                                                <div>
+                                                  <span className={`text-[6.5px] font-extrabold px-1 py-0.5 rounded border ${
                                                     isClinical ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
                                                   }`}>
                                                     {c.program}
@@ -560,13 +561,12 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               {/* Course Title */}
                                               <div 
                                                 style={{ 
-                                                  fontSize: '7.5px', 
+                                                  fontSize: '8px', 
                                                   fontWeight: '700', 
                                                   color: '#0f172a', 
-                                                  lineHeight: '1.2', 
-                                                  marginTop: '1.5px', 
-                                                  wordBreak: 'break-word',
+                                                  lineHeight: '1.3', 
                                                   overflowWrap: 'break-word',
+                                                  wordBreak: 'normal',
                                                   textAlign: 'left'
                                                 }}
                                               >
@@ -575,14 +575,13 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
                                               {/* Oral Exam Badge */}
                                               {c.has_oral_exam && (
-                                                <div style={{ marginTop: '2px' }}>
+                                                <div style={{ marginTop: '1px' }}>
                                                   <span 
                                                     style={{ 
                                                       display: 'inline-flex', 
                                                       alignItems: 'center',
-                                                      gap: '2px',
-                                                      padding: '1px 4px', 
-                                                      fontSize: '6.5px', 
+                                                      padding: '1px 3px', 
+                                                      fontSize: '7px', 
                                                       fontWeight: '800', 
                                                       lineHeight: '1', 
                                                       color: '#78350f', 
