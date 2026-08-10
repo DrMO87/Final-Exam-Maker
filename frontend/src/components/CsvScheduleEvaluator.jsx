@@ -156,7 +156,7 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
     
     const conflictsList = hardConflicts.filter(c => String(c.courseA.id) === cId || String(c.courseB.id) === cId);
     const oralList = oralViolations.filter(o => String(o.course.id) === cId);
-    const gapList = studyGapWarnings.filter(g => String(g.courseA.id) === cId || String(g.courseB.id) === cId);
+    const gapList = studyGapWarnings.filter(g => g.laterCourseId === cId);
 
     return {
       hasHardConflict: conflictsList.length > 0,
@@ -315,14 +315,18 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
           const requiredGap = overlap >= 50 ? 3 : overlap >= 10 ? 2 : 1;
 
           if (dayDiff < requiredGap) {
+            const laterItem = itemA.dayIndex > itemB.dayIndex ? itemA : itemB;
+            const earlierItem = itemA.dayIndex > itemB.dayIndex ? itemB : itemA;
+
             studyGapWarnings.push({
-              courseA: itemA.course,
-              courseB: itemB.course,
-              dateA: itemA.dateStr,
-              dateB: itemB.dateStr,
+              courseA: earlierItem.course,
+              courseB: laterItem.course,
+              dateA: earlierItem.dateStr,
+              dateB: laterItem.dateStr,
               overlap,
               dayDiff,
-              requiredGap
+              requiredGap,
+              laterCourseId: String(laterItem.course.id)
             });
           }
         }
