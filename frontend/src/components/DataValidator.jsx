@@ -5,13 +5,16 @@ import {
   exportValidationMatrixToExcel,
   exportValidationMatrixToCSV
 } from '../utils/courseUtils';
+import CsvScheduleEvaluator from './CsvScheduleEvaluator';
 
 function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [courses, setCourses] = useState([]);
   const [conflicts, setConflicts] = useState([]);
+  const [calendar, setCalendar] = useState([]);
   const [conflictMap, setConflictMap] = useState(new Map());
+  const [showEvaluatorModal, setShowEvaluatorModal] = useState(false);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +36,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
       if (res.data.success) {
         setCourses(res.data.courses || []);
         setConflicts(res.data.conflicts || []);
+        setCalendar(res.data.calendar || []);
 
         // Build conflict map (course_id -> array of { targetCourse, overlap })
         const map = new Map();
@@ -115,9 +119,15 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           <p className="text-sm text-slate-500">Review all extracted course metadata, enrolled student counts, oral flags, and student conflict pairs before scheduling.</p>
         </div>
 
-        <div className="flex gap-3 shrink-0">
+        <div className="flex gap-2.5 shrink-0 flex-wrap">
           <button className="btn btn-secondary text-xs" onClick={onBack}>
             ← Back to Upload
+          </button>
+          <button 
+            className="btn bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-300 font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition-all active:scale-95" 
+            onClick={() => setShowEvaluatorModal(true)}
+          >
+            📊 CSV / Excel Evaluator
           </button>
           <button className="btn btn-secondary border-hue-gold text-hue-navy font-bold text-xs" onClick={onProceedToManual}>
             ⚡ Step 4: Pre-Scheduling
@@ -391,6 +401,20 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           </tbody>
         </table>
       </div>
+      {/* CSV / Excel Manual Timetable Evaluator Modal */}
+      {showEvaluatorModal && (
+        <CsvScheduleEvaluator
+          sessionId={sessionId}
+          courses={courses}
+          conflicts={conflicts}
+          calendar={calendar}
+          onApplySchedule={(assignmentsMap) => {
+            setShowEvaluatorModal(false);
+            onProceedToManual(assignmentsMap);
+          }}
+          onClose={() => setShowEvaluatorModal(false)}
+        />
+      )}
     </div>
   );
 }

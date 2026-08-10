@@ -3,6 +3,7 @@ import axios from 'axios';
 import { addDays, format, parseISO } from 'date-fns';
 import { getAbbreviatedCourseName } from '../utils/courseUtils';
 import PdfExportModal from './PdfExportModal';
+import CsvScheduleEvaluator from './CsvScheduleEvaluator';
 
 function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComplete, onBack }) {
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const [draggedCourse, setDraggedCourse] = useState(null);
   const [activeDragSlot, setActiveDragSlot] = useState(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showEvaluatorModal, setShowEvaluatorModal] = useState(false);
 
   // Course Bank Search, Filter & Sort State
   const [bankSearch, setBankSearch] = useState('');
@@ -458,8 +460,15 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           <h2 className="mb-1">Manual Pre-Scheduling & Level Assistant <span className="text-slate-400 font-normal text-lg">(Optional)</span></h2>
           <p className="text-sm text-slate-500">Pin courses manually or auto-schedule level by level. Cross-program same courses are automatically placed on the same day.</p>
         </div>
-        <div className="flex gap-2">
-          <button className="btn btn-secondary" onClick={onBack}>Back</button>
+        <div className="flex gap-2 flex-wrap">
+          <button className="btn btn-secondary text-xs" onClick={onBack}>Back</button>
+          <button 
+            className="btn bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-300 font-extrabold text-xs flex items-center gap-1.5 shadow-xs" 
+            onClick={() => setShowEvaluatorModal(true)}
+            title="Export/Import manual CSV/Excel table and evaluate against Step 3 conflict data"
+          >
+            📊 CSV / Excel Evaluator
+          </button>
           <button 
             className="btn btn-gold font-bold shadow-md hover:shadow-lg flex items-center gap-1.5 text-xs" 
             onClick={() => setShowPdfModal(true)}
@@ -467,11 +476,26 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           >
             📄 Export Branded PDF
           </button>
-          <button className="btn btn-primary shadow-glow-primary" onClick={() => onComplete(lockedAssignments, getPdfScheduleData())}>
+          <button className="btn btn-primary shadow-glow-primary text-xs" onClick={() => onComplete(lockedAssignments, getPdfScheduleData())}>
             Proceed to Generate
           </button>
         </div>
       </div>
+
+      {/* CSV / Excel Manual Timetable Evaluator Modal */}
+      {showEvaluatorModal && (
+        <CsvScheduleEvaluator
+          sessionId={sessionId}
+          courses={courses}
+          conflicts={conflicts}
+          calendar={calendar}
+          onApplySchedule={(assignmentsMap) => {
+            setLockedAssignments(assignmentsMap);
+            setShowEvaluatorModal(false);
+          }}
+          onClose={() => setShowEvaluatorModal(false)}
+        />
+      )}
 
       {/* Branded PDF Export Modal */}
       {showPdfModal && (

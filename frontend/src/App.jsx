@@ -8,6 +8,7 @@ import FileUpload from './components/FileUpload';
 import DataValidator from './components/DataValidator';
 import ManualScheduler from './components/ManualScheduler';
 import ScheduleViewer from './components/ScheduleViewer';
+import CsvScheduleEvaluator from './components/CsvScheduleEvaluator';
 
 function App() {
   const { user, logout } = useAuth();
@@ -26,6 +27,7 @@ function App() {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showCsvEvaluatorModal, setShowCsvEvaluatorModal] = useState(false);
 
   // Global PDF & System Settings state
   const [pdfSettings, setPdfSettings] = useState(() => {
@@ -605,6 +607,19 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Global CSV / Excel Evaluator Modal */}
+      {showCsvEvaluatorModal && (
+        <CsvScheduleEvaluator
+          sessionId={sessionId}
+          onApplySchedule={(assignmentsMap) => {
+            setLockedAssignments(assignmentsMap);
+            setShowCsvEvaluatorModal(false);
+            setCurrentStep(4);
+          }}
+          onClose={() => setShowCsvEvaluatorModal(false)}
+        />
       )}
     </div>
   );
