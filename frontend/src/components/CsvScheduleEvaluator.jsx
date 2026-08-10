@@ -198,7 +198,10 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       // Format Date string YYYY-MM-DD
       let dateStr = '';
       if (dateVal instanceof Date) {
-        dateStr = dateVal.toISOString().split('T')[0];
+        const y = dateVal.getFullYear();
+        const m = String(dateVal.getMonth() + 1).padStart(2, '0');
+        const d = String(dateVal.getDate()).padStart(2, '0');
+        dateStr = `${y}-${m}-${d}`;
       } else if (dateVal) {
         dateStr = String(dateVal).trim().split('T')[0];
       }
