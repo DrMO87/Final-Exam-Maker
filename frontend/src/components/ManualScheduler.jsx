@@ -508,34 +508,30 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const availableLevels = [...new Set(courses.map(c => c.level))].sort((a,b) => Number(a)-Number(b));
 
   return (
-    <div className="card w-full flex flex-col h-[calc(100vh-120px)]">
-      {/* Header Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-200/80 shrink-0">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-black text-slate-800 tracking-tight font-outfit m-0">
-              Manual Pre-Scheduling &amp; Level Assistant
-            </h2>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md border border-slate-200">
-              Optional
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1 mb-0">
-            Pin courses manually or auto-schedule level by level. Cross-program identical courses are automatically placed on the same day.
-          </p>
+    <div className="card w-full flex flex-col h-[calc(100vh-48px)] p-3 sm:p-4">
+      {/* Ultra-Compact Header Bar */}
+      <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-slate-200/80 shrink-0 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-extrabold text-slate-800 tracking-tight font-outfit m-0">
+            Manual Pre-Scheduling
+          </h2>
+          <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-md border border-slate-200">
+            Optional
+          </span>
+          <span className="hidden md:inline text-xs text-slate-400 font-medium">| Pin courses manually or auto-schedule by level</span>
         </div>
 
         {/* Primary Header Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0">
           <button 
-            className="px-3.5 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-all shadow-2xs active:scale-95"
+            className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-all shadow-2xs active:scale-95"
             onClick={onBack}
           >
             ← Back
           </button>
           
           <button 
-            className="px-3.5 py-2 rounded-xl bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-900 font-extrabold text-xs flex items-center gap-1.5 shadow-2xs transition-all active:scale-95" 
+            className="px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-900 font-extrabold text-xs flex items-center gap-1.5 shadow-2xs transition-all active:scale-95" 
             onClick={() => setShowEvaluatorModal(true)}
             title="Export/Import manual CSV/Excel table and evaluate against Step 3 conflict data"
           >
@@ -543,15 +539,15 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           </button>
 
           <button 
-            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95" 
+            className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition-all active:scale-95" 
             onClick={() => setShowPdfModal(true)}
             title="Export official branded PDF timetable of current pre-scheduled courses"
           >
-            <span>📄</span> Export Branded PDF
+            <span>📄</span> Export PDF
           </button>
 
           <button 
-            className="px-4 py-2 rounded-xl bg-[#002147] hover:bg-[#001530] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-95 border border-[#FFB81C]/30" 
+            className="px-3.5 py-1.5 rounded-lg bg-[#002147] hover:bg-[#001530] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-95 border border-[#FFB81C]/30" 
             onClick={() => onComplete(lockedAssignments, getPdfScheduleData())}
           >
             <span>🚀</span> Proceed to Generate ➔
@@ -586,22 +582,21 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         />
       )}
 
-      {/* Level Quick Actions Toolbar */}
-      <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-2.5 mb-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3 shrink-0 shadow-2xs">
-        <div className="flex items-center gap-3 flex-wrap">
+      {/* Ultra-Slim Quick Actions Toolbar */}
+      <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-1.5 mb-2.5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-2 min-w-0">
           {/* Conflict Policy Toggle */}
-          <div className="flex items-center gap-2 border-r border-slate-200 pr-3 flex-wrap">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Conflict Rule:</span>
+          <div className="flex items-center gap-1.5 border-r border-slate-200 pr-2 shrink-0">
             <button
               onClick={() => setAllowMinorConflicts(!allowMinorConflicts)}
-              className={`px-3 py-1.5 text-xs font-extrabold rounded-xl border shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 ${
+              className={`px-2.5 py-1 text-[11px] font-extrabold rounded-lg border transition-all flex items-center gap-1 active:scale-95 ${
                 allowMinorConflicts 
                   ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100' 
                   : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
               }`}
               title={allowMinorConflicts ? "Minor overlaps (<5 students) are allowed on same day" : "ALL student overlaps (≥1 student) are strictly blocked"}
             >
-              {allowMinorConflicts ? '⚠️ Allow <5 Overlaps' : '🛡️ Inhibit ALL Conflicts'}
+              {allowMinorConflicts ? '⚠️ Allow <5' : '🛡️ Inhibit ALL'}
             </button>
 
             {/* Bypassed Minor Conflicts Summary Badge */}
@@ -613,44 +608,42 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               return (
                 <button
                   onClick={() => setShowExceptionsSummaryModal(true)}
-                  className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95"
+                  className="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[11px] rounded-lg shadow-2xs transition-all flex items-center gap-1 active:scale-95"
                   title="Click to view detailed breakdown of all minor student conflict overlaps allowed under exception policy"
                 >
-                  <span>⚠️ {activeExceptions.length} Exception{activeExceptions.length > 1 ? 's' : ''}</span>
-                  <span className="bg-amber-950/40 text-amber-100 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-                    ({totalExcludedStudents} Students Bypassed)
+                  <span>⚠️ {activeExceptions.length} Ex</span>
+                  <span className="bg-amber-950/40 text-amber-100 text-[9px] px-1 py-0.2 rounded-full font-bold">
+                    ({totalExcludedStudents})
                   </span>
                 </button>
               );
             })()}
           </div>
 
-          <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Auto-Schedule:</span>
-          
           <button
             onClick={handleAutoScheduleAll}
-            className="px-3.5 py-1.5 rounded-xl bg-[#002147] hover:bg-[#001530] text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition-all active:scale-95"
+            className="px-2.5 py-1 rounded-lg bg-[#002147] hover:bg-[#001530] text-white text-[11px] font-extrabold shadow-2xs flex items-center gap-1 transition-all active:scale-95 shrink-0"
             title="Auto-place remaining unassigned courses across all levels"
           >
-            <span>⚡</span> Auto-Schedule All
+            <span>⚡</span> Auto-All
           </button>
 
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1 shrink-0 overflow-x-auto">
             {availableLevels.map(lvl => {
               const levelUnassigned = courses.filter(c => String(c.level) === String(lvl) && !lockedAssignments[c.id]).length;
               return (
                 <button
                   key={lvl}
                   onClick={() => handleAutoScheduleLevel(lvl)}
-                  className="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-[#002147] hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95"
+                  className="px-2 py-1 bg-white border border-slate-300 hover:border-[#002147] hover:bg-slate-100 text-slate-800 text-[11px] font-bold rounded-lg shadow-2xs transition-all flex items-center gap-1 active:scale-95"
                 >
-                  <span>Level {lvl}</span>
+                  <span>L{lvl}</span>
                   {levelUnassigned > 0 ? (
-                    <span className="bg-[#002147] text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-4 text-center">
+                    <span className="bg-[#002147] text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-3.5 text-center">
                       {levelUnassigned}
                     </span>
                   ) : (
-                    <span className="text-emerald-600 text-[11px] font-black">✓</span>
+                    <span className="text-emerald-600 text-[10px] font-black">✓</span>
                   )}
                 </button>
               );
@@ -658,25 +651,25 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <button 
             onClick={() => setLockedAssignments({})}
-            className="text-xs text-rose-600 hover:text-rose-700 font-bold px-2.5 py-1.5 hover:bg-rose-50 rounded-xl transition-colors flex items-center gap-1"
+            className="text-[11px] text-rose-600 hover:text-rose-700 font-bold px-2 py-1 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1"
           >
-            <span>🗑️</span> Clear All Pre-Scheduled
+            <span>🗑️</span> Clear
           </button>
         </div>
       </div>
 
       <div className="flex gap-6 flex-1 overflow-hidden min-h-0">
-        {/* Course Bank Sidebar */}
+        {/* Course Bank Sidebar - Streamlined Width */}
         <div 
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDropOnBank}
-          className="w-80 shrink-0 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden"
+          className="w-64 shrink-0 bg-white rounded-xl shadow-2xs border border-slate-200 flex flex-col overflow-hidden"
         >
           {/* Course Bank Header & Filter Bar */}
-          <div className="p-3 border-b border-slate-200 bg-slate-50 shrink-0 space-y-2">
+          <div className="p-2 border-b border-slate-200 bg-slate-50 shrink-0 space-y-1.5">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-xs font-extrabold text-[#002147] uppercase tracking-wider">
@@ -698,7 +691,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                     return `${filtered.length}/${unassigned.length}`;
                   })()})
                 </h3>
-                <p className="text-[10px] text-slate-500 font-medium">Drag to grid or click to select</p>
+                <p className="text-[9.5px] text-slate-500 font-medium">Drag to grid or click to select</p>
               </div>
 
               {(bankSearch || bankProgramFilter !== 'ALL' || bankLevelFilter !== 'ALL' || bankOralOnly || bankSortBy !== 'default') && (
@@ -711,7 +704,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                     setBankOralOnly(false);
                     setBankSortBy('default');
                   }}
-                  className="text-[10px] text-rose-600 font-bold hover:underline"
+                  className="text-[9.5px] text-rose-600 font-bold hover:underline"
                 >
                   Reset Filters
                 </button>
@@ -725,12 +718,12 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                 value={bankSearch}
                 onChange={(e) => setBankSearch(e.target.value)}
                 placeholder="🔍 Search code, title..."
-                className="w-full h-7 pl-2.5 pr-6 rounded-lg border border-slate-300 bg-white text-xs font-medium focus:border-hue-navy focus:outline-none"
+                className="w-full h-6.5 pl-2 pr-6 rounded-md border border-slate-300 bg-white text-[11px] font-medium focus:border-[#002147] focus:outline-none"
               />
               {bankSearch && (
                 <button
                   onClick={() => setBankSearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px]"
                 >
                   ✕
                 </button>
@@ -738,12 +731,12 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             </div>
 
             {/* Filter Controls Row */}
-            <div className="grid grid-cols-2 gap-1.5 text-[10.5px]">
+            <div className="grid grid-cols-2 gap-1 text-[10px]">
               {/* Program Filter */}
               <select
                 value={bankProgramFilter}
                 onChange={(e) => setBankProgramFilter(e.target.value)}
-                className="h-7 px-1.5 rounded-md border border-slate-300 bg-white font-semibold text-slate-700 text-[11px]"
+                className="h-6.5 px-1 rounded border border-slate-300 bg-white font-bold text-slate-700 text-[10.5px]"
               >
                 <option value="ALL">All Programs</option>
                 {[...new Set(courses.map(c => c.program))].map(prog => (
@@ -755,7 +748,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               <select
                 value={bankLevelFilter}
                 onChange={(e) => setBankLevelFilter(e.target.value)}
-                className="h-7 px-1.5 rounded-md border border-slate-300 bg-white font-semibold text-slate-700 text-[11px]"
+                className="h-6.5 px-1 rounded border border-slate-300 bg-white font-bold text-slate-700 text-[10.5px]"
               >
                 <option value="ALL">All Levels</option>
                 {availableLevels.map(lvl => (
@@ -765,11 +758,11 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             </div>
 
             {/* Sort & Oral Filter Row */}
-            <div className="flex items-center justify-between gap-1 text-[10.5px]">
+            <div className="flex items-center justify-between gap-1 text-[10px]">
               <select
                 value={bankSortBy}
                 onChange={(e) => setBankSortBy(e.target.value)}
-                className="h-7 px-1.5 rounded-md border border-slate-300 bg-white font-bold text-[#002147] text-[11px] flex-1"
+                className="h-6.5 px-1 rounded border border-slate-300 bg-white font-bold text-[#002147] text-[10.5px] flex-1"
               >
                 <option value="default">Sort: Default (Program)</option>
                 <option value="code">Sort: Code (A-Z)</option>
@@ -781,7 +774,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               <button
                 type="button"
                 onClick={() => setBankOralOnly(!bankOralOnly)}
-                className={`h-7 px-2 rounded-md border text-[10.5px] font-bold transition-all shrink-0 ${
+                className={`h-6.5 px-1.5 rounded border text-[10px] font-bold transition-all shrink-0 ${
                   bankOralOnly ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
                 }`}
                 title="Toggle Oral Exams Only"
@@ -791,7 +784,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto p-2 space-y-4">
             {(() => {
               const unassigned = courses.filter(c => !lockedAssignments[c.id]);
 
@@ -829,10 +822,10 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               
               if (courses.length === 0) {
                 return (
-                  <div className="text-center p-6 bg-red-50 text-red-600 rounded-xl border border-red-200 mt-6">
-                    <p className="font-semibold text-sm mb-2">No courses uploaded for this session.</p>
-                    <p className="text-xs text-red-500 mb-4">Please click below to return to Step 2 and upload your CSV files.</p>
-                    <button className="btn btn-secondary btn-sm w-full" onClick={onBack}>
+                  <div className="text-center p-4 bg-red-50 text-red-600 rounded-xl border border-red-200 mt-4">
+                    <p className="font-semibold text-xs mb-1">No courses uploaded for this session.</p>
+                    <p className="text-[10px] text-red-500 mb-3">Please click below to return to Step 2.</p>
+                    <button className="btn btn-secondary btn-sm w-full text-xs" onClick={onBack}>
                       Go to Step 2 (Upload)
                     </button>
                   </div>
@@ -840,13 +833,13 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               }
 
               if (unassigned.length === 0) {
-                return <div className="text-center text-slate-400 text-sm mt-10 font-medium">🎉 All courses assigned to schedule!</div>;
+                return <div className="text-center text-slate-400 text-xs mt-6 font-semibold">🎉 All courses assigned to schedule!</div>;
               }
 
               if (sorted.length === 0) {
                 return (
-                  <div className="text-center text-slate-400 text-xs mt-10 p-4 border border-dashed rounded-xl">
-                    🔍 No courses match your search or filter criteria.
+                  <div className="text-center text-slate-400 text-[11px] mt-6 p-3 border border-dashed rounded-lg">
+                    🔍 No courses match criteria.
                   </div>
                 );
               }
@@ -861,24 +854,24 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               };
 
               return Object.keys(grouped).sort().map(program => (
-                <div key={program} className="mb-6">
-                  <h4 className="text-xs font-bold uppercase tracking-wider mb-4 text-slate-800 bg-slate-100 px-2 py-1 rounded">
+                <div key={program} className="mb-4">
+                  <h4 className="text-[10.5px] font-extrabold uppercase tracking-wider mb-2 text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
                     {program}
                   </h4>
                   {Object.keys(grouped[program]).sort((a,b) => Number(a)-Number(b)).map(level => {
                     const theme = levelColors[level] || levelColors['default'];
                     return (
-                      <div key={level} className="mb-5 pl-3 border-l-2 border-slate-100">
-                        <div className="flex items-center justify-between mb-3">
-                          <h5 className={`text-[11px] font-bold uppercase tracking-widest ${theme.text}`}>Level {level}</h5>
+                      <div key={level} className="mb-3 pl-2 border-l-2 border-slate-200">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <h5 className={`text-[10px] font-extrabold uppercase tracking-widest ${theme.text}`}>Level {level}</h5>
                           <button 
                             onClick={() => handleAutoScheduleLevel(level)}
-                            className="text-[10px] font-bold text-hue-navy bg-slate-100 hover:bg-hue-gold/20 px-2 py-0.5 rounded transition-colors"
+                            className="text-[9px] font-extrabold text-[#002147] bg-slate-100 hover:bg-amber-100 px-1.5 py-0.2 rounded transition-colors"
                           >
                             ⚡ Auto-Place
                           </button>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           {grouped[program][level].map(course => {
                             const isSelected = selectedCourse?.id === course.id;
                             
@@ -888,18 +881,18 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, course, { type: 'BANK' })}
                                 onClick={() => handleCourseClick(course)}
-                                className={`p-3 rounded-r-lg border-y border-r border-l-4 shadow-sm cursor-grab active:cursor-grabbing transition-all duration-200 
-                                  ${isSelected ? `text-white scale-[1.02] ${theme.selectedBg}` : `bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ${theme.left}`}`}
+                                className={`p-2 rounded-r-md border-y border-r border-l-3 shadow-2xs cursor-grab active:cursor-grabbing transition-all duration-150 
+                                  ${isSelected ? `text-white scale-[1.01] ${theme.selectedBg}` : `bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ${theme.left}`}`}
                               >
-                                <div className={`font-bold text-sm mb-1 ${isSelected ? 'text-white' : 'text-slate-800'}`}>{course.course_code}</div>
-                                <div className={`text-[10px] font-medium leading-snug ${isSelected ? 'text-white/90' : 'text-slate-500'}`}>{course.course_title}</div>
+                                <div className={`font-extrabold text-xs mb-0.5 ${isSelected ? 'text-white' : 'text-slate-800'}`}>{course.course_code}</div>
+                                <div className={`text-[9.5px] font-medium leading-tight line-clamp-1 ${isSelected ? 'text-white/90' : 'text-slate-500'}`}>{course.course_title}</div>
                                 
-                                <div className="flex gap-2 mt-2">
-                                  <div className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                                    {course.student_count} Students
+                                <div className="flex gap-1.5 mt-1">
+                                  <div className={`text-[8.5px] px-1 py-0.2 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                    {course.student_count} Std
                                   </div>
                                   {course.has_oral_exam ? (
-                                    <div className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'}`}>
+                                    <div className={`text-[8.5px] px-1 py-0.2 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'}`}>
                                       🎤 Oral
                                     </div>
                                   ) : null}
@@ -917,18 +910,18 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
           </div>
         </div>
 
-        {/* Matrix View */}
-        <div className="flex-1 table-container overflow-auto bg-white rounded-xl shadow-sm border border-slate-200 relative">
-          <table className="w-full text-sm">
-            <thead className="table-header sticky top-0 z-20 shadow-sm">
+        {/* Matrix View - High Density Layout */}
+        <div className="flex-1 table-container overflow-auto bg-white rounded-xl shadow-2xs border border-slate-200 relative">
+          <table className="w-full text-xs">
+            <thead className="table-header sticky top-0 z-20 shadow-2xs">
               <tr>
-                <th className="sticky left-0 bg-slate-50 z-30 w-32 border-b border-r border-slate-200">Date</th>
+                <th className="sticky left-0 bg-slate-50 z-30 w-28 border-b border-r border-slate-200 p-1 text-[11px] font-extrabold text-slate-700">Date</th>
                 {programLevels.map(pl => {
                   const [prog, lvl] = pl.split('|');
                   return (
-                    <th key={pl} className="min-w-[200px] border-b border-slate-200">
-                      <div className="text-hue-navy">{prog}</div>
-                      <div className="text-slate-400 font-normal">{lvl}</div>
+                    <th key={pl} className="min-w-[160px] border-b border-slate-200 p-1 text-center bg-slate-50">
+                      <div className="text-[#002147] font-black text-[11px]">{prog}</div>
+                      <div className="text-slate-500 font-bold text-[10px]">{lvl}</div>
                     </th>
                   );
                 })}
@@ -937,9 +930,9 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             <tbody className="divide-y divide-slate-100">
               {calendar.map(day => (
                 <tr key={day.dayIndex} className="table-row relative group">
-                  <td className="table-cell sticky left-0 bg-white shadow-[1px_0_0_0_#e2e8f0] z-10 align-top pt-4">
-                    <div className="font-bold text-hue-navy">{day.dateStr}</div>
-                    <div className="text-xs text-slate-500">{day.dayOfWeek} (Gr {day.groupType})</div>
+                  <td className="table-cell sticky left-0 bg-white shadow-[1px_0_0_0_#e2e8f0] z-10 align-top p-1.5 border-r border-slate-200">
+                    <div className="font-extrabold text-[#002147] text-xs leading-tight">{day.dateStr}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{day.dayOfWeek} (Gr {day.groupType})</div>
                   </td>
                   
                   {programLevels.map(pl => {
@@ -965,7 +958,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                           onDragLeave={handleDragLeaveSlot}
                           onDrop={(e) => handleDropOnSlot(e, day.dayIndex, periodNum, pl)}
                           onClick={() => handleSlotClick(day.dayIndex, periodNum, pl)}
-                          className={`p-1.5 rounded-lg transition-all border min-h-[60px] flex flex-col justify-between ${
+                          className={`p-1 rounded-md transition-all border min-h-[44px] flex flex-col justify-between ${
                             isSlotHovered 
                               ? 'bg-amber-100/80 border-amber-500 ring-2 ring-amber-300 shadow-md' 
                               : isSelectable 
@@ -974,14 +967,14 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                           }`}
                         >
                           {/* Period Label Header */}
-                          <div className="flex items-center justify-between gap-1 mb-1 pb-1 border-b border-slate-200/60 text-[9px] font-bold text-slate-500">
-                            <span className={`px-1.5 py-0.2 rounded text-[8.5px] font-extrabold ${
+                          <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-slate-200/60 text-[8.5px] font-bold text-slate-500">
+                            <span className={`px-1 py-0.1 rounded text-[8px] font-black ${
                               periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'
                             }`}>
                               P{periodNum}
                             </span>
-                            <span className="text-[8px] font-medium text-slate-400">
-                              {assignments.length > 0 ? `${assignments.length} course${assignments.length > 1 ? 's' : ''}` : 'Empty'}
+                            <span className="text-[7.5px] font-medium text-slate-400">
+                              {assignments.length > 0 ? `${assignments.length}` : 'Empty'}
                             </span>
                           </div>
 

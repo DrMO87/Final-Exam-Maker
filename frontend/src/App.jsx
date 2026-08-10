@@ -352,7 +352,7 @@ function App() {
       <main className={`flex-1 h-screen overflow-y-auto relative transition-all duration-300 ${
         isSidebarCollapsed ? 'ml-20' : 'ml-64'
       }`}>
-        <div className="w-full px-4 py-8 md:px-8 md:py-12">
+        <div className={`w-full ${currentStep === 4 ? 'px-3 py-3' : 'px-4 py-8 md:px-8 md:py-12'}`}>
           <div className="animate-fade-in">
             {currentStep === 1 && (
               <div className="pt-4">
