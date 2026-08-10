@@ -7,6 +7,8 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
   const [evaluating, setEvaluating] = useState(false);
   const [evalResult, setEvalResult] = useState(null);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('matrix'); // 'matrix', 'diagnostics', 'unassigned'
+  const [selectedDiagnosticItem, setSelectedDiagnosticItem] = useState(null);
 
   // Conflict lookup helper (overlap between 2 course IDs)
   const getOverlap = (idA, idB) => {
@@ -123,6 +125,25 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
     };
 
     reader.readAsBinaryString(file);
+  };
+
+  // Helper to diagnose specific item rule violations
+  const getItemDiagnostics = (item, hardConflicts, oralViolations, studyGapWarnings) => {
+    const cId = String(item.course.id);
+    
+    const conflictsList = hardConflicts.filter(c => String(c.courseA.id) === cId || String(c.courseB.id) === cId);
+    const oralList = oralViolations.filter(o => String(o.course.id) === cId);
+    const gapList = studyGapWarnings.filter(g => String(g.courseA.id) === cId || String(g.courseB.id) === cId);
+
+    return {
+      hasHardConflict: conflictsList.length > 0,
+      hasOralViolation: oralList.length > 0,
+      hasGapWarning: gapList.length > 0,
+      conflictsList,
+      oralList,
+      gapList,
+      isClean: conflictsList.length === 0 && oralList.length === 0 && gapList.length === 0
+    };
   };
 
   // CORE EVALUATION ENGINE
@@ -283,6 +304,29 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       }
     }
 
+    // 5. Build Matrix Table Preview Structure
+    const matrixPreview = {};
+    const importedDates = [...new Set(assignedCoursesList.map(i => i.dateStr))].sort();
+
+    importedDates.forEach(d => {
+      matrixPreview[d] = { 1: {}, 2: {} };
+    });
+
+    assignedCoursesList.forEach(item => {
+      const plKey = `${item.course.program}|Level ${item.course.level}`;
+      if (matrixPreview[item.dateStr] && matrixPreview[item.dateStr][item.period]) {
+        if (!matrixPreview[item.dateStr][item.period][plKey]) {
+          matrixPreview[item.dateStr][item.period][plKey] = [];
+        }
+        
+        const diag = getItemDiagnostics(item, hardConflicts, oralViolations, studyGapWarnings);
+        matrixPreview[item.dateStr][item.period][plKey].push({
+          ...item,
+          diagnostics: diag
+        });
+      }
+    });
+
     // CALCULATE COMPLIANCE SCORE
     const totalAssigned = assignedCoursesList.length;
     const totalCourseCount = courses.length;
@@ -299,6 +343,8 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       periodCapacityViolations,
       studyGapWarnings,
       invalidRows,
+      matrixPreview,
+      importedDates,
       score,
       isPerfect: hardConflicts.length === 0 && oralViolations.length === 0 && periodCapacityViolations.length === 0 && unassignedCoursesList.length === 0
     });
@@ -483,108 +529,356 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
 
               </div>
 
-              {/* HARD STUDENT CONFLICTS TABLE */}
-              {evalResult.hardConflicts.length > 0 && (
-                <div className="bg-white rounded-2xl p-5 border border-red-200 shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 text-red-900 font-extrabold text-xs">
-                    <span>🚨</span> Hard Student Overlap Conflicts (Scheduled Same Day & Period)
+              {/* INTERACTIVE NAVIGATION TABS */}
+              <div className="flex border-b border-slate-200 gap-2 shrink-0 bg-white p-2 rounded-xl shadow-2xs">
+                <button
+                  onClick={() => setActiveTab('matrix')}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${
+                    activeTab === 'matrix' 
+                      ? 'bg-[#002147] text-white shadow-xs' 
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>📅</span> Interactive Timetable Matrix Preview
+                </button>
+                
+                <button
+                  onClick={() => setActiveTab('diagnostics')}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${
+                    activeTab === 'diagnostics' 
+                      ? 'bg-[#002147] text-white shadow-xs' 
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>🚨</span> Rule Breakdown &amp; Comments
+                  {(evalResult.hardConflicts.length + evalResult.oralViolations.length + evalResult.studyGapWarnings.length) > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">
+                      {evalResult.hardConflicts.length + evalResult.oralViolations.length + evalResult.studyGapWarnings.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('unassigned')}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${
+                    activeTab === 'unassigned' 
+                      ? 'bg-[#002147] text-white shadow-xs' 
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>📋</span> Unassigned Courses ({evalResult.unassignedCourses.length})
+                </button>
+              </div>
+
+              {/* TAB 1: INTERACTIVE TIMETABLE MATRIX PREVIEW */}
+              {activeTab === 'matrix' && (
+                <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="font-extrabold text-sm text-[#002147]">Imported Timetable Matrix Preview</h4>
+                      <p className="text-xs text-slate-500 font-medium">Click any course card to inspect rule diagnostic comments, conflict details, and placement suggestions.</p>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-[11px] font-bold">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Conflict-Free</span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Hard Conflict</span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> Oral Violation</span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Gap Warning</span>
+                    </div>
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-xs text-left">
-                      <thead>
-                        <tr className="bg-red-50 text-red-900 border-b border-red-200">
-                          <th className="p-2 font-bold">Course 1</th>
-                          <th className="p-2 font-bold">Course 2</th>
-                          <th className="p-2 font-bold">Assigned Date & Period</th>
-                          <th className="p-2 font-bold text-center">Student Overlap</th>
-                          <th className="p-2 font-bold text-center">Severity</th>
+                  <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table className="w-full border-collapse text-[9px] table-fixed min-w-[900px]">
+                      <thead className="bg-[#002147] text-white">
+                        <tr>
+                          <th className="p-2 border border-slate-400 w-[8%] text-center uppercase font-bold text-[#FFB81C]">Date</th>
+                          <th className="p-2 border border-slate-400 w-[5%] text-center uppercase font-bold text-[#FFB81C]">Period</th>
+                          {[
+                            'PharmD|Level 1', 'PharmD Clinical|Level 1',
+                            'PharmD|Level 2', 'PharmD Clinical|Level 2',
+                            'PharmD|Level 3', 'PharmD Clinical|Level 3',
+                            'PharmD|Level 4', 'PharmD Clinical|Level 4',
+                            'PharmD|Level 5', 'PharmD Clinical|Level 5'
+                          ].map(pl => {
+                            const [prog, lvl] = pl.split('|');
+                            const isClinical = prog.toLowerCase().includes('clinical');
+                            return (
+                              <th key={pl} className="p-1 border border-slate-400 text-center font-bold bg-[#002147]">
+                                <div className={`text-[8px] font-black leading-tight ${isClinical ? 'text-[#FFB81C]' : 'text-white'}`}>{prog}</div>
+                                <div className="text-slate-200 font-bold text-[7.5px]">{lvl}</div>
+                              </th>
+                            );
+                          })}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {evalResult.hardConflicts.map((c, i) => (
-                          <tr key={i} className="hover:bg-red-50/40">
-                            <td className="p-2 font-bold text-slate-800">{c.courseA.course_code} - {c.courseA.course_title}</td>
-                            <td className="p-2 font-bold text-slate-800">{c.courseB.course_code} - {c.courseB.course_title}</td>
-                            <td className="p-2 font-semibold text-slate-600">{c.dateStr} (Period {c.period})</td>
-                            <td className="p-2 text-center font-black text-red-700">{c.overlap} Students</td>
-                            <td className="p-2 text-center">
-                              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">
-                                {c.severity}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                      <tbody>
+                        {evalResult.importedDates.map(dateStr => {
+                          const dateObj = new Date(dateStr + 'T00:00:00');
+                          const dayName = isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                          const formattedDate = isNaN(dateObj.getTime()) ? dateStr : dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                          return [1, 2].map(periodNum => (
+                            <tr key={`${dateStr}-${periodNum}`} className="border-b border-slate-200">
+                              {periodNum === 1 && (
+                                <td rowSpan={2} className="border border-slate-300 p-1 text-center align-middle bg-slate-50 font-bold border-l-4 border-l-[#FFB81C]">
+                                  <div className="text-[10px] text-[#002147] font-extrabold">{dayName}</div>
+                                  <div className="text-[7.5px] text-slate-500">{formattedDate}</div>
+                                </td>
+                              )}
+
+                              <td className="border border-slate-300 p-1 text-center align-middle bg-white font-bold">
+                                <span className={`px-1 py-0.2 rounded text-[7.5px] ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
+                                  P{periodNum}
+                                </span>
+                              </td>
+
+                              {[
+                                'PharmD|Level 1', 'PharmD Clinical|Level 1',
+                                'PharmD|Level 2', 'PharmD Clinical|Level 2',
+                                'PharmD|Level 3', 'PharmD Clinical|Level 3',
+                                'PharmD|Level 4', 'PharmD Clinical|Level 4',
+                                'PharmD|Level 5', 'PharmD Clinical|Level 5'
+                              ].map(plKey => {
+                                const assignedItems = evalResult.matrixPreview[dateStr]?.[periodNum]?.[plKey] || [];
+
+                                return (
+                                  <td key={plKey} className="border border-slate-300 p-1 align-top bg-white">
+                                    {assignedItems.length > 0 ? (
+                                      <div className="space-y-1">
+                                        {assignedItems.map(item => {
+                                          const diag = item.diagnostics;
+                                          const isSelected = selectedDiagnosticItem?.course.id === item.course.id;
+
+                                          let cardStyle = 'bg-white border-emerald-300 text-slate-800 shadow-2xs';
+                                          if (diag.hasHardConflict) cardStyle = 'bg-red-50 border-red-400 text-red-950 font-semibold shadow-xs';
+                                          else if (diag.hasOralViolation) cardStyle = 'bg-purple-50 border-purple-400 text-purple-950 font-semibold shadow-xs';
+                                          else if (diag.hasGapWarning) cardStyle = 'bg-amber-50 border-amber-400 text-amber-950 font-semibold shadow-xs';
+
+                                          return (
+                                            <div
+                                              key={item.course.id}
+                                              onClick={() => setSelectedDiagnosticItem(item)}
+                                              className={`p-1.5 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] ${cardStyle} ${
+                                                isSelected ? 'ring-2 ring-[#002147] shadow-md scale-[1.02]' : ''
+                                              }`}
+                                            >
+                                              <div className="flex items-center justify-between gap-1 mb-0.5">
+                                                <span className="font-extrabold text-[9px] text-[#002147]">{item.course.course_code}</span>
+                                                <span className="text-[7px] bg-white/80 border border-slate-300 px-1 py-0.2 rounded font-bold">
+                                                  👥 {item.course.student_count}
+                                                </span>
+                                              </div>
+                                              <div className="text-[8px] leading-tight truncate font-medium text-slate-700">{item.course.course_title}</div>
+
+                                              {/* STATUS BADGES */}
+                                              <div className="mt-1 flex flex-wrap gap-1">
+                                                {diag.hasHardConflict && (
+                                                  <span className="text-[6.5px] bg-red-600 text-white font-black px-1 py-0.2 rounded">
+                                                    🚨 Conflict ({diag.conflictsList[0]?.overlap})
+                                                  </span>
+                                                )}
+                                                {diag.hasOralViolation && (
+                                                  <span className="text-[6.5px] bg-purple-600 text-white font-black px-1 py-0.2 rounded">
+                                                    🎤 Oral P2 Error
+                                                  </span>
+                                                )}
+                                                {diag.hasGapWarning && !diag.hasHardConflict && (
+                                                  <span className="text-[6.5px] bg-amber-600 text-white font-black px-1 py-0.2 rounded">
+                                                    ⚠️ Rest Gap Warning
+                                                  </span>
+                                                )}
+                                                {diag.isClean && (
+                                                  <span className="text-[6.5px] bg-emerald-600 text-white font-extrabold px-1 py-0.2 rounded">
+                                                    ✓ Valid
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    ) : (
+                                      <div className="text-slate-300 text-center py-1 text-[7.5px] font-light">—</div>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ));
+                        })}
                       </tbody>
                     </table>
                   </div>
+
+                  {/* DIAGNOSTIC COMMENT SIDE PANEL FOR SELECTED COURSE */}
+                  {selectedDiagnosticItem && (
+                    <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl space-y-3 animate-fade-in">
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">💬</span>
+                          <h4 className="font-extrabold text-sm text-white font-outfit">
+                            Rule Diagnostic Comments: <span className="text-[#FFB81C]">{selectedDiagnosticItem.course.course_code}</span> — {selectedDiagnosticItem.course.course_title}
+                          </h4>
+                        </div>
+                        <button
+                          onClick={() => setSelectedDiagnosticItem(null)}
+                          className="text-slate-400 hover:text-white font-bold text-xs"
+                        >
+                          ✕ Close Comment Panel
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3 bg-slate-800/80 rounded-xl space-y-1">
+                          <div className="font-bold text-[#FFB81C] text-[11px] uppercase tracking-wider">📌 Course Metadata &amp; Assigned Slot</div>
+                          <div>Program &amp; Level: <strong className="text-white">{selectedDiagnosticItem.course.program} (Level {selectedDiagnosticItem.course.level})</strong></div>
+                          <div>Enrolled Students: <strong className="text-white">{selectedDiagnosticItem.course.student_count}</strong></div>
+                          <div>Assigned Exam Slot: <strong className="text-white">{selectedDiagnosticItem.dateStr} (Period {selectedDiagnosticItem.period})</strong></div>
+                          <div>Oral Exam: <strong className="text-white">{selectedDiagnosticItem.course.has_oral_exam ? 'Yes (Requires Period 1)' : 'No'}</strong></div>
+                        </div>
+
+                        <div className="p-3 bg-slate-800/80 rounded-xl space-y-2">
+                          <div className="font-bold text-[#FFB81C] text-[11px] uppercase tracking-wider">🔍 Scheduling Rule Diagnostic Comments</div>
+                          
+                          {selectedDiagnosticItem.diagnostics.isClean ? (
+                            <div className="text-emerald-400 font-bold flex items-center gap-1.5">
+                              <span>✅</span> This course placement is 100% compliant with zero student conflicts or rule violations.
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {selectedDiagnosticItem.diagnostics.conflictsList.map((c, i) => (
+                                <div key={i} className="p-2 bg-red-950/80 border border-red-500/50 rounded-lg text-red-200 font-medium">
+                                  <strong className="text-white">🚨 HARD CONFLICT:</strong> Shares <strong className="underline decoration-red-400 text-white">{c.overlap} students</strong> with <strong>{c.courseA.id === selectedDiagnosticItem.course.id ? c.courseB.course_code : c.courseA.course_code}</strong> on {c.dateStr} (Period {c.period}).
+                                </div>
+                              ))}
+
+                              {selectedDiagnosticItem.diagnostics.oralList.map((o, i) => (
+                                <div key={i} className="p-2 bg-purple-950/80 border border-purple-500/50 rounded-lg text-purple-200 font-medium">
+                                  <strong className="text-white">🎤 ORAL EXAM VIOLATION:</strong> Placed in Period {o.period}. Faculty scheduling rules strictly require oral exam courses to be placed in Period 1.
+                                </div>
+                              ))}
+
+                              {selectedDiagnosticItem.diagnostics.gapList.map((g, i) => (
+                                <div key={i} className="p-2 bg-amber-950/80 border border-amber-500/50 rounded-lg text-amber-200 font-medium">
+                                  <strong className="text-white">⚠️ STUDY GAP BUFFER PENALTY:</strong> Scheduled on consecutive days with insufficient rest buffer ({g.dayDiff} day gap vs required {g.requiredGap} days rest for {g.overlap} shared students).
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* ORAL EXAM VIOLATIONS */}
-              {evalResult.oralViolations.length > 0 && (
-                <div className="bg-white rounded-2xl p-5 border border-amber-200 shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 text-amber-900 font-extrabold text-xs">
-                    <span>🎤</span> Oral Exam Period Violations (Assigned to Period 2)
-                  </div>
+              {/* TAB 2: RULE DIAGNOSTICS & COMMENTS */}
+              {activeTab === 'diagnostics' && (
+                <div className="space-y-4">
+                  {/* HARD STUDENT CONFLICTS TABLE */}
+                  {evalResult.hardConflicts.length > 0 && (
+                    <div className="bg-white rounded-2xl p-5 border border-red-200 shadow-sm space-y-3">
+                      <div className="flex items-center gap-2 text-red-900 font-extrabold text-xs">
+                        <span>🚨</span> Hard Student Overlap Conflicts (Scheduled Same Day &amp; Period)
+                      </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-xs text-left">
-                      <thead>
-                        <tr className="bg-amber-50 text-amber-900 border-b border-amber-200">
-                          <th className="p-2 font-bold">Course Code & Title</th>
-                          <th className="p-2 font-bold">Program & Level</th>
-                          <th className="p-2 font-bold">Assigned Slot</th>
-                          <th className="p-2 font-bold">Rule Requirement</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {evalResult.oralViolations.map((v, i) => (
-                          <tr key={i} className="hover:bg-amber-50/40">
-                            <td className="p-2 font-bold text-slate-800">{v.course.course_code} - {v.course.course_title}</td>
-                            <td className="p-2 text-slate-600">{v.course.program} (L{v.course.level})</td>
-                            <td className="p-2 font-bold text-amber-800">{v.dateStr} — Period {v.period}</td>
-                            <td className="p-2 text-slate-700 font-medium">{v.rule}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-xs text-left">
+                          <thead>
+                            <tr className="bg-red-50 text-red-900 border-b border-red-200">
+                              <th className="p-2 font-bold">Course 1</th>
+                              <th className="p-2 font-bold">Course 2</th>
+                              <th className="p-2 font-bold">Assigned Date &amp; Period</th>
+                              <th className="p-2 font-bold text-center">Student Overlap</th>
+                              <th className="p-2 font-bold text-center">Severity</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200">
+                            {evalResult.hardConflicts.map((c, i) => (
+                              <tr key={i} className="hover:bg-red-50/40">
+                                <td className="p-2 font-bold text-slate-800">{c.courseA.course_code} - {c.courseA.course_title}</td>
+                                <td className="p-2 font-bold text-slate-800">{c.courseB.course_code} - {c.courseB.course_title}</td>
+                                <td className="p-2 font-semibold text-slate-600">{c.dateStr} (Period {c.period})</td>
+                                <td className="p-2 text-center font-black text-red-700">{c.overlap} Students</td>
+                                <td className="p-2 text-center">
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white">
+                                    {c.severity}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ORAL EXAM VIOLATIONS */}
+                  {evalResult.oralViolations.length > 0 && (
+                    <div className="bg-white rounded-2xl p-5 border border-purple-200 shadow-sm space-y-3">
+                      <div className="flex items-center gap-2 text-purple-900 font-extrabold text-xs">
+                        <span>🎤</span> Oral Exam Period Violations (Assigned to Period 2)
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-xs text-left">
+                          <thead>
+                            <tr className="bg-purple-50 text-purple-900 border-b border-purple-200">
+                              <th className="p-2 font-bold">Course Code &amp; Title</th>
+                              <th className="p-2 font-bold">Program &amp; Level</th>
+                              <th className="p-2 font-bold">Assigned Slot</th>
+                              <th className="p-2 font-bold">Rule Requirement</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200">
+                            {evalResult.oralViolations.map((v, i) => (
+                              <tr key={i} className="hover:bg-purple-50/40">
+                                <td className="p-2 font-bold text-slate-800">{v.course.course_code} - {v.course.course_title}</td>
+                                <td className="p-2 text-slate-600">{v.course.program} (L{v.course.level})</td>
+                                <td className="p-2 font-bold text-purple-800">{v.dateStr} — Period {v.period}</td>
+                                <td className="p-2 text-slate-700 font-medium">{v.rule}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CAPACITY VIOLATIONS */}
+                  {evalResult.periodCapacityViolations.length > 0 && (
+                    <div className="bg-white rounded-2xl p-5 border border-purple-200 shadow-sm space-y-3">
+                      <div className="flex items-center gap-2 text-purple-900 font-extrabold text-xs">
+                        <span>👥</span> Period Capacity Overshoots (&gt; 1000 Students)
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-xs text-left">
+                          <thead>
+                            <tr className="bg-purple-50 text-purple-900 border-b border-purple-200">
+                              <th className="p-2 font-bold">Date &amp; Period</th>
+                              <th className="p-2 font-bold text-center">Total Students</th>
+                              <th className="p-2 font-bold">Assigned Courses</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200">
+                            {evalResult.periodCapacityViolations.map((v, i) => (
+                              <tr key={i}>
+                                <td className="p-2 font-bold text-slate-800">{v.dateStr} (Period {v.period})</td>
+                                <td className="p-2 text-center font-black text-purple-700">{v.totalStudents} / 1000</td>
+                                <td className="p-2 text-slate-600 font-medium">{v.courses.join(', ')}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* CAPACITY VIOLATIONS */}
-              {evalResult.periodCapacityViolations.length > 0 && (
-                <div className="bg-white rounded-2xl p-5 border border-purple-200 shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 text-purple-900 font-extrabold text-xs">
-                    <span>👥</span> Period Capacity Overshoots (&gt; 1000 Students)
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-xs text-left">
-                      <thead>
-                        <tr className="bg-purple-50 text-purple-900 border-b border-purple-200">
-                          <th className="p-2 font-bold">Date & Period</th>
-                          <th className="p-2 font-bold text-center">Total Students</th>
-                          <th className="p-2 font-bold">Assigned Courses</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {evalResult.periodCapacityViolations.map((v, i) => (
-                          <tr key={i}>
-                            <td className="p-2 font-bold text-slate-800">{v.dateStr} (Period {v.period})</td>
-                            <td className="p-2 text-center font-black text-purple-700">{v.totalStudents} / 1000</td>
-                            <td className="p-2 text-slate-600 font-medium">{v.courses.join(', ')}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* UNASSIGNED COURSES */}
-              {evalResult.unassignedCourses.length > 0 && (
+              {/* TAB 3: UNASSIGNED COURSES */}
+              {activeTab === 'unassigned' && (
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
                   <div className="flex items-center gap-2 text-slate-800 font-extrabold text-xs">
                     <span>📋</span> Unassigned Courses from Step 3 Database ({evalResult.unassignedCourses.length})
