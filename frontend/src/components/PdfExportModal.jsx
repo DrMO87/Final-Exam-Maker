@@ -11,7 +11,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
   const [matrixColumnMode, setMatrixColumnMode] = useState('detailed'); // 'detailed' (10 Program Columns), 'unified' (5 Level Columns)
   const [orientation, setOrientation] = useState('landscape'); // 'landscape' or 'portrait'
   const [pageSize, setPageSize] = useState('a4'); // 'a4' or 'a3'
-  const [zoomLevel, setZoomLevel] = useState(85); // Default 85% (Fit Page Margins)
+  const [zoomLevel, setZoomLevel] = useState(100); // Default 100% (Fits 1060px A4 Landscape Margins)
 
   // Local or external settings state with fallback
   const [localSettings, setLocalSettings] = useState(() => {
@@ -135,10 +135,11 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
       
       // Clone element off-screen for pristine rendering without modal scrollbar distortion
       const clone = element.cloneNode(true);
-      const targetWidth = orientation === 'landscape' ? '1280px' : '920px';
+      const targetWidth = orientation === 'landscape' ? '1060px' : '760px';
       clone.style.width = targetWidth;
+      clone.style.maxWidth = targetWidth;
       clone.style.transform = 'none';
-      clone.style.padding = '16px';
+      clone.style.padding = '8px';
       clone.style.boxSizing = 'border-box';
       clone.style.background = '#ffffff';
 
@@ -158,7 +159,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
           scale: 2, 
           useCORS: true, 
           logging: false,
-          windowWidth: orientation === 'landscape' ? 1280 : 920
+          windowWidth: orientation === 'landscape' ? 1060 : 760
         },
         jsPDF: { unit: 'mm', format: pageSize, orientation: orientation },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
@@ -334,7 +335,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
               id="pdf-document-content" 
               className="bg-white text-slate-900 shadow-2xl rounded-none p-3 sm:p-4 border border-slate-300 font-sans text-xs flex flex-col justify-between"
               style={{
-                width: orientation === 'landscape' ? '1280px' : '920px',
+                width: orientation === 'landscape' ? '1060px' : '760px',
                 minHeight: '800px',
                 boxSizing: 'border-box'
               }}
@@ -342,9 +343,20 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
               {/* PRINT CSS TO FORCE TABLE HEADER REPETITION & REFINED MARGINS */}
               <style>{`
                 @media print {
-                  @page { margin: 3mm; }
+                  @page { size: A4 landscape; margin: 4mm; }
+                  body { background: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                  #pdf-document-content {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                    transform: none !important;
+                  }
                   thead { display: table-header-group !important; }
                   tr { page-break-inside: avoid !important; }
+                  table { table-layout: fixed !important; width: 100% !important; }
                 }
                 thead { display: table-header-group; }
                 tr { page-break-inside: avoid; }
@@ -393,30 +405,31 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                 <div className="mb-4 overflow-hidden">
                     
                     {/* Matrix Table with Navy/Gold Styling */}
-                    <table className="w-full border-collapse border border-slate-300 text-[9px] table-fixed">
+                    <table className="w-full border-collapse border border-slate-300 text-[9px] table-fixed" style={{ width: '100%', tableLayout: 'fixed' }}>
                       <thead className="bg-[#002147] text-white">
                         <tr className="bg-[#002147] text-white">
-                          <th className="border border-slate-400 p-1.5 text-center w-[8.5%] uppercase font-bold text-[8.5px] text-[#FFB81C] border-l-4 border-l-[#FFB81C]">
-                            Date & Day
+                          <th style={{ width: '7.5%' }} className="border border-slate-400 p-1 text-center uppercase font-bold text-[8px] text-[#FFB81C] border-l-4 border-l-[#FFB81C]">
+                            Date &amp; Day
                           </th>
-                          <th className="border border-slate-400 p-1.5 text-center w-[5.5%] uppercase font-bold text-[8px] text-[#FFB81C]">
+                          <th style={{ width: '4.5%' }} className="border border-slate-400 p-1 text-center uppercase font-bold text-[7.5px] text-[#FFB81C]">
                             Period
                           </th>
                           {columnsToUse.map(colKey => {
+                            const colWidth = `${88 / columnsToUse.length}%`;
                             if (matrixColumnMode === 'unified') {
                               return (
-                                <th key={colKey} className="border border-slate-400 p-1.5 text-center font-bold bg-[#002147] text-white">
-                                  <div className="text-[9.5px] font-black text-[#FFB81C] uppercase tracking-wider">{colKey}</div>
-                                  <div className="text-slate-300 font-medium text-[7.5px]">PharmD & Clinical</div>
+                                <th key={colKey} style={{ width: colWidth }} className="border border-slate-400 p-1 text-center font-bold bg-[#002147] text-white">
+                                  <div className="text-[9px] font-black text-[#FFB81C] uppercase tracking-wider">{colKey}</div>
+                                  <div className="text-slate-300 font-medium text-[7px]">PharmD &amp; Clinical</div>
                                 </th>
                               );
                             }
                             const [prog, lvl] = colKey.split('|');
                             const isClinical = prog.toLowerCase().includes('clinical');
                             return (
-                              <th key={colKey} className="border border-slate-400 p-1 text-center font-bold bg-[#002147]">
-                                <div className={`text-[8px] font-black leading-tight ${isClinical ? 'text-[#FFB81C]' : 'text-white'}`}>{prog}</div>
-                                <div className="text-slate-200 font-bold text-[8px]">{lvl}</div>
+                              <th key={colKey} style={{ width: colWidth }} className="border border-slate-400 p-1 text-center font-bold bg-[#002147]">
+                                <div className={`text-[7.5px] font-black leading-tight ${isClinical ? 'text-[#FFB81C]' : 'text-white'}`}>{prog}</div>
+                                <div className="text-slate-200 font-bold text-[7.5px]">{lvl}</div>
                               </th>
                             );
                           })}
@@ -436,32 +449,33 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                               {periodNum === 1 && (
                                 <td 
                                   rowSpan={2} 
-                                  style={{ backgroundColor: '#f8fafc', position: 'relative', zIndex: 10 }}
-                                  className="border border-slate-300 p-1 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight"
+                                  style={{ backgroundColor: '#f8fafc', position: 'relative', zIndex: 10, width: '7.5%' }}
+                                  className="border border-slate-300 p-0.5 text-center align-middle font-bold bg-[#F8FAFC] border-l-4 border-l-[#FFB81C] leading-tight"
                                 >
-                                  <div className="flex flex-col items-center justify-center h-full py-1">
-                                    <div className="text-[10px] text-[#002147] font-extrabold">{dayName}</div>
-                                    <div className="text-[7.5px] text-slate-600 font-bold mt-0.5 whitespace-nowrap">{formattedDate}</div>
+                                  <div className="flex flex-col items-center justify-center h-full py-0.5">
+                                    <div className="text-[9.5px] text-[#002147] font-extrabold">{dayName}</div>
+                                    <div className="text-[7px] text-slate-600 font-bold mt-0.5 whitespace-nowrap">{formattedDate}</div>
                                   </div>
                                 </td>
                               )}
 
                               <td 
-                                style={{ backgroundColor: '#ffffff' }}
+                                style={{ backgroundColor: '#ffffff', width: '4.5%' }}
                                 className="border border-slate-300 p-0.5 text-center font-bold align-middle bg-white"
                               >
-                                <span className={`inline-block px-1 py-0.5 rounded text-[7.5px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
+                                <span className={`inline-block px-1 py-0.2 rounded text-[7px] font-bold ${periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'}`}>
                                   P{periodNum}
                                 </span>
                               </td>
 
                               {columnsToUse.map(colKey => {
                                 const assignedItems = matrixData[dateStr]?.[periodNum]?.[colKey] || [];
+                                const colWidth = `${88 / columnsToUse.length}%`;
 
                                 return (
                                   <td 
                                     key={colKey} 
-                                    style={{ backgroundColor: '#ffffff' }}
+                                    style={{ backgroundColor: '#ffffff', width: colWidth }}
                                     className="border border-slate-300 p-0.5 align-top bg-white"
                                   >
                                     {assignedItems.length > 0 ? (
@@ -476,11 +490,11 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               style={{ 
                                                 backgroundColor: '#ffffff', 
                                                 border: '1px solid #cbd5e1', 
-                                                borderRadius: '5px', 
-                                                padding: '4px 5px', 
-                                                marginBottom: '4px',
+                                                borderRadius: '4px', 
+                                                padding: '3px 4px', 
+                                                marginBottom: '3px',
                                                 boxSizing: 'border-box',
-                                                overflow: 'visible'
+                                                overflow: 'hidden'
                                               }}
                                             >
                                               {/* Card Header Row: Course Code + Student Count Micro Badge */}
@@ -489,22 +503,25 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                   display: 'flex', 
                                                   alignItems: 'center', 
                                                   justifyContent: 'space-between', 
-                                                  gap: '4px',
+                                                  gap: '2px',
                                                   borderBottom: '1px solid #e2e8f0', 
-                                                  paddingBottom: '3px', 
-                                                  marginBottom: '3px',
+                                                  paddingBottom: '2px', 
+                                                  marginBottom: '2.5px',
                                                   width: '100%',
-                                                  lineHeight: '1.2'
+                                                  lineHeight: '1'
                                                 }}
                                               >
                                                 <span 
                                                   style={{ 
-                                                    fontSize: '9px', 
+                                                    fontSize: '8.5px', 
                                                     fontWeight: '900', 
                                                     color: '#002147', 
                                                     letterSpacing: '-0.01em',
                                                     display: 'inline-block',
-                                                    verticalAlign: 'middle'
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    maxWidth: '68%'
                                                   }}
                                                 >
                                                   {c.course_code}
@@ -514,10 +531,10 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                                   style={{ 
                                                     display: 'inline-block', 
                                                     textAlign: 'center',
-                                                    padding: '1px 4px', 
+                                                    padding: '1px 3px', 
                                                     fontSize: '7px', 
                                                     fontWeight: '800', 
-                                                    lineHeight: '1.1', 
+                                                    lineHeight: '1', 
                                                     color: '#1e293b', 
                                                     backgroundColor: '#f1f5f9', 
                                                     border: '1px solid #cbd5e1', 
@@ -531,7 +548,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               </div>
                                               
                                               {matrixColumnMode === 'unified' && (
-                                                <div style={{ marginBottom: '3px' }}>
+                                                <div style={{ marginBottom: '2px' }}>
                                                   <span className={`text-[6.5px] font-extrabold px-1 py-0.2 rounded border ${
                                                     isClinical ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-blue-50 text-blue-900 border-blue-200'
                                                   }`}>
@@ -543,11 +560,11 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
                                               {/* Course Title */}
                                               <div 
                                                 style={{ 
-                                                  fontSize: '8px', 
+                                                  fontSize: '7.5px', 
                                                   fontWeight: '700', 
                                                   color: '#0f172a', 
-                                                  lineHeight: '1.25', 
-                                                  marginTop: '2px', 
+                                                  lineHeight: '1.2', 
+                                                  marginTop: '1.5px', 
                                                   wordBreak: 'break-word',
                                                   overflowWrap: 'break-word',
                                                   textAlign: 'left'
@@ -558,14 +575,16 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
                                               {/* Oral Exam Badge */}
                                               {c.has_oral_exam && (
-                                                <div style={{ marginTop: '3px' }}>
+                                                <div style={{ marginTop: '2px' }}>
                                                   <span 
                                                     style={{ 
-                                                      display: 'inline-block', 
-                                                      padding: '1px 5px', 
+                                                      display: 'inline-flex', 
+                                                      alignItems: 'center',
+                                                      gap: '2px',
+                                                      padding: '1px 4px', 
                                                       fontSize: '6.5px', 
                                                       fontWeight: '800', 
-                                                      lineHeight: '1.1', 
+                                                      lineHeight: '1', 
                                                       color: '#78350f', 
                                                       backgroundColor: '#fef3c7', 
                                                       border: '1px solid #fcd34d', 
