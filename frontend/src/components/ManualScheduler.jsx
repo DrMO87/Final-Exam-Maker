@@ -509,29 +509,52 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
 
   return (
     <div className="card w-full flex flex-col h-[calc(100vh-120px)]">
-      <div className="flex justify-between items-center mb-4 shrink-0">
+      {/* Header Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-200/80 shrink-0">
         <div>
-          <h2 className="mb-1">Manual Pre-Scheduling & Level Assistant <span className="text-slate-400 font-normal text-lg">(Optional)</span></h2>
-          <p className="text-sm text-slate-500">Pin courses manually or auto-schedule level by level. Cross-program same courses are automatically placed on the same day.</p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-black text-slate-800 tracking-tight font-outfit m-0">
+              Manual Pre-Scheduling &amp; Level Assistant
+            </h2>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md border border-slate-200">
+              Optional
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1 mb-0">
+            Pin courses manually or auto-schedule level by level. Cross-program identical courses are automatically placed on the same day.
+          </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <button className="btn btn-secondary text-xs" onClick={onBack}>Back</button>
+
+        {/* Primary Header Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
           <button 
-            className="btn bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-300 font-extrabold text-xs flex items-center gap-1.5 shadow-xs" 
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-all shadow-2xs active:scale-95"
+            onClick={onBack}
+          >
+            ← Back
+          </button>
+          
+          <button 
+            className="px-3.5 py-2 rounded-xl bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-900 font-extrabold text-xs flex items-center gap-1.5 shadow-2xs transition-all active:scale-95" 
             onClick={() => setShowEvaluatorModal(true)}
             title="Export/Import manual CSV/Excel table and evaluate against Step 3 conflict data"
           >
-            📊 CSV / Excel Evaluator
+            <span>📊</span> CSV / Excel Evaluator
           </button>
+
           <button 
-            className="btn btn-gold font-bold shadow-md hover:shadow-lg flex items-center gap-1.5 text-xs" 
+            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95" 
             onClick={() => setShowPdfModal(true)}
             title="Export official branded PDF timetable of current pre-scheduled courses"
           >
-            📄 Export Branded PDF
+            <span>📄</span> Export Branded PDF
           </button>
-          <button className="btn btn-primary shadow-glow-primary text-xs" onClick={() => onComplete(lockedAssignments, getPdfScheduleData())}>
-            Proceed to Generate
+
+          <button 
+            className="px-4 py-2 rounded-xl bg-[#002147] hover:bg-[#001530] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-95 border border-[#FFB81C]/30" 
+            onClick={() => onComplete(lockedAssignments, getPdfScheduleData())}
+          >
+            <span>🚀</span> Proceed to Generate ➔
           </button>
         </div>
       </div>
@@ -564,17 +587,17 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
       )}
 
       {/* Level Quick Actions Toolbar */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-2.5 mb-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3 shrink-0 shadow-2xs">
         <div className="flex items-center gap-3 flex-wrap">
           {/* Conflict Policy Toggle */}
           <div className="flex items-center gap-2 border-r border-slate-200 pr-3 flex-wrap">
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Conflict Rule:</span>
+            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Conflict Rule:</span>
             <button
               onClick={() => setAllowMinorConflicts(!allowMinorConflicts)}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg border shadow-sm transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-extrabold rounded-xl border shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 ${
                 allowMinorConflicts 
-                  ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100' 
-                  : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+                  ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100' 
+                  : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
               }`}
               title={allowMinorConflicts ? "Minor overlaps (<5 students) are allowed on same day" : "ALL student overlaps (≥1 student) are strictly blocked"}
             >
@@ -590,7 +613,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               return (
                 <button
                   onClick={() => setShowExceptionsSummaryModal(true)}
-                  className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+                  className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95"
                   title="Click to view detailed breakdown of all minor student conflict overlaps allowed under exception policy"
                 >
                   <span>⚠️ {activeExceptions.length} Exception{activeExceptions.length > 1 ? 's' : ''}</span>
@@ -602,40 +625,45 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
             })()}
           </div>
 
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">⚡ Auto-Schedule:</span>
+          <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Auto-Schedule:</span>
+          
           <button
             onClick={handleAutoScheduleAll}
-            className="btn btn-primary btn-sm px-3 text-xs font-bold shadow-glow-primary flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-xl bg-[#002147] hover:bg-[#001530] text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition-all active:scale-95"
             title="Auto-place remaining unassigned courses across all levels"
           >
-            ⚡ Auto-Schedule All
+            <span>⚡</span> Auto-Schedule All
           </button>
 
-          {availableLevels.map(lvl => {
-            const levelUnassigned = courses.filter(c => String(c.level) === String(lvl) && !lockedAssignments[c.id]).length;
-            return (
-              <button
-                key={lvl}
-                onClick={() => handleAutoScheduleLevel(lvl)}
-                className="px-3 py-1.5 bg-white border border-slate-300 hover:border-hue-gold hover:bg-hue-gold/10 text-slate-800 text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5"
-              >
-                <span>Level {lvl}</span>
-                {levelUnassigned > 0 ? (
-                  <span className="bg-hue-navy text-white text-[10px] px-1.5 py-0.2 rounded-full">{levelUnassigned}</span>
-                ) : (
-                  <span className="text-emerald-600 text-[10px]">✓</span>
-                )}
-              </button>
-            );
-          })}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {availableLevels.map(lvl => {
+              const levelUnassigned = courses.filter(c => String(c.level) === String(lvl) && !lockedAssignments[c.id]).length;
+              return (
+                <button
+                  key={lvl}
+                  onClick={() => handleAutoScheduleLevel(lvl)}
+                  className="px-2.5 py-1.5 bg-white border border-slate-300 hover:border-[#002147] hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95"
+                >
+                  <span>Level {lvl}</span>
+                  {levelUnassigned > 0 ? (
+                    <span className="bg-[#002147] text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-4 text-center">
+                      {levelUnassigned}
+                    </span>
+                  ) : (
+                    <span className="text-emerald-600 text-[11px] font-black">✓</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button 
             onClick={() => setLockedAssignments({})}
-            className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 hover:bg-red-50 rounded transition-colors"
+            className="text-xs text-rose-600 hover:text-rose-700 font-bold px-2.5 py-1.5 hover:bg-rose-50 rounded-xl transition-colors flex items-center gap-1"
           >
-            Clear All Pre-Scheduled
+            <span>🗑️</span> Clear All Pre-Scheduled
           </button>
         </div>
       </div>
