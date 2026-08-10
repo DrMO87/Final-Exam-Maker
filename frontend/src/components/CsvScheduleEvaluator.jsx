@@ -21,6 +21,29 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
   };
 
   // Helper to normalize course matching from string
+  const findCourseExactMatch = (code, title, program, level) => {
+    let matches = courses;
+
+    if (code) {
+      const normCode = String(code).trim().toLowerCase();
+      matches = matches.filter(c => c.course_code && c.course_code.trim().toLowerCase() === normCode);
+    } else if (title) {
+      const normTitle = String(title).trim().toLowerCase();
+      matches = matches.filter(c => c.course_title && c.course_title.trim().toLowerCase() === normTitle);
+    }
+
+    if (matches.length > 1 && program) {
+      const normProg = String(program).trim().toLowerCase();
+      matches = matches.filter(c => c.program && c.program.trim().toLowerCase() === normProg);
+    }
+
+    if (matches.length > 1 && level !== undefined && level !== '') {
+      matches = matches.filter(c => String(c.level) === String(level));
+    }
+
+    return matches.length > 0 ? matches[0] : null;
+  };
+
   const findCourseByCodeOrTitle = (codeOrTitle) => {
     if (!codeOrTitle) return null;
     const norm = String(codeOrTitle).trim().toLowerCase();
@@ -158,10 +181,12 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       // Flexibly find columns regardless of casing or exact header formatting
       const code = row['Course Code'] || row['course_code'] || row['Code'] || row['CODE'] || '';
       const title = row['Course Title'] || row['course_title'] || row['Title'] || row['TITLE'] || '';
+      const program = row['Program'] || row['program'] || row['PROGRAM'] || '';
+      const level = row['Level'] || row['level'] || row['LEVEL'] || '';
       let dateVal = row['Exam Date (YYYY-MM-DD)'] || row['Exam Date'] || row['exam_date'] || row['Date'] || '';
       let periodVal = row['Exam Period (1 or 2)'] || row['Exam Period'] || row['period'] || row['Period'] || '';
 
-      const targetCourse = findCourseByCodeOrTitle(code) || findCourseByCodeOrTitle(title);
+      const targetCourse = findCourseExactMatch(code, title, program, level) || findCourseByCodeOrTitle(code) || findCourseByCodeOrTitle(title);
 
       if (!targetCourse) {
         if (code || title) {
