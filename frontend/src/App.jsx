@@ -21,6 +21,7 @@ function App() {
     return localStorage.getItem('scheduler_sessionId') || null;
   });
   const [lockedAssignments, setLockedAssignments] = useState({});
+  const [customCalendar, setCustomCalendar] = useState(null);
   const [schedule, setSchedule] = useState(null);
   
   const [showUserModal, setShowUserModal] = useState(false);
@@ -615,8 +616,9 @@ function App() {
       {showCsvEvaluatorModal && (
         <CsvScheduleEvaluator
           sessionId={sessionId}
-          onApplySchedule={(assignmentsMap) => {
+          onApplySchedule={(assignmentsMap, newCalendar) => {
             setLockedAssignments(assignmentsMap);
+            if (newCalendar) setCustomCalendar(newCalendar);
             setShowCsvEvaluatorModal(false);
             setCurrentStep(4);
           }}
