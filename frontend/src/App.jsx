@@ -29,6 +29,7 @@ function App() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showCsvEvaluatorModal, setShowCsvEvaluatorModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Global PDF & System Settings state
   const [pdfSettings, setPdfSettings] = useState(() => {
@@ -122,6 +123,7 @@ function App() {
   const handleStepClick = (stepNum) => {
     if (stepNum > 1 && !sessionId) return;
     setCurrentStep(stepNum);
+    setIsMobileMenuOpen(false);
   };
 
   const handleSignatorySettingChange = (index, field, value) => {
@@ -158,19 +160,50 @@ function App() {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans select-none">
+    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans select-none relative">
       
-      {/* Sidebar matching exact design concept from Supervisors Automated Assign navigation.tsx */}
+      {/* Mobile Top Navbar (< md) */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-13 bg-[#002147] text-white z-40 flex items-center justify-between px-3.5 border-b border-[#FFB81C]/30 shadow-md">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-base focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            ☰
+          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="font-extrabold text-sm tracking-tight font-outfit text-white">Final Exam Maker</span>
+            <span className="text-[9px] font-bold text-[#FFB81C] bg-[#001530] px-1.5 py-0.2 rounded border border-[#FFB81C]/30">HUE</span>
+          </div>
+        </div>
+
+        <div className="text-[10px] font-extrabold bg-white/10 px-2 py-0.5 rounded-full text-white/90">
+          Step {currentStep} of 5
+        </div>
+      </div>
+
+      {/* Mobile Drawer Overlay Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="md:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 transition-opacity"
+        />
+      )}
+
+      {/* Sidebar Navigation */}
       <aside 
-        className={`fixed left-0 top-0 bottom-0 shadow-2xl z-50 flex flex-col transition-all duration-300 ${
-          isSidebarCollapsed ? 'w-20' : 'w-64'
+        className={`fixed left-0 top-0 bottom-0 shadow-2xl z-50 flex flex-col transition-transform md:transition-all duration-300 ${
+          isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'
+        } ${
+          isSidebarCollapsed ? 'md:w-20' : 'md:w-64'
         }`}
         style={{ background: 'linear-gradient(180deg, #002147 0%, #001530 60%, #000d1f 100%)' }}
       >
-        {/* Toggle Collapse Button */}
+        {/* Toggle Collapse Button (Desktop Only) */}
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="absolute -right-3.5 top-7 z-50 w-7 h-7 bg-[#001530] border border-white/20 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-white/10 hover:scale-110 active:scale-95 transition-all focus:outline-none"
+          className="hidden md:flex absolute -right-3.5 top-7 z-50 w-7 h-7 bg-[#001530] border border-white/20 rounded-full items-center justify-center text-white shadow-lg hover:bg-white/10 hover:scale-110 active:scale-95 transition-all focus:outline-none"
           title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
           <svg className={`w-4 h-4 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,8 +382,8 @@ function App() {
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 h-screen overflow-y-auto relative transition-all duration-300 ${
-        isSidebarCollapsed ? 'ml-20' : 'ml-64'
+      <main className={`flex-1 h-screen overflow-y-auto relative transition-all duration-300 pt-13 md:pt-0 ${
+        isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
         <div className={`w-full ${currentStep === 4 ? 'px-3 py-3' : 'px-4 py-8 md:px-8 md:py-12'}`}>
           <div className="animate-fade-in">

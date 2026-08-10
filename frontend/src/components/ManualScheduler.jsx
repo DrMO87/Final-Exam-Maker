@@ -30,6 +30,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const [allowMinorConflicts, setAllowMinorConflicts] = useState(false); // false = inhibit ALL conflicts, true = allow <5 overlaps
   const [draggedCourse, setDraggedCourse] = useState(null);
   const [activeDragSlot, setActiveDragSlot] = useState(null);
+  const [mobileTab, setMobileTab] = useState('grid'); // 'grid' or 'bank' on mobile phones
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [showEvaluatorModal, setShowEvaluatorModal] = useState(false);
   const [showExceptionsSummaryModal, setShowExceptionsSummaryModal] = useState(false);
@@ -661,12 +662,34 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         </div>
       </div>
 
-      <div className="flex gap-6 flex-1 overflow-hidden min-h-0">
-        {/* Course Bank Sidebar - Streamlined Width */}
+      {/* Mobile View Selector Bar (< md) */}
+      <div className="flex md:hidden bg-slate-200/80 p-1 rounded-xl mb-2 shrink-0 border border-slate-300/60">
+        <button
+          onClick={() => setMobileTab('grid')}
+          className={`flex-1 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+            mobileTab === 'grid' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          <span>📅</span> Timetable Grid
+        </button>
+        <button
+          onClick={() => setMobileTab('bank')}
+          className={`flex-1 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+            mobileTab === 'bank' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          <span>📋</span> Course Bank ({unassignedCourses.length})
+        </button>
+      </div>
+
+      <div className="flex gap-4 md:gap-6 flex-1 overflow-hidden min-h-0">
+        {/* Course Bank Sidebar - Mobile Responsive */}
         <div 
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDropOnBank}
-          className="w-64 shrink-0 bg-white rounded-xl shadow-2xs border border-slate-200 flex flex-col overflow-hidden"
+          className={`w-full md:w-64 shrink-0 bg-white rounded-xl shadow-2xs border border-slate-200 flex-col overflow-hidden ${
+            mobileTab === 'bank' ? 'flex' : 'hidden md:flex'
+          }`}
         >
           {/* Course Bank Header & Filter Bar */}
           <div className="p-2 border-b border-slate-200 bg-slate-50 shrink-0 space-y-1.5">
@@ -911,7 +934,9 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         </div>
 
         {/* Matrix View - High Density Layout */}
-        <div className="flex-1 table-container overflow-auto bg-white rounded-xl shadow-2xs border border-slate-200 relative">
+        <div className={`flex-1 table-container overflow-auto bg-white rounded-xl shadow-2xs border border-slate-200 relative ${
+          mobileTab === 'grid' ? 'flex flex-col' : 'hidden md:flex md:flex-col'
+        }`}>
           <table className="w-full text-xs">
             <thead className="table-header sticky top-0 z-20 shadow-2xs">
               <tr>

@@ -1,0 +1,19 @@
+{
+  "short_name": "FinalExamMaker",
+  "name": "Final Exam Maker — Horus University Egypt",
+  "description": "Official Faculty Examination Scheduler & Timetable Evaluator for Horus University Egypt (HUE)",
+  "icons": [
+    {
+      "src": "/assets/logo_hue.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#002147",
+  "theme_color": "#002147",
+  "display": "standalone",
+  "orientation": "any",
+  "scope": "/"
+}
