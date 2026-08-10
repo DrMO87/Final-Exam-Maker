@@ -963,10 +963,10 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
 
           {evalResult && (
             <button
-              onClick={() => onApplySchedule(evalResult.assignmentsMap)}
-              className="py-2 px-5 rounded-xl bg-[#002147] hover:bg-[#001530] text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95"
+              onClick={() => onApplySchedule(evalResult.assignmentsMap, evalResult.newCalendar)}
+              className="py-2.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95"
             >
-              <span>🚀</span> Load Evaluated Manual Timetable into Application
+              <span>🚀</span> Apply Evaluated Schedule to Application
             </button>
           )}
         </div>
