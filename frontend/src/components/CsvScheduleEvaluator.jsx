@@ -198,9 +198,11 @@ function CsvScheduleEvaluator({ sessionId, courses = [], conflicts = [], calenda
       // Format Date string YYYY-MM-DD
       let dateStr = '';
       if (dateVal instanceof Date) {
-        const y = dateVal.getFullYear();
-        const m = String(dateVal.getMonth() + 1).padStart(2, '0');
-        const d = String(dateVal.getDate()).padStart(2, '0');
+        // xlsx creates Dates in UTC representing the exact Excel date.
+        // We MUST use getUTCDate() to avoid timezone shifts on machines behind UTC.
+        const y = dateVal.getUTCFullYear();
+        const m = String(dateVal.getUTCMonth() + 1).padStart(2, '0');
+        const d = String(dateVal.getUTCDate()).padStart(2, '0');
         dateStr = `${y}-${m}-${d}`;
       } else if (dateVal) {
         dateStr = String(dateVal).trim().split('T')[0];
