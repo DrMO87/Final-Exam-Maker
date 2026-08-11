@@ -153,7 +153,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
   const matrixView = createMatrixView();
 
   return (
-    <div className="card w-full relative">
+    <div className="card w-full flex-1 flex flex-col min-h-0 relative">
       {/* Step 3 vs Start All Over Choice Modal */}
       {showChoiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
@@ -214,13 +214,13 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-6">
-        <h2>Generate & View Schedule</h2>
-        <div className="flex gap-2">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <h2 className="dark:text-white">Generate &amp; View Schedule</h2>
+        <div className="flex flex-wrap gap-2">
           {lockedCount > 0 && (
             <button 
               onClick={() => setShowChoiceModal(true)}
-              className="btn btn-secondary btn-sm border-hue-gold/50 text-hue-navy hover:bg-hue-gold/10 font-bold"
+              className="btn btn-secondary btn-sm border-hue-gold/50 text-hue-navy dark:text-amber-300 hover:bg-hue-gold/10 font-bold"
             >
               ⚙️ Generation Options ({lockedCount} locked)
             </button>
@@ -239,7 +239,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
 
       {!generatedSchedule && (
         <div className="text-center py-12">
-          <p className="text-slate-500 mb-8 max-w-lg mx-auto">
+          <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-lg mx-auto">
             Click the button below to generate the exam schedule based on the uploaded data and constraints.
           </p>
           <div className="flex justify-center gap-4">
@@ -263,18 +263,18 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
       )}
 
       {loading && (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-          <svg className="animate-spin h-10 w-10 text-hue-navy mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <div className="flex flex-col items-center justify-center py-20 text-slate-500 dark:text-slate-400">
+          <svg className="animate-spin h-10 w-10 text-hue-navy dark:text-amber-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
           <p className="font-medium">Generating optimized schedule... This may take a moment.</p>
         </div>
       )}
 
       {generatedSchedule && generatedSchedule.schedule && (
-        <div className="animate-fade-in">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="animate-fade-in flex-1 flex flex-col min-h-0">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
-              <h3 className="mb-1">Generated Schedule ({generatedSchedule.schedule.length} exams)</h3>
-              <p className="text-slate-500 text-sm font-medium">
+              <h3 className="mb-1 dark:text-white">Generated Schedule ({generatedSchedule.schedule.length} exams)</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
                 Schedule generated successfully with <span className={generatedSchedule.violations?.length > 0 ? "text-semantic-warning font-bold" : "text-semantic-success font-bold"}>{generatedSchedule.violations?.length || 0} violations</span>
               </p>
             </div>
@@ -292,13 +292,13 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
                 📄 Export Branded PDF
               </button>
               <button 
-                className="btn btn-secondary btn-sm border-hue-gold/60 text-hue-navy hover:bg-hue-gold/15 font-bold" 
+                className="btn btn-secondary btn-sm border-hue-gold/60 text-hue-navy dark:text-amber-300 hover:bg-hue-gold/15 font-bold" 
                 onClick={() => setShowVaultModal(true)}
               >
-                🏛️ Schedule Vault & Compare
+                🏛️ Schedule Vault &amp; Compare
               </button>
               <button 
-                className="btn btn-secondary btn-sm border-slate-300 text-slate-700 font-semibold" 
+                className="btn btn-secondary btn-sm border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold" 
                 onClick={() => window.open(`/api/scheduler/backup/${sessionId}`, '_blank')}
               >
                 💾 Backup Session (.json)
@@ -306,7 +306,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
               <button className="btn btn-secondary btn-sm" onClick={exportToMarkdown}>
                 📥 Export Markdown
               </button>
-              <button className="btn btn-secondary btn-sm text-slate-500 hover:text-red-600" onClick={onReset}>
+              <button className="btn btn-secondary btn-sm text-slate-500 hover:text-red-600 dark:hover:text-red-400" onClick={onReset}>
                 🔄 New Session
               </button>
             </div>
@@ -339,7 +339,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
           )}
 
           {/* Program Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {(() => {
               const pharmdCourses = generatedSchedule.schedule.filter(item => item.course.program === 'PharmD');
               const clinicalCourses = generatedSchedule.schedule.filter(item => item.course.program === 'PharmD Clinical');
@@ -358,10 +358,10 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
                     <div className="text-sm text-hue-navy/80 mt-1">courses scheduled</div>
                   </div>
 
-                  <div className="stat-card bg-white text-slate-800">
-                    <h4 className="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-2">📅 Exam Days</h4>
-                    <div className="text-4xl font-bold font-outfit text-hue-navy">{matrixView.dates.length}</div>
-                    <div className="text-sm text-slate-500 mt-1">days used in session</div>
+                  <div className="stat-card bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-100 dark:border-slate-800">
+                    <h4 className="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">📅 Exam Days</h4>
+                    <div className="text-4xl font-bold font-outfit text-hue-navy dark:text-amber-400">{matrixView.dates.length}</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">days used in session</div>
                   </div>
                 </>
               );
@@ -369,33 +369,33 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
           </div>
 
           {/* Matrix View: Program-Level as Columns, Days as Rows */}
-          <div className="mb-12">
-            <h3 className="mb-4">📅 Schedule Matrix View</h3>
-            <div className="table-container">
+          <div className="mb-10 flex-1 flex flex-col min-h-0">
+            <h3 className="mb-3 dark:text-white">📅 Schedule Matrix View</h3>
+            <div className="table-container flex-1 overflow-auto border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
               <table className="w-full text-sm">
-                <thead className="table-header">
+                <thead className="table-header sticky top-0 z-20">
                   <tr>
-                    <th className="sticky left-0 bg-slate-50 shadow-[1px_0_0_0_#e2e8f0] z-10 w-28 whitespace-nowrap">Date</th>
-                    <th className="whitespace-nowrap">Day</th>
-                    <th className="whitespace-nowrap">Group</th>
+                    <th className="sticky left-0 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] z-30 w-28 whitespace-nowrap text-slate-700 dark:text-slate-200">Date</th>
+                    <th className="whitespace-nowrap bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-200">Day</th>
+                    <th className="whitespace-nowrap bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-200">Group</th>
                     {matrixView.programLevels.map((pl, idx) => {
                       const [program, level] = pl.split('|');
                       return (
-                        <th key={idx} className="min-w-[200px] border-l border-slate-200">
-                          <span className="block text-hue-navy">{program}</span>
+                        <th key={idx} className="min-w-[200px] border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                          <span className="block text-hue-navy dark:text-amber-400">{program}</span>
                           <span className="block text-slate-400 font-normal">{level}</span>
                         </th>
                       );
                     })}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                   {matrixView.dates.map((date, dateIdx) => (
                     <tr key={dateIdx} className="table-row">
-                      <td className="table-cell sticky left-0 bg-white shadow-[1px_0_0_0_#e2e8f0] font-semibold text-hue-navy">
+                      <td className="table-cell sticky left-0 bg-white dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] font-semibold text-hue-navy dark:text-amber-400 border-r border-slate-200 dark:border-slate-800">
                         {date}
                       </td>
-                      <td className="table-cell font-medium">
+                      <td className="table-cell font-medium dark:text-slate-200">
                         {matrixView.dayInfo[date]?.dayOfWeek}
                       </td>
                       <td className="table-cell">
@@ -404,31 +404,31 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
                       {matrixView.programLevels.map((pl, plIdx) => {
                         const courses = matrixView.matrix[date]?.[pl] || [];
                         return (
-                          <td key={plIdx} className={`p-3 align-top border-l border-slate-100 ${courses.length > 0 ? 'bg-hue-navy/5' : ''}`}>
+                          <td key={plIdx} className={`p-3 align-top border-l border-slate-100 dark:border-slate-800 ${courses.length > 0 ? 'bg-hue-navy/5 dark:bg-slate-800/40' : ''}`}>
                             {courses.length > 0 ? (
                               <div className="space-y-2">
                                 {courses.sort((a,b) => a.period - b.period).map((item, idx) => (
-                                  <div key={idx} className={`p-2.5 rounded-lg bg-white border border-slate-200 shadow-sm ${idx < courses.length - 1 ? 'mb-2' : ''}`}>
-                                    <div className="font-bold text-hue-navy mb-0.5">
+                                  <div key={idx} className={`p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm ${idx < courses.length - 1 ? 'mb-2' : ''}`}>
+                                    <div className="font-bold text-hue-navy dark:text-amber-400 mb-0.5">
                                       {item.course.course_code}
                                     </div>
-                                    <div className="text-xs text-slate-600 font-medium leading-snug mb-2 line-clamp-2" title={item.course.course_title}>
+                                    <div className="text-xs text-slate-600 dark:text-slate-300 font-medium leading-snug mb-2 line-clamp-2" title={item.course.course_title}>
                                       {item.course.course_title}
                                     </div>
                                     <div className="flex flex-wrap gap-1">
-                                      <span className="badge badge-gray text-[10px] px-1.5 py-0.5 border border-slate-300 shadow-sm">Period {item.period}</span>
+                                      <span className="badge badge-gray text-[10px] px-1.5 py-0.5 border border-slate-300 dark:border-slate-700 shadow-sm">Period {item.period}</span>
                                       {item.course.has_oral_exam && (
                                         <span className="badge badge-info text-[10px] px-1.5 py-0.5">🎤 Oral</span>
                                       )}
                                       {item.course.student_count && (
-                                        <span className="badge badge-gray text-[10px] px-1.5 py-0.5 bg-slate-100">👥 {item.course.student_count}</span>
+                                        <span className="badge badge-gray text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700">👥 {item.course.student_count}</span>
                                       )}
                                     </div>
                                   </div>
                                 ))}
                               </div>
                             ) : (
-                              <div className="flex justify-center items-center h-full min-h-[60px] text-slate-300">—</div>
+                              <div className="flex justify-center items-center h-full min-h-[60px] text-slate-300 dark:text-slate-700">—</div>
                             )}
                           </td>
                         );
@@ -442,7 +442,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
 
           {/* Detailed List View */}
           <div className="mb-12">
-            <h3 className="mb-4">📋 Detailed Schedule List</h3>
+            <h3 className="mb-4 dark:text-white">📋 Detailed Schedule List</h3>
             {Object.keys(groupedSchedule).sort().map(key => {
               const dayGroup = groupedSchedule[key];
               const totalStudents = dayGroup.exams.reduce((sum, e) => sum + (e.course.student_count || 0), 0);
@@ -459,7 +459,7 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
                   </div>
                 </h4>
 
-                <div className="table-container rounded-t-none border-t-0 shadow-none border-x border-b">
+                <div className="table-container rounded-t-none border-t-0 shadow-none border-x border-b border-slate-200 dark:border-slate-800">
                   <table className="w-full text-sm">
                     <thead className="table-header">
                       <tr>
@@ -471,17 +471,17 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
                         <th className="w-1/6 text-center">Students</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                       {dayGroup.exams.map((item, idx) => (
                         <tr key={idx} className="table-row">
-                          <td className="table-cell font-medium">{item.course.program}</td>
-                          <td className="table-cell text-slate-500">{item.course.level}</td>
-                          <td className="table-cell font-bold text-hue-navy">{item.course.course_code}</td>
-                          <td className="table-cell">{item.course.course_title}</td>
+                          <td className="table-cell font-medium dark:text-slate-200">{item.course.program}</td>
+                          <td className="table-cell text-slate-500 dark:text-slate-400">{item.course.level}</td>
+                          <td className="table-cell font-bold text-hue-navy dark:text-amber-400">{item.course.course_code}</td>
+                          <td className="table-cell dark:text-slate-200">{item.course.course_title}</td>
                           <td className="table-cell text-center">
-                            {item.course.has_oral_exam ? <span className="badge badge-info">Yes</span> : <span className="text-slate-300">-</span>}
+                            {item.course.has_oral_exam ? <span className="badge badge-info">Yes</span> : <span className="text-slate-300 dark:text-slate-600">-</span>}
                           </td>
-                          <td className="table-cell text-center font-medium">~{item.course.student_count}</td>
+                          <td className="table-cell text-center font-medium dark:text-slate-200">~{item.course.student_count}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -495,16 +495,16 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
             <div className="bg-semantic-warning/10 border-l-4 border-semantic-warning rounded-r-xl p-5 mb-8">
               <h3 className="text-semantic-warning mb-2 flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                Violations & Warnings
+                Violations &amp; Warnings
               </h3>
-              <p className="text-sm text-yellow-800/80 mb-4 font-medium">
+              <p className="text-sm text-yellow-800/80 dark:text-yellow-300/80 mb-4 font-medium">
                 The following constraints could not be fully satisfied:
               </p>
               <div className="space-y-2">
                 {generatedSchedule.violations.map((violation, idx) => (
-                  <div key={idx} className="bg-white/60 px-3 py-2 rounded-lg text-sm text-yellow-900 border border-yellow-200/50">
+                  <div key={idx} className="bg-white/60 dark:bg-slate-800/80 px-3 py-2 rounded-lg text-sm text-yellow-900 dark:text-yellow-200 border border-yellow-200/50 dark:border-yellow-800/50">
                     <strong className="text-semantic-warning mr-2">{violation.type}:</strong> {violation.course} 
-                    <span className="text-slate-500 ml-2">({violation.program}, Level {violation.level})</span>
+                    <span className="text-slate-500 dark:text-slate-400 ml-2">({violation.program}, Level {violation.level})</span>
                   </div>
                 ))}
               </div>
