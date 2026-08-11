@@ -157,14 +157,14 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
       {/* Step 3 vs Start All Over Choice Modal */}
       {showChoiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 space-y-6 animate-scale-up">
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-              <div className="w-12 h-12 rounded-xl bg-hue-gold/10 text-hue-navy flex items-center justify-center text-2xl font-bold">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-6 animate-scale-up text-slate-800 dark:text-slate-100">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="w-12 h-12 rounded-xl bg-hue-gold/10 text-hue-navy dark:text-amber-400 flex items-center justify-center text-2xl font-bold">
                 ⚙️
               </div>
               <div>
-                <h3 className="text-lg font-bold text-hue-navy">Schedule Generation Mode</h3>
-                <p className="text-xs text-slate-500">You have {lockedCount} pre-scheduled course(s) from Step 4.</p>
+                <h3 className="text-lg font-bold text-hue-navy dark:text-amber-400">Schedule Generation Mode</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">You have {lockedCount} pre-scheduled course(s) from Step 4.</p>
               </div>
             </div>
 
@@ -172,42 +172,42 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
               {/* Option 1: Continue with Step 4 */}
               <button
                 onClick={() => handleGenerateSchedule(false)}
-                className="w-full text-left p-4 rounded-xl border-2 border-hue-navy/20 hover:border-hue-gold bg-slate-50 hover:bg-hue-gold/5 transition-all group cursor-pointer flex items-start gap-4"
+                className="w-full text-left p-4 rounded-xl border-2 border-hue-navy/20 dark:border-amber-400/30 hover:border-hue-gold bg-slate-50 dark:bg-slate-800 hover:bg-hue-gold/5 transition-all group cursor-pointer flex items-start gap-4"
               >
                 <div className="text-2xl mt-0.5">🔒</div>
                 <div>
-                  <div className="font-bold text-sm text-hue-navy group-hover:text-hue-gold transition-colors">
+                  <div className="font-bold text-sm text-hue-navy dark:text-amber-300 group-hover:text-hue-gold transition-colors">
                     Continue with Step 4 Pre-Scheduled Assignments
                   </div>
-                  <div className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Keep your {lockedCount} locked course(s) from Step 4 fixed in place on the calendar, and let AI auto-schedule all remaining courses around them.
-                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Keep your custom locked courses and let AI auto-schedule only the remaining unassigned courses.
+                  </p>
                 </div>
               </button>
 
-              {/* Option 2: Start All Over */}
+              {/* Option 2: Clear & Re-run full generator */}
               <button
                 onClick={() => handleGenerateSchedule(true)}
-                className="w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-red-400 bg-slate-50 hover:bg-red-50/50 transition-all group cursor-pointer flex items-start gap-4"
+                className="w-full text-left p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group cursor-pointer flex items-start gap-4"
               >
                 <div className="text-2xl mt-0.5">🔄</div>
                 <div>
-                  <div className="font-bold text-sm text-slate-800 group-hover:text-red-600 transition-colors">
-                    Start All Over (Ignore Step 4)
+                  <div className="font-bold text-sm text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                    Clear Pre-Scheduled Locks &amp; Generate From Scratch
                   </div>
-                  <div className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Ignore all manual pre-scheduled assignments and generate a completely fresh AI schedule from scratch for all courses.
-                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Ignore Step 4 pre-scheduled courses and allow AI complete freedom across all courses.
+                  </p>
                 </div>
               </button>
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-              <button className="btn btn-secondary btn-sm text-xs" onClick={onBack}>
-                ← Return to Step 4 (Pre-Scheduling)
-              </button>
-              <button className="text-xs text-slate-400 hover:text-slate-600 underline" onClick={() => setShowChoiceModal(false)}>
-                Dismiss
+            <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={() => setShowChoiceModal(false)}
+                className="btn btn-secondary btn-sm"
+              >
+                Cancel
               </button>
             </div>
           </div>

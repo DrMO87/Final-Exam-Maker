@@ -18,10 +18,10 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center p-4 font-sans select-none relative">
+    <div className="min-h-screen bg-[#F4F6FB] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex items-center justify-center p-4 font-sans select-none relative transition-colors">
       
       {/* Centered Main Login Card */}
-      <div className="w-full max-w-[440px] bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-slate-100 animate-fade-in relative z-10">
+      <div className="w-full max-w-[440px] bg-white dark:bg-slate-900 rounded-3xl shadow-xl p-8 md:p-10 border border-slate-100 dark:border-slate-800 animate-fade-in relative z-10">
         
         {/* Brand Shield Logo Header */}
         <div className="flex flex-col items-center justify-center text-center">
@@ -41,10 +41,10 @@ function Login() {
           </div>
 
           {/* Heading */}
-          <h2 className="text-2xl font-black text-slate-900 mt-4 mb-1 font-outfit">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-4 mb-1 font-outfit">
             Welcome Back
           </h2>
-          <p className="text-slate-500 text-xs font-medium max-w-[280px] leading-relaxed">
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-medium max-w-[280px] leading-relaxed">
             Sign In to access the Horus University Exam Management System
           </p>
 
@@ -52,7 +52,7 @@ function Login() {
 
         {/* Error Notification */}
         {error && (
-          <div className="mt-5 p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-medium flex items-center gap-2.5 animate-shake">
+          <div className="mt-5 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-xs text-rose-700 dark:text-rose-300 font-medium flex items-center gap-2.5 animate-shake">
             <span className="text-base">⚠️</span>
             <span>{error}</span>
           </div>
@@ -63,7 +63,7 @@ function Login() {
           
           {/* Email / Username Field */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Email Address
             </label>
             <div className="relative">
@@ -75,7 +75,7 @@ function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="melkhodary@horus.edu.eg"
-                className="w-full h-12 pl-11 pr-4 rounded-2xl bg-[#EBF3FE] border border-blue-100/80 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 focus:bg-white transition-all font-medium"
+                className="w-full h-12 pl-11 pr-4 rounded-2xl bg-[#EBF3FE] dark:bg-slate-800 border border-blue-100/80 dark:border-slate-700 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-medium"
                 required
               />
             </div>
@@ -83,7 +83,7 @@ function Login() {
 
           {/* Password Field */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -95,13 +95,13 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
-                className="w-full h-12 pl-11 pr-11 rounded-2xl bg-[#EBF3FE] border border-blue-100/80 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 focus:bg-white transition-all font-medium"
+                className="w-full h-12 pl-11 pr-11 rounded-2xl bg-[#EBF3FE] dark:bg-slate-800 border border-blue-100/80 dark:border-slate-700 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-medium"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-sm transition-colors"
                 title={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? '👁️' : '🙈'}

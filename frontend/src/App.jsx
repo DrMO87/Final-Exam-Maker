@@ -181,8 +181,17 @@ function App() {
     { num: 5, label: 'Generate Schedule', icon: '📅', desc: 'AI conflict resolution' }
   ];
 
+  const zoomScale = globalZoom / 100;
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans select-none relative">
+    <div 
+      className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 overflow-hidden font-sans select-none relative transition-colors duration-200"
+      style={{
+        zoom: `${globalZoom}%`,
+        width: `${100 / zoomScale}vw`,
+        height: `${100 / zoomScale}vh`
+      }}
+    >
       
       {/* Mobile Top Navbar (< md) */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-13 bg-[#002147] text-white z-40 flex items-center justify-between px-3 border-b border-[#FFB81C]/30 shadow-md">
@@ -506,21 +515,27 @@ function App() {
 
       {/* Main Content Area with Global Zoom Scale Support */}
       <main 
-        className={`flex-1 h-screen overflow-y-auto relative transition-all duration-300 pt-13 md:pt-0 ${
+        className={`flex-1 h-full overflow-y-auto relative bg-slate-50 dark:bg-slate-950 transition-all duration-300 pt-13 md:pt-0 ${
           isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}
-        style={{ zoom: `${globalZoom}%` }}
       >
-        <div className={`w-full ${currentStep === 4 ? 'px-3 py-3' : 'px-4 py-8 md:px-8 md:py-12'}`}>
-          <div className="animate-fade-in">
+        <div 
+          style={{ 
+            zoom: `${globalZoom}%`,
+            width: `${100 / zoomScale}%`,
+            minHeight: `${100 / zoomScale}%`
+          }}
+          className={`flex-1 flex flex-col ${currentStep === 4 ? 'px-2 py-2' : 'px-4 py-6 md:px-8 md:py-8'}`}
+        >
+          <div className="animate-fade-in flex-1 flex flex-col">
             {currentStep === 1 && (
-              <div className="pt-4">
+              <div className="pt-2 flex-1 flex flex-col">
                 <SessionForm onSessionCreated={handleSessionCreated} />
               </div>
             )}
 
             {currentStep === 2 && (
-              <div className="pt-4">
+              <div className="pt-2 flex-1 flex flex-col">
                 <FileUpload 
                   sessionId={sessionId} 
                   onFilesUploaded={handleFilesUploaded}
@@ -530,7 +545,7 @@ function App() {
             )}
 
             {currentStep === 3 && (
-              <div className="pt-4">
+              <div className="pt-2 flex-1 flex flex-col">
                 <DataValidator 
                   sessionId={sessionId}
                   onProceedToManual={handleAuditCompleteToManual}
@@ -541,7 +556,7 @@ function App() {
             )}
 
             {currentStep === 4 && (
-              <div className="pt-4 h-full">
+              <div className="pt-2 flex-1 flex flex-col min-h-0">
                 <ManualScheduler 
                   sessionId={sessionId}
                   pdfSettings={pdfSettings}
@@ -555,7 +570,7 @@ function App() {
             )}
 
             {currentStep === 5 && (
-              <div className="pt-4">
+              <div className="pt-2 flex-1 flex flex-col">
                 <ScheduleViewer 
                   sessionId={sessionId}
                   schedule={schedule}
@@ -591,15 +606,15 @@ function App() {
       {/* Dedicated System & PDF Settings Modal */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none">
-          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-y-auto max-h-[90vh] text-slate-800 dark:text-slate-100">
             
-            <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-              <h3 className="text-lg font-black text-[#002147] font-outfit flex items-center gap-2">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-lg font-black text-[#002147] dark:text-amber-400 font-outfit flex items-center gap-2">
                 <span>⚙️</span> Settings & PDF Preferences
               </h3>
               <button 
                 onClick={() => setShowSettingsModal(false)}
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition-colors"
+                className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center text-sm font-bold transition-colors"
               >
                 ✕
               </button>
@@ -608,27 +623,27 @@ function App() {
             <div className="py-4 space-y-4 text-xs">
 
               {/* Periods Config Setup */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <div className="font-bold text-[#002147] text-xs">⏰ Examination Period Times</div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-2">
+                <div className="font-bold text-[#002147] dark:text-amber-300 text-xs">⏰ Examination Period Times</div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Period 1 Time</label>
+                    <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Period 1 Time</label>
                     <input
                       type="text"
                       value={pdfSettings.period1Time}
                       onChange={(e) => setPdfSettings({ ...pdfSettings, period1Time: e.target.value })}
-                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white"
                       placeholder="09:00 AM - 11:00 AM"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Period 2 Time</label>
+                    <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Period 2 Time</label>
                     <input
                       type="text"
                       value={pdfSettings.period2Time}
                       onChange={(e) => setPdfSettings({ ...pdfSettings, period2Time: e.target.value })}
-                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                      className="w-full h-8 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white"
                       placeholder="12:00 PM - 02:00 PM"
                     />
                   </div>
@@ -636,10 +651,10 @@ function App() {
               </div>
 
               {/* Custom Signatures & Titles Setup */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-2">
                 <div className="flex justify-between items-center">
-                  <div className="font-bold text-[#002147] text-xs">✍️ Customized Document Signatures</div>
-                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-700">
+                  <div className="font-bold text-[#002147] dark:text-amber-300 text-xs">✍️ Customized Document Signatures</div>
+                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-700 dark:text-slate-300">
                     <input
                       type="checkbox"
                       checked={pdfSettings.showSignatures}
@@ -653,11 +668,11 @@ function App() {
                 {pdfSettings.showSignatures && (
                   <>
                     <div>
-                      <label className="block text-slate-600 font-semibold mb-1">Number of Signatories</label>
+                      <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Number of Signatories</label>
                       <select
                         value={pdfSettings.numSignatures}
                         onChange={(e) => setPdfSettings({ ...pdfSettings, numSignatures: Number(e.target.value) })}
-                        className="w-full h-8 px-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-800"
+                        className="w-full h-8 px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white"
                       >
                         <option value={1}>1 Signatory</option>
                         <option value={2}>2 Signatories</option>
@@ -668,20 +683,20 @@ function App() {
 
                     <div className="space-y-1.5 pt-1">
                       {Array.from({ length: pdfSettings.numSignatures }).map((_, idx) => (
-                        <div key={idx} className="grid grid-cols-2 gap-2 bg-white p-2 rounded-xl border border-slate-200">
+                        <div key={idx} className="grid grid-cols-2 gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
                           <input
                             type="text"
                             value={pdfSettings.signatories[idx]?.name || ''}
                             onChange={(e) => handleSignatorySettingChange(idx, 'name', e.target.value)}
                             placeholder={`#${idx + 1} Signatory Name`}
-                            className="h-7 px-2 border border-slate-200 rounded-lg text-xs font-medium"
+                            className="h-7 px-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg text-xs font-medium"
                           />
                           <input
                             type="text"
                             value={pdfSettings.signatories[idx]?.title || ''}
                             onChange={(e) => handleSignatorySettingChange(idx, 'title', e.target.value)}
                             placeholder={`#${idx + 1} Official Title`}
-                            className="h-7 px-2 border border-slate-200 rounded-lg text-xs font-bold text-[#002147]"
+                            className="h-7 px-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-xs font-bold text-[#002147] dark:text-amber-400"
                           />
                         </div>
                       ))}
@@ -691,10 +706,10 @@ function App() {
               </div>
 
               {/* Table Stamp Toggle */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-[#002147] text-xs">🔴 Final Version Stamp</div>
-                  <div className="text-slate-500 text-[11px]">Include tilted red rectangular "FINAL VERSION" rubber stamp at bottom of document</div>
+                  <div className="font-bold text-[#002147] dark:text-amber-300 text-xs">🔴 Final Version Stamp</div>
+                  <div className="text-slate-500 dark:text-slate-400 text-[11px]">Include tilted red rectangular "FINAL VERSION" rubber stamp at bottom of document</div>
                 </div>
                 <input
                   type="checkbox"
@@ -706,17 +721,17 @@ function App() {
 
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
               <button
                 type="button"
                 onClick={resetPdfSettings}
-                className="btn btn-secondary btn-sm text-xs font-medium text-slate-500 hover:text-slate-800"
+                className="btn btn-secondary btn-sm text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
               >
                 Restore Defaults
               </button>
               <button
                 onClick={() => setShowSettingsModal(false)}
-                className="px-6 py-2 bg-[#002147] text-white font-bold rounded-xl text-xs hover:bg-[#001530] transition-all shadow-md"
+                className="px-6 py-2 bg-[#002147] hover:bg-[#001530] text-white font-bold rounded-xl text-xs transition-all shadow-md"
               >
                 Save Settings
               </button>
@@ -728,22 +743,22 @@ function App() {
       {/* Dedicated Help & Guide Modal */}
       {showHelpModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none">
-          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-              <h3 className="text-lg font-black text-[#002147] font-outfit flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-y-auto max-h-[90vh] text-slate-800 dark:text-slate-100">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-lg font-black text-[#002147] dark:text-amber-400 font-outfit flex items-center gap-2">
                 <span>❓</span> Help & User Guide — Final Exam Maker
               </h3>
               <button 
                 onClick={() => setShowHelpModal(false)}
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition-colors"
+                className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center text-sm font-bold transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <div className="py-4 space-y-4 text-xs text-slate-700 leading-relaxed">
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl">
-                <div className="font-bold text-[#002147] text-sm mb-1">🚀 Quick Start Workflow</div>
+            <div className="py-4 space-y-4 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl">
+                <div className="font-bold text-[#002147] dark:text-amber-300 text-sm mb-1">🚀 Quick Start Workflow</div>
                 <ol className="list-decimal pl-4 space-y-1">
                   <li><strong>Step 1 (Create Session):</strong> Set up session dates and semester label.</li>
                   <li><strong>Step 2 (Upload Files):</strong> Upload student numbers, course metadata, and conflict matrix CSV files (or click Auto-Fill Built-in Samples).</li>
@@ -753,13 +768,13 @@ function App() {
                 </ol>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
-                <div className="font-bold text-[#002147] text-xs">📋 Required CSV File Formats</div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-1">
+                <div className="font-bold text-[#002147] dark:text-amber-300 text-xs">📋 Required CSV File Formats</div>
                 <p>Ensure file names contain keywords like <code>student</code>, <code>pharmd</code>, <code>clinical</code>, or <code>conflict</code> for auto-matching on upload.</p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-end">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
               <button
                 onClick={() => setShowHelpModal(false)}
                 className="btn btn-primary btn-sm px-5"

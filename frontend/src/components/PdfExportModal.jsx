@@ -230,7 +230,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in select-none">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col overflow-hidden border border-slate-200">
+      <div className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
         
         {/* Modal Header */}
         <div className="bg-[#002147] text-white p-4 flex justify-between items-center shrink-0 border-b border-[#FFB81C]/40">
@@ -254,7 +254,7 @@ function PdfExportModal({ sessionId, session, scheduleData, pdfSettings: externa
         </div>
 
         {/* Configuration Controls Bar */}
-        <div className="bg-slate-100 border-b border-slate-200 p-3 shrink-0 space-y-3 text-xs">
+        <div className="bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-3 shrink-0 space-y-3 text-xs">
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5">
             

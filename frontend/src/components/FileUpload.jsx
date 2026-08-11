@@ -184,17 +184,17 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
     return (
       <div
         className={`relative group rounded-xl border-2 border-dashed transition-all p-6 text-center
-          ${isActive ? 'border-hue-navy bg-hue-navy/5' : fileSelected ? 'border-semantic-success/50 bg-semantic-success/5' : 'border-slate-200 hover:border-hue-navy/50 bg-slate-50 hover:bg-slate-50/50'}`}
+          ${isActive ? 'border-hue-navy dark:border-amber-400 bg-hue-navy/5 dark:bg-amber-400/10' : fileSelected ? 'border-semantic-success/50 bg-semantic-success/5 dark:bg-semantic-success/10' : 'border-slate-200 dark:border-slate-700 hover:border-hue-navy/50 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-50/50'}`}
         onDragEnter={(e) => handleDrag(e, id)}
         onDragOver={(e) => handleDrag(e, id)}
         onDragLeave={(e) => handleDrag(e, id)}
         onDrop={(e) => handleDrop(e, id)}
       >
-        <span className="block font-semibold text-slate-700 mb-2">{label} {isRequired && <span className="text-red-500">*</span>}</span>
-        <span className="block text-sm text-slate-500 mb-4">Click "Select File" or drag & drop .csv or .xlsx file here</span>
+        <span className="block font-semibold text-slate-700 dark:text-slate-200 mb-2">{label} {isRequired && <span className="text-red-500">*</span>}</span>
+        <span className="block text-sm text-slate-500 dark:text-slate-400 mb-4">Click "Select File" or drag & drop .csv or .xlsx file here</span>
         <label
           htmlFor={id}
-          className="inline-flex items-center justify-center px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 cursor-pointer shadow-sm transition-colors"
+          className="inline-flex items-center justify-center px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer shadow-sm transition-colors"
         >
           {fileSelected ? 'Change File' : 'Select File'}
         </label>
@@ -216,7 +216,7 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
                 e.stopPropagation();
                 handleRemoveFile(id);
               }}
-              className="ml-1 text-slate-400 hover:text-red-500 hover:bg-white/60 p-0.5 rounded transition-colors"
+              className="ml-1 text-slate-400 hover:text-red-500 hover:bg-white/60 dark:hover:bg-slate-700/60 p-0.5 rounded transition-colors"
               title="Remove file"
             >
               ✕
@@ -231,10 +231,10 @@ function FileUpload({ sessionId, onFilesUploaded, onBack }) {
 
   return (
     <div className="card max-w-3xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <h2 className="mb-1">Upload Files</h2>
-          <p className="text-slate-500 text-sm">
+          <h2 className="mb-1 dark:text-white">Upload Files</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
             Upload student numbers, course lists, and conflict matrices (.csv or .xlsx format)
           </p>
         </div>

@@ -108,15 +108,15 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
   });
 
   return (
-    <div className="card w-full flex flex-col space-y-6">
+    <div className="card w-full flex-1 flex flex-col space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div>
-          <h2 className="mb-1 flex items-center gap-2">
+          <h2 className="mb-1 flex items-center gap-2 dark:text-white">
             <span>🔍 Data Audit & Validation Matrix</span>
             <span className="badge badge-success text-xs font-bold px-2 py-0.5">Verified</span>
           </h2>
-          <p className="text-sm text-slate-500">Review all extracted course metadata, enrolled student counts, oral flags, and student conflict pairs before scheduling.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Review all extracted course metadata, enrolled student counts, oral flags, and student conflict pairs before scheduling.</p>
         </div>
 
         <div className="flex gap-2.5 shrink-0 flex-wrap">
@@ -124,12 +124,12 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
             ← Back to Upload
           </button>
           <button 
-            className="btn bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-300 font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition-all active:scale-95" 
+            className="btn bg-purple-50 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-300 dark:border-purple-800 font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition-all active:scale-95" 
             onClick={() => setShowEvaluatorModal(true)}
           >
             📊 CSV / Excel Evaluator
           </button>
-          <button className="btn btn-secondary border-hue-gold text-hue-navy font-bold text-xs" onClick={onProceedToManual}>
+          <button className="btn btn-secondary border-hue-gold text-hue-navy dark:text-amber-300 font-bold text-xs" onClick={onProceedToManual}>
             ⚡ Step 4: Pre-Scheduling
           </button>
           <button className="btn btn-primary shadow-glow-primary text-xs font-bold" onClick={onProceedToAuto}>
@@ -138,44 +138,44 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
         </div>
       </div>
 
-      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm font-medium">{error}</div>}
 
       {/* KPI Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">📚 Uploaded Courses</div>
-          <div className="text-2xl font-bold font-outfit text-hue-navy">{courses.length}</div>
+        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">📚 Uploaded Courses</div>
+          <div className="text-2xl font-bold font-outfit text-hue-navy dark:text-amber-400">{courses.length}</div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">👥 Enrolled Students</div>
-          <div className="text-2xl font-bold font-outfit text-blue-600">{totalStudents.toLocaleString()}</div>
+        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">👥 Enrolled Students</div>
+          <div className="text-2xl font-bold font-outfit text-blue-600 dark:text-blue-400">{totalStudents.toLocaleString()}</div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">⚔️ Conflict Pairs</div>
-          <div className="text-2xl font-bold font-outfit text-amber-600">{conflicts.length}</div>
+        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">⚔️ Conflict Pairs</div>
+          <div className="text-2xl font-bold font-outfit text-amber-600 dark:text-amber-400">{conflicts.length}</div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">🎤 Oral Exams</div>
-          <div className="text-2xl font-bold font-outfit text-purple-600">{oralCount}</div>
+        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">🎤 Oral Exams</div>
+          <div className="text-2xl font-bold font-outfit text-purple-600 dark:text-purple-400">{oralCount}</div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center col-span-2 md:col-span-1">
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">🎓 Level Distribution</div>
-          <div className="text-[11px] font-bold text-slate-700 flex justify-center gap-1.5 mt-1">
-            <span>L1:<strong className="text-blue-600">{levelDistribution[1]}</strong></span>
-            <span>L2:<strong className="text-emerald-600">{levelDistribution[2]}</strong></span>
-            <span>L3:<strong className="text-purple-600">{levelDistribution[3]}</strong></span>
-            <span>L4:<strong className="text-amber-600">{levelDistribution[4]}</strong></span>
-            <span>L5:<strong className="text-rose-600">{levelDistribution[5]}</strong></span>
+        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center col-span-2 md:col-span-1">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">🎓 Level Distribution</div>
+          <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex justify-center gap-1.5 mt-1">
+            <span>L1:<strong className="text-blue-600 dark:text-blue-400">{levelDistribution[1]}</strong></span>
+            <span>L2:<strong className="text-emerald-600 dark:text-emerald-400">{levelDistribution[2]}</strong></span>
+            <span>L3:<strong className="text-purple-600 dark:text-purple-400">{levelDistribution[3]}</strong></span>
+            <span>L4:<strong className="text-amber-600 dark:text-amber-400">{levelDistribution[4]}</strong></span>
+            <span>L5:<strong className="text-rose-600 dark:text-rose-400">{levelDistribution[5]}</strong></span>
           </div>
         </div>
       </div>
 
       {/* Health Checks & Insights Panel */}
-      <div className="bg-slate-900 text-white rounded-2xl p-4 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-slate-900 dark:bg-slate-950 text-white rounded-2xl p-4 shadow-lg border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl font-bold shrink-0">
             ✓
@@ -195,7 +195,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-3 flex-1 min-w-[240px]">
           <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">🔎 Search:</span>
           <input
@@ -226,7 +226,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           <select
             value={programFilter}
             onChange={(e) => setProgramFilter(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-hue-gold"
+            className="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-hue-gold"
           >
             <option value="ALL">All Programs</option>
             <option value="PharmD">PharmD</option>
@@ -237,7 +237,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-hue-gold"
+            className="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-hue-gold"
           >
             <option value="ALL">All Levels (1-5)</option>
             <option value="1">Level 1</option>
@@ -251,7 +251,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           <select
             value={conflictFilter}
             onChange={(e) => setConflictFilter(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-hue-gold"
+            className="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-hue-gold"
           >
             <option value="ALL">All Courses</option>
             <option value="CONFLICTS_ONLY">Has Conflicts Only</option>
@@ -259,17 +259,17 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
           </select>
 
           {/* Download Buttons */}
-          <div className="flex items-center gap-2 border-l border-slate-300 pl-2">
+          <div className="flex items-center gap-2 border-l border-slate-300 dark:border-slate-700 pl-2">
             <button
               onClick={() => exportValidationMatrixToExcel(filteredCourses, conflictMap, sessionId)}
-              className="btn btn-sm text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 flex items-center gap-1.5 shadow-sm"
+              className="btn btn-sm text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5 shadow-sm"
               title="Download Data Validation Table as Excel (.xlsx)"
             >
               📊 Download Excel (.xlsx)
             </button>
             <button
               onClick={() => exportValidationMatrixToCSV(filteredCourses, conflictMap, sessionId)}
-              className="btn btn-sm text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 flex items-center gap-1.5 shadow-sm"
+              className="btn btn-sm text-xs font-bold text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-300 dark:border-blue-800 flex items-center gap-1.5 shadow-sm"
               title="Download Data Validation Table as CSV"
             >
               📄 Download CSV
@@ -279,7 +279,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
       </div>
 
       {/* Audit Data Table */}
-      <div className="table-container border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="table-container border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-xs">
           <thead className="table-header">
             <tr>
@@ -292,7 +292,7 @@ function DataValidator({ sessionId, onProceedToManual, onProceedToAuto, onBack }
               <th className="py-3 px-4 text-left">Conflicted Courses & Overlap</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 bg-white">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
             {filteredCourses.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center py-12 text-slate-400">

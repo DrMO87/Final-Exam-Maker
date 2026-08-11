@@ -15,15 +15,68 @@ const db = new Database(dbPath, { verbose: console.log });
 db.pragma('foreign_keys = ON');
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS scheduling_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_name TEXT NOT NULL,
+    semester TEXT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    excluded_dates TEXT DEFAULT '[]',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS courses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER,
+    program TEXT NOT NULL,
+    level INTEGER NOT NULL DEFAULT 1,
+    course_code TEXT NOT NULL,
+    course_title TEXT NOT NULL,
+    has_oral_exam INTEGER DEFAULT 0,
+    student_count INTEGER DEFAULT 0,
+    credit_hours INTEGER DEFAULT 3,
+    is_heavy INTEGER DEFAULT 0,
+    must_be_first INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES scheduling_sessions(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS conflicts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER,
+    course_a_id INTEGER,
+    course_b_id INTEGER,
+    overlap_count INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(session_id, course_a_id, course_b_id),
+    FOREIGN KEY (session_id) REFERENCES scheduling_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_a_id) REFERENCES courses(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_b_id) REFERENCES courses(id) ON DELETE CASCADE
+  );
+
   CREATE TABLE IF NOT EXISTS saved_schedules (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     schedule_data TEXT NOT NULL,
-    locked_assignments TEXT,
+    locked_assignments TEXT DEFAULT '{}',
     violation_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES scheduling_sessions(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS schedules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER,
+    course_id INTEGER,
+    exam_date DATE NOT NULL,
+    day_of_week TEXT,
+    group_type TEXT,
+    period TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES scheduling_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
   );
 
   CREATE TABLE IF NOT EXISTS users (
@@ -86,9 +139,9 @@ const query = (sql, params = []) => {
         resolve({ rows });
       }
       // INSERT with RETURNING
-      else if (sql.includes('RETURNING')) {
-        // SQLite doesn't support RETURNING, so we need to handle it differently
-        const cleanSql = sql.split('RETURNING')[0].trim();
+      else if (sql.toUpperCase().includes('RETURNING')) {
+        // SQLite doesn't support RETURNING, so we handle it by fetching lastInsertRowid
+        const cleanSql = sql.split(/RETURNING/i)[0].trim();
 
         const stmt = db.prepare(cleanSql);
         const info = params.length > 0 ? stmt.run(...params) : stmt.run();

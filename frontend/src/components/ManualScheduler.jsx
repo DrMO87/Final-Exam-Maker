@@ -509,7 +509,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
   const availableLevels = [...new Set(courses.map(c => c.level))].sort((a,b) => Number(a)-Number(b));
 
   return (
-    <div className="card w-full flex flex-col h-[calc(100vh-48px)] p-4 sm:p-5">
+    <div className="card w-full flex-1 flex flex-col h-full min-h-0 p-4 sm:p-5">
       {/* Standard Header Bar */}
       <div className="flex items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-200/80 dark:border-slate-800 shrink-0 flex-wrap sm:flex-nowrap">
         <div className="flex items-center gap-2.5">
@@ -687,15 +687,15 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         <div 
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDropOnBank}
-          className={`w-full md:w-64 shrink-0 bg-white rounded-xl shadow-2xs border border-slate-200 flex-col overflow-hidden ${
+          className={`w-full md:w-64 shrink-0 bg-white dark:bg-slate-900 rounded-xl shadow-2xs border border-slate-200 dark:border-slate-800 flex-col overflow-hidden ${
             mobileTab === 'bank' ? 'flex' : 'hidden md:flex'
           }`}
         >
           {/* Course Bank Header & Filter Bar */}
-          <div className="p-2 border-b border-slate-200 bg-slate-50 shrink-0 space-y-1.5">
+          <div className="p-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 shrink-0 space-y-1.5">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-xs font-extrabold text-[#002147] uppercase tracking-wider">
+                <h3 className="text-xs font-extrabold text-[#002147] dark:text-amber-400 uppercase tracking-wider">
                   Course Bank ({(() => {
                     const unassigned = courses.filter(c => !lockedAssignments[c.id]);
                     const filtered = unassigned.filter(c => {
@@ -714,7 +714,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                     return `${filtered.length}/${unassigned.length}`;
                   })()})
                 </h3>
-                <p className="text-[9.5px] text-slate-500 font-medium">Drag to grid or click to select</p>
+                <p className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium">Drag to grid or click to select</p>
               </div>
 
               {(bankSearch || bankProgramFilter !== 'ALL' || bankLevelFilter !== 'ALL' || bankOralOnly || bankSortBy !== 'default') && (
@@ -727,7 +727,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                     setBankOralOnly(false);
                     setBankSortBy('default');
                   }}
-                  className="text-[9.5px] text-rose-600 font-bold hover:underline"
+                  className="text-[9.5px] text-rose-600 dark:text-rose-400 font-bold hover:underline"
                 >
                   Reset Filters
                 </button>
@@ -741,7 +741,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                 value={bankSearch}
                 onChange={(e) => setBankSearch(e.target.value)}
                 placeholder="🔍 Search code, title..."
-                className="w-full h-6.5 pl-2 pr-6 rounded-md border border-slate-300 bg-white text-[11px] font-medium focus:border-[#002147] focus:outline-none"
+                className="w-full h-6.5 pl-2 pr-6 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px] font-medium text-slate-800 dark:text-white focus:border-[#002147] dark:focus:border-amber-400 focus:outline-none"
               />
               {bankSearch && (
                 <button
@@ -759,7 +759,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               <select
                 value={bankProgramFilter}
                 onChange={(e) => setBankProgramFilter(e.target.value)}
-                className="h-6.5 px-1 rounded border border-slate-300 bg-white font-bold text-slate-700 text-[10.5px]"
+                className="h-6.5 px-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 text-[10.5px]"
               >
                 <option value="ALL">All Programs</option>
                 {[...new Set(courses.map(c => c.program))].map(prog => (
@@ -771,7 +771,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               <select
                 value={bankLevelFilter}
                 onChange={(e) => setBankLevelFilter(e.target.value)}
-                className="h-6.5 px-1 rounded border border-slate-300 bg-white font-bold text-slate-700 text-[10.5px]"
+                className="h-6.5 px-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 text-[10.5px]"
               >
                 <option value="ALL">All Levels</option>
                 {availableLevels.map(lvl => (
@@ -785,7 +785,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
               <select
                 value={bankSortBy}
                 onChange={(e) => setBankSortBy(e.target.value)}
-                className="h-6.5 px-1 rounded border border-slate-300 bg-white font-bold text-[#002147] text-[10.5px] flex-1"
+                className="h-6.5 px-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-[#002147] dark:text-amber-400 text-[10.5px] flex-1"
               >
                 <option value="default">Sort: Default (Program)</option>
                 <option value="code">Sort: Code (A-Z)</option>
@@ -798,7 +798,7 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                 type="button"
                 onClick={() => setBankOralOnly(!bankOralOnly)}
                 className={`h-6.5 px-1.5 rounded border text-[10px] font-bold transition-all shrink-0 ${
-                  bankOralOnly ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+                  bankOralOnly ? 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 text-amber-900 dark:text-amber-300' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
                 title="Toggle Oral Exams Only"
               >
