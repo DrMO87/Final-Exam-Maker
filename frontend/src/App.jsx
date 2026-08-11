@@ -185,12 +185,7 @@ function App() {
 
   return (
     <div 
-      className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 overflow-hidden font-sans select-none relative transition-colors duration-200"
-      style={{
-        zoom: `${globalZoom}%`,
-        width: `${100 / zoomScale}vw`,
-        height: `${100 / zoomScale}vh`
-      }}
+      className="flex h-screen w-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 overflow-hidden font-sans select-none relative transition-colors duration-200"
     >
       
       {/* Mobile Top Navbar (< md) */}
@@ -521,11 +516,9 @@ function App() {
       >
         <div 
           style={{ 
-            zoom: `${globalZoom}%`,
-            width: `${100 / zoomScale}%`,
-            minHeight: `${100 / zoomScale}%`
+            zoom: `${globalZoom}%`
           }}
-          className={`flex-1 flex flex-col ${currentStep === 4 ? 'px-2 py-2' : 'px-4 py-6 md:px-8 md:py-8'}`}
+          className={`w-full flex-1 flex flex-col min-h-full ${currentStep === 4 ? 'px-2 py-2' : 'px-4 py-6 md:px-8 md:py-8'}`}
         >
           <div className="animate-fade-in flex-1 flex flex-col">
             {currentStep === 1 && (

@@ -354,14 +354,14 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
 
                   <div className="stat-card bg-gradient-gold text-hue-navy border-0 shadow-glow-gold">
                     <h4 className="text-hue-navy/80 text-sm font-semibold uppercase tracking-wider mb-2">🏥 PharmD Clinical</h4>
-                    <div className="text-4xl font-bold font-outfit">{clinicalCourses.length}</div>
+                    <div className="text-4xl font-bold font-outfit text-hue-navy">{clinicalCourses.length}</div>
                     <div className="text-sm text-hue-navy/80 mt-1">courses scheduled</div>
                   </div>
 
                   <div className="stat-card bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-100 dark:border-slate-800">
-                    <h4 className="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">📅 Exam Days</h4>
-                    <div className="text-4xl font-bold font-outfit text-hue-navy dark:text-amber-400">{matrixView.dates.length}</div>
-                    <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">days used in session</div>
+                    <h4 className="text-slate-500 dark:text-slate-300 text-sm font-semibold uppercase tracking-wider mb-2">📅 Exam Days</h4>
+                    <div className="text-4xl font-bold font-outfit text-hue-navy dark:text-amber-300">{matrixView.dates.length}</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-300 mt-1">days used in session</div>
                   </div>
                 </>
               );
@@ -375,15 +375,15 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
               <table className="w-full text-sm">
                 <thead className="table-header sticky top-0 z-20">
                   <tr>
-                    <th className="sticky left-0 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] z-30 w-28 whitespace-nowrap text-slate-700 dark:text-slate-200">Date</th>
-                    <th className="whitespace-nowrap bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-200">Day</th>
-                    <th className="whitespace-nowrap bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-200">Group</th>
+                    <th className="sticky left-0 bg-slate-100 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] z-30 w-28 whitespace-nowrap text-slate-800 dark:text-amber-300 font-extrabold">Date</th>
+                    <th className="whitespace-nowrap bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-amber-300 font-extrabold">Day</th>
+                    <th className="whitespace-nowrap bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-amber-300 font-extrabold">Group</th>
                     {matrixView.programLevels.map((pl, idx) => {
                       const [program, level] = pl.split('|');
                       return (
-                        <th key={idx} className="min-w-[200px] border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-                          <span className="block text-hue-navy dark:text-amber-400">{program}</span>
-                          <span className="block text-slate-400 font-normal">{level}</span>
+                        <th key={idx} className="min-w-[200px] border-l border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 p-2">
+                          <span className="block text-hue-navy dark:text-amber-300 font-black text-xs">{program}</span>
+                          <span className="block text-slate-500 dark:text-slate-200 font-bold text-[11px]">{level}</span>
                         </th>
                       );
                     })}
@@ -392,10 +392,10 @@ function ScheduleViewer({ sessionId, schedule, lockedAssignments, pdfSettings, o
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                   {matrixView.dates.map((date, dateIdx) => (
                     <tr key={dateIdx} className="table-row">
-                      <td className="table-cell sticky left-0 bg-white dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] font-semibold text-hue-navy dark:text-amber-400 border-r border-slate-200 dark:border-slate-800">
+                      <td className="table-cell sticky left-0 bg-white dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] font-extrabold text-hue-navy dark:text-amber-300 border-r border-slate-200 dark:border-slate-800">
                         {date}
                       </td>
-                      <td className="table-cell font-medium dark:text-slate-200">
+                      <td className="table-cell font-bold text-slate-800 dark:text-white">
                         {matrixView.dayInfo[date]?.dayOfWeek}
                       </td>
                       <td className="table-cell">

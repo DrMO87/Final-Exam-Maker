@@ -934,30 +934,30 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
         </div>
 
         {/* Matrix View - High Density Layout */}
-        <div className={`flex-1 table-container overflow-auto bg-white rounded-xl shadow-2xs border border-slate-200 relative ${
+        <div className={`flex-1 table-container overflow-auto bg-white dark:bg-slate-900 rounded-xl shadow-2xs border border-slate-200 dark:border-slate-800 relative ${
           mobileTab === 'grid' ? 'flex flex-col' : 'hidden md:flex md:flex-col'
         }`}>
           <table className="w-full text-xs">
             <thead className="table-header sticky top-0 z-20 shadow-2xs">
               <tr>
-                <th className="sticky left-0 bg-slate-50 z-30 w-28 border-b border-r border-slate-200 p-1 text-[11px] font-extrabold text-slate-700">Date</th>
+                <th className="sticky left-0 bg-slate-100 dark:bg-slate-950 z-30 w-28 border-b border-r border-slate-200 dark:border-slate-800 p-1 text-[11px] font-extrabold text-slate-800 dark:text-amber-300">Date</th>
                 {programLevels.map(pl => {
                   const [prog, lvl] = pl.split('|');
                   return (
-                    <th key={pl} className="min-w-[160px] border-b border-slate-200 p-1 text-center bg-slate-50">
-                      <div className="text-[#002147] font-black text-[11px]">{prog}</div>
-                      <div className="text-slate-500 font-bold text-[10px]">{lvl}</div>
+                    <th key={pl} className="min-w-[160px] border-b border-slate-200 dark:border-slate-800 p-1 text-center bg-slate-100 dark:bg-slate-950">
+                      <div className="text-[#002147] dark:text-amber-300 font-black text-[11px]">{prog}</div>
+                      <div className="text-slate-600 dark:text-slate-200 font-bold text-[10px]">{lvl}</div>
                     </th>
                   );
                 })}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
               {calendar.map(day => (
                 <tr key={day.dayIndex} className="table-row relative group">
-                  <td className="table-cell sticky left-0 bg-white shadow-[1px_0_0_0_#e2e8f0] z-10 align-top p-1.5 border-r border-slate-200">
-                    <div className="font-extrabold text-[#002147] text-xs leading-tight">{day.dateStr}</div>
-                    <div className="text-[10px] text-slate-500 font-medium">{day.dayOfWeek} (Gr {day.groupType})</div>
+                  <td className="table-cell sticky left-0 bg-white dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b] z-10 align-top p-1.5 border-r border-slate-200 dark:border-slate-800">
+                    <div className="font-extrabold text-[#002147] dark:text-amber-300 text-xs leading-tight">{day.dateStr}</div>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-200 font-bold">{day.dayOfWeek} (Gr {day.groupType})</div>
                   </td>
                   
                   {programLevels.map(pl => {
