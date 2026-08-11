@@ -878,18 +878,18 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
 
               return Object.keys(grouped).sort().map(program => (
                 <div key={program} className="mb-4">
-                  <h4 className="text-[10.5px] font-extrabold uppercase tracking-wider mb-2 text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
+                  <h4 className="text-[10.5px] font-extrabold uppercase tracking-wider mb-2 text-slate-800 dark:text-amber-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/60">
                     {program}
                   </h4>
                   {Object.keys(grouped[program]).sort((a,b) => Number(a)-Number(b)).map(level => {
                     const theme = levelColors[level] || levelColors['default'];
                     return (
-                      <div key={level} className="mb-3 pl-2 border-l-2 border-slate-200">
+                      <div key={level} className="mb-3 pl-2 border-l-2 border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-between mb-1.5">
                           <h5 className={`text-[10px] font-extrabold uppercase tracking-widest ${theme.text}`}>Level {level}</h5>
                           <button 
                             onClick={() => handleAutoScheduleLevel(level)}
-                            className="text-[9px] font-extrabold text-[#002147] bg-slate-100 hover:bg-amber-100 px-1.5 py-0.2 rounded transition-colors"
+                            className="text-[9px] font-extrabold text-[#002147] dark:text-amber-400 bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 px-1.5 py-0.2 rounded transition-colors"
                           >
                             ⚡ Auto-Place
                           </button>
@@ -905,17 +905,17 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                 onDragStart={(e) => handleDragStart(e, course, { type: 'BANK' })}
                                 onClick={() => handleCourseClick(course)}
                                 className={`p-2 rounded-r-md border-y border-r border-l-3 shadow-2xs cursor-grab active:cursor-grabbing transition-all duration-150 
-                                  ${isSelected ? `text-white scale-[1.01] ${theme.selectedBg}` : `bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ${theme.left}`}`}
+                                  ${isSelected ? `text-white scale-[1.01] ${theme.selectedBg}` : `bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/80 ${theme.left}`}`}
                               >
-                                <div className={`font-extrabold text-xs mb-0.5 ${isSelected ? 'text-white' : 'text-slate-800'}`}>{course.course_code}</div>
-                                <div className={`text-[9.5px] font-medium leading-tight line-clamp-1 ${isSelected ? 'text-white/90' : 'text-slate-500'}`}>{course.course_title}</div>
+                                <div className={`font-extrabold text-xs mb-0.5 ${isSelected ? 'text-white' : 'text-slate-800 dark:text-amber-400'}`}>{course.course_code}</div>
+                                <div className={`text-[9.5px] font-medium leading-tight line-clamp-1 ${isSelected ? 'text-white/90' : 'text-slate-500 dark:text-slate-200'}`}>{course.course_title}</div>
                                 
                                 <div className="flex gap-1.5 mt-1">
-                                  <div className={`text-[8.5px] px-1 py-0.2 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                  <div className={`text-[8.5px] px-1 py-0.2 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200'}`}>
                                     {course.student_count} Std
                                   </div>
                                   {course.has_oral_exam ? (
-                                    <div className={`text-[8.5px] px-1 py-0.2 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'}`}>
+                                    <div className={`text-[8.5px] px-1 py-0.2 rounded font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/40 dark:border-amber-700/60'}`}>
                                       🎤 Oral
                                     </div>
                                   ) : null}
@@ -985,20 +985,20 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                           onClick={() => handleSlotClick(day.dayIndex, periodNum, pl)}
                           className={`p-1 rounded-md transition-all border min-h-[44px] flex flex-col justify-between ${
                             isSlotHovered 
-                              ? 'bg-amber-100/80 border-amber-500 ring-2 ring-amber-300 shadow-md' 
+                              ? 'bg-amber-100/80 dark:bg-amber-950/90 border-amber-500 ring-2 ring-amber-300 shadow-md' 
                               : isSelectable 
-                                ? 'bg-blue-50/70 border-blue-300 border-dashed cursor-pointer hover:bg-blue-100/80' 
-                                : 'bg-slate-50/70 border-slate-200/80'
+                                ? 'bg-blue-50/70 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 border-dashed cursor-pointer hover:bg-blue-100/80 dark:hover:bg-blue-900/40' 
+                                : 'bg-slate-50/70 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/80'
                           }`}
                         >
                           {/* Period Label Header */}
-                          <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-slate-200/60 text-[8.5px] font-bold text-slate-500">
+                          <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-slate-200/60 dark:border-slate-700/60 text-[8.5px] font-bold text-slate-500 dark:text-slate-300">
                             <span className={`px-1 py-0.1 rounded text-[8px] font-black ${
-                              periodNum === 1 ? 'bg-blue-100 text-blue-900' : 'bg-amber-100 text-amber-900'
+                              periodNum === 1 ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 border border-blue-300/40 dark:border-blue-700/60' : 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300/40 dark:border-amber-700/60'
                             }`}>
                               P{periodNum}
                             </span>
-                            <span className="text-[7.5px] font-medium text-slate-400">
+                            <span className="text-[7.5px] font-bold text-slate-500 dark:text-slate-300">
                               {assignments.length > 0 ? `${assignments.length}` : 'Empty'}
                             </span>
                           </div>
@@ -1022,10 +1022,10 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
                                       isSelected ? 'ring-2 ring-hue-gold shadow-md' : ''
                                     } ${
                                       hasConflict 
-                                        ? 'bg-red-50 border-red-300 shadow-sm' 
+                                        ? 'bg-red-50 dark:bg-red-950/90 border-red-300 dark:border-red-700 shadow-sm text-red-950 dark:text-red-100' 
                                         : hasMinorException 
-                                          ? 'bg-amber-50/90 border-amber-400 ring-1 ring-amber-300 shadow-xs' 
-                                          : 'bg-white border-slate-200 shadow-2xs hover:shadow-xs'
+                                          ? 'bg-amber-50/90 dark:bg-amber-950/90 border-amber-400 dark:border-amber-700 ring-1 ring-amber-300 shadow-xs text-amber-950 dark:text-amber-100' 
+                                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-2xs hover:shadow-xs text-slate-800 dark:text-slate-100'
                                     }`}
                                   >
                                     <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 opacity-0 invisible group-hover/card:opacity-100 group-hover/card:visible transition-all duration-200 pointer-events-none">
@@ -1091,21 +1091,21 @@ function ManualScheduler({ sessionId, pdfSettings, onUpdatePdfSettings, onComple
 
                                     <button 
                                       onClick={(e) => handleUnassign(assignment.course.id, e)}
-                                      className="absolute -top-1.5 -right-1.5 bg-white text-slate-400 hover:text-red-500 rounded-full w-4 h-4 flex items-center justify-center border shadow-xs text-[10px] z-10"
+                                      className="absolute -top-1.5 -right-1.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-full w-4 h-4 flex items-center justify-center border border-slate-300 dark:border-slate-700 shadow-xs text-[10px] z-10"
                                       title="Unassign course"
                                     >
                                       &times;
                                     </button>
 
                                     <div className="flex items-center justify-between gap-1 mb-0.5">
-                                      <span className={`font-extrabold text-[11px] ${hasConflict ? 'text-red-700' : hasMinorException ? 'text-amber-900 font-black' : 'text-hue-navy'}`}>
+                                      <span className={`font-extrabold text-[11px] ${hasConflict ? 'text-red-700 dark:text-red-300' : hasMinorException ? 'text-amber-900 dark:text-amber-300 font-black' : 'text-hue-navy dark:text-amber-400'}`}>
                                         {assignment.course.course_code}
                                       </span>
-                                      <span className="text-[8.5px] bg-slate-100 text-slate-700 font-bold px-1 py-0.2 rounded border border-slate-200 shrink-0">
+                                      <span className="text-[8.5px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold px-1 py-0.2 rounded border border-slate-200 dark:border-slate-700 shrink-0">
                                         👥 {assignment.course.student_count || 0}
                                       </span>
                                     </div>
-                                    <div className="text-[9.5px] text-slate-700 truncate font-semibold leading-tight">{assignment.course.course_title}</div>
+                                    <div className="text-[9.5px] text-slate-700 dark:text-slate-200 truncate font-semibold leading-tight">{assignment.course.course_title}</div>
 
                                     {hasMinorException && !hasConflict && (
                                       <div className="mt-1 flex items-center gap-1">
