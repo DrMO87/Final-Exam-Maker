@@ -136,9 +136,26 @@ if (connectionString) {
     }
   };
 } else {
-  console.log('✅ Using local SQLite database (no DATABASE_URL provided)');
-  const sqliteDb = (await import('./database-sqlite.js')).default;
-  dbPool = sqliteDb;
+  console.log('✅ Checking database adapter (no DATABASE_URL provided)...');
+  try {
+    const sqliteDb = (await import('./database-sqlite.js')).default;
+    dbPool = sqliteDb;
+  } catch (err) {
+    console.warn('⚠️ SQLite native module not available in serverless cloud:', err.message);
+    dbPool = {
+      query: async () => {
+        throw new Error('Database Error: DATABASE_URL environment variable is missing on Vercel. Please set DATABASE_URL in Vercel project Settings -> Environment Variables.');
+      },
+      connect: async () => {
+        return {
+          query: async () => {
+            throw new Error('Database Error: DATABASE_URL environment variable is missing on Vercel. Please set DATABASE_URL in Vercel project Settings -> Environment Variables.');
+          },
+          release: () => {}
+        };
+      }
+    };
+  }
 }
 
 export default dbPool;
